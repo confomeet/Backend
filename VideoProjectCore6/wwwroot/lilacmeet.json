@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "lilacmeet2",
+  "private_key_id": "d590bbc42b050b175a1e1028cafc2b3231c4f57b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC4pE3HpUXRkSSh\n0k7mxpDbDRluh5Gn/eCE3cJEy4u8ZPKufjT/kvdhgozG6FHp+ANdXaL4Hgld1DdK\nK3CN07ZzCIO2BLkKEpcyg8p28HVLHhoQQoG8QXfGQR/MIdd1CGkiqIAJbpONRTiL\ncoqtDponlL+kULiq7/y5EbryVe8jEUz2jUqWutuLKiXFeNXLKq3VOIQcBzXXDM6w\njB0z1C3JLFBOkK8wec4U0ghF1uPf/zuycKYwRrpa6X1SZttOQ4qV0ZOSsIsvTKYe\nYpXGS4KY0a3IHntqXzVy2RMror9ImHcVTXttU2bhU7yycSmCVWR2CDME5zV5+FGZ\nolnKCxk7AgMBAAECggEABK6XPFHwDcrbk3Dk8vbOXdzyAVAAZ7KehVqm3ki3tTdt\nbJ2i/ry9d3mwfoC4nFwKIHggivXJW1mSF1g3pUOyPi4ql4HSJrO8UBnFwgisk2g4\nKqO3wiF6MIrz4UtrDmWACP1zKwoPRXH1EkV9cmWgOhMMXasgVlFPPBV7g0FI7D+C\niJQVz5gKwMWgNg8X9fYx9PG3Y67YBjRJePJ7tYwJEQI9eY30Yrlb2VpCTTNtTGMc\nme7vhfLrpbkcIzRxGIIoPr0n0eYfH5HGyyky1paea1L85eAC8RGYBdEmWxqAJs3Z\nN/sQro4ixGEt0mr/R+Slirao975YAGY7lsYZPBRNNQKBgQDZoi/j5ENFjmS7DzLO\n9Pgt1Tnme8wBvVACcDlfiNK12T3tSXO8NzZ3dOapAGaHFUZ6/22/OsTAVxkBdt38\njXoLWXN1Wzi6o5Mv4+SGktHwTYo/clIpHPrHhhr7xj14SU6ShcwLqBjQX47edL7w\nAuFLEOcPSsMmd71ElZZ03cSjNwKBgQDZMTK/TDp6hMmUJdVdOQUYLTtjGoi778nx\nDtr4nKRHRv9Vn7W4qkbEepJ2pCR4CRK3wfK75SLWgrwlPBwXrlbsmW1cDtwsMym7\nTWprJgCeMKs+pzM6LoAeOCXDjj134sOpytjOsi5KovLfEsVLt8tgbp+ippsf6pmI\n3k1ClOZEHQKBgDVfGO+CYx0DtqBJMeSfHt3elLx5T6Z9jsmKTAepvkLqa81tXfyi\nbbEN8iMv/fTSut4fFgL3npisw20ggYAWEgAGh9IX9OmQg+ASu1BlYSbVXToCBzQd\n70JPGP71ts1w7NvyBAA30R4I0Tis2MZzblzCYGfXpdQhOUFAjg1K9ZYxAoGAAf0J\nUecIwgZlMg4GngvfmBER8h5UEiRn3OUd7BjDCEQGImqL51znuPTGUn++NbsfiL8l\n0cKPRxd7UXvzZeQat5/P+H/KVD1DrItQ5ho69zfK2Y/+UBIM6jnpXpj2xxo0YGGT\nCpFnCxfi0VgCpmbQXdmlbH/J+8jSDwa5/loOoaECgYAgg8SFDWrjjDE2z/dg8exf\nCHw4122F22LoH3Z0CAFGe1L4FYI9+NcJsj6w36O9urclzuBrnoLgmRm7qeK9rNGB\nW8HtS7jKmAzFtvCPFi7cIt9MP4MRtSr6O0Vm0Om774ZiBu98nwUAE/VyE6o+PXO1\nRAdf6Qu4xcc3NFGESEPKvA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-rx7pz@lilacmeet2.iam.gserviceaccount.com",
+  "client_id": "117148241568337449409",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-rx7pz%40lilacmeet2.iam.gserviceaccount.com"
+}

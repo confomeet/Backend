@@ -1,0 +1,10 @@
+diff a/VideoProjectCore6/Models/OraDbContext.cs b/VideoProjectCore6/Models/OraDbContext.cs	(rejected hunks)
+@@ -5,7 +5,7 @@
+ 
+ namespace VideoProjectCore6.Models
+ {
+-    public partial class OraDbContext : IdentityDbContext<User, Role, int, UserClaim, UserRole, UserLogin,RoleClaim, IdentityUserToken<int>>
++    public partial class OraDbContext : DbContext
+     {
+         public OraDbContext()
+         {
