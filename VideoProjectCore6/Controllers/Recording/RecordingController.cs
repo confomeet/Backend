@@ -2,6 +2,7 @@
 using VideoProjectCore6.DTOs.RecordingDto;
 using VideoProjectCore6.Repositories.IRecordingRepository;
 using VideoProjectCore6.Repositories.IUserRepository;
+using VideoProjectCore6.Services.RecordingService;
 
 namespace VideoProjectCore6.Controllers.Recording
 {

@@ -11,12 +11,14 @@ namespace VideoProjectCore6.Services.RecordingService
         private readonly OraDbContext _DbContext;
 
         private readonly IConfiguration _IConfiguation;
+        private readonly ILogger _ILogger;
 
 
-        public RecordingRepository(OraDbContext dbContext, IConfiguration configuration)
+        public RecordingRepository(OraDbContext dbContext, IConfiguration configuration, ILogger<RecordingRepository> logger)
         {
             _DbContext = dbContext;
             _IConfiguation = configuration;
+            _ILogger = logger;
         }
 
 
@@ -35,8 +37,11 @@ namespace VideoProjectCore6.Services.RecordingService
                 FileSize = recordingPostDto.FileSize,
                 CreatedDate = now,
                 FilePath = recordingPostDto.FilePath,
-                IsSucceeded = recordingPostDto.Status
+                IsSucceeded = recordingPostDto.Status,
+                Status = RecordingStatus.Recorded
             };
+
+            _ILogger.LogInformation("Adding recording {} at {} in status={}", newRecordingLog.RecordingfileName, newRecordingLog.FilePath, newRecordingLog.Status);
 
             try
             {

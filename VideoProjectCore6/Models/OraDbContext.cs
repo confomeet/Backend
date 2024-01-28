@@ -341,6 +341,15 @@ namespace VideoProjectCore6.Models
                     .HasMaxLength(1000)
                     .IsUnicode(false)
                     .HasColumnName("file_path");
+
+                entity.Property(e => e.VideoPublicLink)
+                    .HasColumnName("video_public_link");
+
+                entity.Property(e => e.Status)
+                    .HasPrecision(2)
+                    .HasColumnName("status")
+                    .HasConversion<int>();
+
             });
 
             modelBuilder.Entity<Contact>(entity =>
