@@ -74,20 +74,20 @@ namespace VideoProjectCore6.Services.RecordingService
                     rl.Status = RecordingStatus.UploadingFailed;
                     return false;
                 }
+                logger.LogInformation("Uploaded file {}:{} successfully published. public_url={}", rl.Id, rl.RecordingfileName, rl.VideoPublicLink);
                 rl.Status = RecordingStatus.Uploaded;
                 rl.VideoPublicLink = public_link;
                 return true;
             }
-            catch (OperationCanceledException)
-            {
-                logger.LogInformation("Uploading of recording {} cancelled cancelled", rl.RecordingfileName);
-                return false;
-            }
             catch (Exception e)
             {
-                logger.LogError("Uploading of recording {}:{} failed due to unexpected error={}", rl.Id, rl.RecordingfileName, e.Message);
+                logger.LogError("Uploading of recording {}:{} failed. {}", rl.Id, rl.RecordingfileName, e.Message);
                 rl.Status = RecordingStatus.UploadingFailed;
                 return false;
+            }
+            finally
+            {
+                rl.UploadDate = DateTime.UtcNow;
             }
         }
 
@@ -214,7 +214,7 @@ namespace VideoProjectCore6.Services.RecordingService
             return await dbContext.RecordingLogs.Where(rl =>
                 rl.Status == RecordingStatus.Recorded
                 || rl.Status == RecordingStatus.UploadingFailed
-            ).OrderBy(rl => rl.Status).FirstOrDefaultAsync();
+            ).OrderBy(rl => rl.Status).ThenBy(rl => rl.UploadDate ?? DateTime.UnixEpoch).FirstOrDefaultAsync();
         }
 
         private bool IsConfigurationValid(out string misconfigDescription)

@@ -31,5 +31,7 @@ namespace VideoProjectCore6.Models
         public string VideoPublicLink { get; set; }
 
         public RecordingStatus Status { get; set; }
+
+        public DateTime? UploadDate { get; set; }
     }
 }

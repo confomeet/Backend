@@ -350,6 +350,9 @@ namespace VideoProjectCore6.Models
                     .HasColumnName("status")
                     .HasConversion<int>();
 
+                entity.Property(e => e.UploadDate)
+                    .HasColumnName("upload_date")
+                    .HasColumnType("datetime");
             });
 
             modelBuilder.Entity<Contact>(entity =>
