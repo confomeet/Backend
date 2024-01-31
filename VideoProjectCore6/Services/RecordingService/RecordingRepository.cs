@@ -29,6 +29,7 @@ namespace VideoProjectCore6.Services.RecordingService
 
             DateTime now = DateTime.Now;
 
+            var videoPublicLink = _IConfiguation["Meeting:host"] + recordingPostDto.FilePath.Replace("/config/recordings", "/recordings");
             RecordingLog newRecordingLog = new RecordingLog()
             {
                 //VideoType = recordingPostDto.Type,
@@ -38,7 +39,8 @@ namespace VideoProjectCore6.Services.RecordingService
                 CreatedDate = now,
                 FilePath = recordingPostDto.FilePath,
                 IsSucceeded = recordingPostDto.Status,
-                Status = RecordingStatus.Recorded
+                VideoPublicLink = videoPublicLink,
+                Status = RecordingStatus.Uploaded
             };
 
             _ILogger.LogInformation("Adding recording {} at {} in status={}", newRecordingLog.RecordingfileName, newRecordingLog.FilePath, newRecordingLog.Status);

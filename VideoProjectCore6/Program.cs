@@ -62,7 +62,6 @@ using VideoProjectCore6.Services.AclRepository;
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddHostedService<YandexDiskRecordingUploader>();
 builder.Services.AddScoped<IGeneralRepository, GeneralRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
