@@ -1451,27 +1451,24 @@ namespace VideoProjectCore6.Services.UserService
             return true;
         }
 
-        public async Task<UserResultDto> DeleteUser(int id)
+        public async Task<APIResult> DeleteUser(int id)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
             {
-                return new UserResultDto { Message = "USER NOT FOUND", User = null };
+                return new APIResult { Id = 1, Code = APIResult.RESPONSE_CODE.PageNotFound, Message = new List<string> { "USER NOT FOUND" } };
             }
-            if (await DisabledAccount(id))
+            var delResult = await _userManager.DeleteAsync(user);
+            if (!delResult.Succeeded)
             {
-                return new UserResultDto { Message = "USER DISABLED BEFORE THIS TIME", User = null };
+                foreach (var error in delResult.Errors)
+                {
+                    _logger.LogError("Cannot delete user {}, error_code={}, error_text={}", id, error.Code, error.Description);
+                }
+                return new APIResult { Id = 1, Code = APIResult.RESPONSE_CODE.ERROR, Message = new List<string> { "USER NOT DELETE DUE TO SERVICE INTERNAL ERROR" } };
             }
-            user.ProfileStatus = Convert.ToInt32(PROFILE_STATUS.DISABLED);
-            var result = await _userManager.UpdateAsync(user);
-            if (result.Succeeded)
-            {
-                return new UserResultDto { Message = "user was deleted ", User = user };
-            }
-            else
-            {
-                return new UserResultDto { Message = result.Errors.FirstOrDefault().Description, User = null };
-            }
+
+            return new APIResult { Id = 1, Code = APIResult.RESPONSE_CODE.OK, Message = new List<string> { "SUCCESS" } };
         }
 
         public async Task<UserResultDto> EnableUser(int id)

@@ -39,7 +39,7 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         public Task<APIResult> ResendActivation(string email, string lang);     
         public Task<APIResult> SendResetPasswordEmail(MultiLangMessage multiLangMessage, string email, string lang);
         public Task<APIResult> CreateUser(UserPostDto UserPostDto, string ImageUrl, bool updateRoles, string lang, bool FromUg);
-        public Task<UserResultDto> DeleteUser(int id);
+        public Task<APIResult> DeleteUser(int id);
         public Task<List<UserDto>> GetUsers();
         public Task<UserPermissionsDTO> GetUserPermissions(int userId);
         public Task<IdentityResult> EditUserRolesAsync(int userId, List<int> userRoles, string lang);

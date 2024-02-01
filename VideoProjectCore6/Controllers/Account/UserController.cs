@@ -121,6 +121,14 @@ namespace VideoProjectCore6.Controllers.Account
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
+        [HttpPost("{id}/Delete")]
+        public async Task<IActionResult> DeleteUser([FromRoute] int id)
+        {
+            APIResult result = await _IUserRepository.DeleteUser(id);
+            return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
+        }
+
         [HttpPost("AddUser")]
         public async Task<IActionResult> AddeUser([FromBody] UserPostDto UserPostDto, [FromHeader] string lang)
         {
