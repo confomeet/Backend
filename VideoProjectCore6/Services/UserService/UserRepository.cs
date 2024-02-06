@@ -1597,94 +1597,14 @@ namespace VideoProjectCore6.Services.UserService
             }
 
             DateTime lastLog = DateTime.Now;
-            try
+            var info = await _DbContext.UserLogins.Where(x => x.UserId == user.Id).ToListAsync();
+            if (info.Count > 0)
             {
-
-                var info = await _DbContext.UserLogins.Where(x => x.UserId == user.Id).ToListAsync();
-                if (info.Count > 0)
-                {
-                    lastLog = (DateTime)info.Last().LoginDate;
-                }
-
-                bool UAData = logInDto.UA != null;
-                UserLogin userLogin = new()
-                {
-                    Id = GetNewValueBySec(),
-                    LoginProvider = "Local",
-                    UserId = user.Id,
-                    ProviderDisplayName = user.UserName,
-                    ProviderKey = Guid.NewGuid().ToString(), //user.Id.ToString(),    // TODO get a key form the provider.
-                    LoginDate = DateTime.Now,
-                    Ip = UAData ? logInDto.UA.IP : null,
-                    BrowserName = UAData ? logInDto.UA.BrowserName : null,
-                    BrowserVersion = UAData ? logInDto.UA.BrowserVersion : null,
-                    Device = UAData ? logInDto.UA.Device : null,
-                    Os = UAData ? logInDto.UA.OS : null,
-                };
-
-                await _DbContext.UserLogins.AddAsync(userLogin);
-                await _DbContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                var message = ex.Message;
-                if (ex.InnerException != null)
-                {
-                    message += " inner exception is " + ex.InnerException.Message;
-                }
-                _logger.LogInformation("error in adding user logging" + message);
+                lastLog = (DateTime)info.Last().LoginDate;
             }
 
-
-            Claim[] claims = GenerateClaims(user);
-            string jwt = GenerateToken(claims, _jwt.Key);
-
-            try
-            {
-                // get user image.
-                if (user.Image != null/* && _IFilesUploaderRepository.FileExist(user.Image)*/)
-                {
-                    result.Image = user.Image;
-                }
-                else
-                {
-                    /* if (_IFilesUploaderRepository.FileExist("User_images", "default.jpg"))
-                     {
-                         result.Image = Path.Combine("User_images", "default.jpg");
-                     }*/
-                }
-            }
-            catch
-            {
-
-            }
-            var remoteEntityId = user.EntityId != null ? await _DbContext.Users.Where(x => x.Id == user.EntityId).Select(x => x.UserId).FirstOrDefaultAsync():null;
-            result.StatusCode.Id = 1;
-            result.StatusCode.Code = APIResult.RESPONSE_CODE.OK;
-            result.StatusCode.Message.Add("Verfied user.. Welcome");
-            result.StatusCode.Result = true;
-            result.Token = jwt;
-            result.UserId = user.Id;
-            result.UserName = user.UserName;
-            result.FullName = user.FullName;
-            result.Email = logInDto.Email;
-            result.PhoneNumber = user.PhoneNumber;
-            result.EmirateId = user.EmiratesId;
-            result.BirthdayDate = user.BirthdayDate;
-            result.RolesName = await _userManager.GetRolesAsync(user);
-            result.RolesId = await _IRoleRepository.GetRolesIdByUserId(user.Id);
-            result.Address = user.Address;
-            result.CountryId = user.NatId /*await getUserCountryId(user.NatId)*/;
-            result.AreaId = user.AreaId;
-            result.LastLogin = lastLog;
-            result.UserType = user.UserType;
-            result.RemoteUserId = user.UserId;
-            result.EntityId=user.EntityId;
-            result.RemoteEntityId = remoteEntityId;
-            //result.ShowAadel = !await IsEmployee(user.Id);
-
-            //scope.Complete();
-            return result;
+            await LogUserSignInEvent(user, logInDto.UA);
+            return await PrepareUserLoggedInResponse(user);
         }
 
 
@@ -2841,105 +2761,8 @@ namespace VideoProjectCore6.Services.UserService
                 return result;
             }
 
-
-
-            ////////////// Return User Credinteal //////////////
-
-
-
-
-
-            DateTime lastLog = DateTime.Now;
-            try
-            {
-
-                var info = await _DbContext.UserLogins.Where(x => x.UserId == user.Id).ToListAsync();
-                if (info.Count > 0)
-                {
-                    lastLog = (DateTime)info.Last().LoginDate;
-                }
-
-                bool UAData = otpLogInDto.UA != null;
-                UserLogin userLogin = new()
-                {
-                    Id = GetNewValueBySec(),
-                    LoginProvider = "Local",
-                    UserId = user.Id,
-                    ProviderDisplayName = user.UserName,
-                    ProviderKey = Guid.NewGuid().ToString(), //user.Id.ToString(),    // TODO get a key form the provider.
-                    LoginDate = DateTime.Now,
-                    Ip = UAData ? otpLogInDto.UA.IP : null,
-                    BrowserName = UAData ? otpLogInDto.UA.BrowserName : null,
-                    BrowserVersion = UAData ? otpLogInDto.UA.BrowserVersion : null,
-                    Device = UAData ? otpLogInDto.UA.Device : null,
-                    Os = UAData ? otpLogInDto.UA.OS : null,
-                };
-
-                await _DbContext.UserLogins.AddAsync(userLogin);
-                await _DbContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                var message = ex.Message;
-                if (ex.InnerException != null)
-                {
-                    message += " inner exception is " + ex.InnerException.Message;
-                }
-                _logger.LogInformation("error in adding user logging" + message);
-            }
-
-
-            Claim[] claims = GenerateClaims(user);
-            string jwt = GenerateToken(claims, _jwt.Key);
-
-            try
-            {
-                // get user image.
-                if (user.Image != null/* && _IFilesUploaderRepository.FileExist(user.Image)*/)
-                {
-                    result.Image = user.Image;
-                }
-                else
-                {
-                    /* if (_IFilesUploaderRepository.FileExist("User_images", "default.jpg"))
-                     {
-                         result.Image = Path.Combine("User_images", "default.jpg");
-                     }*/
-                }
-            }
-            catch
-            {
-
-            }
-            var remoteEntityId = user.EntityId != null ? await _DbContext.Users.Where(x => x.Id == user.EntityId).Select(x => x.UserId).FirstOrDefaultAsync() : null;
-            result.StatusCode.Id = 1;
-            result.StatusCode.Code = APIResult.RESPONSE_CODE.OK;
-            result.StatusCode.Message.Add("Welcome");
-            result.StatusCode.Result = true;
-            result.Token = jwt;
-            result.UserId = user.Id;
-            result.UserName = user.UserName;
-            result.FullName = user.FullName;
-            result.Email = user.Email;
-            result.PhoneNumber = user.PhoneNumber;
-            result.EmirateId = user.EmiratesId;
-            result.BirthdayDate = user.BirthdayDate;
-            result.RolesName = await _userManager.GetRolesAsync(user);
-            result.RolesId = await _IRoleRepository.GetRolesIdByUserId(user.Id);
-            result.Address = user.Address;
-            result.CountryId = user.NatId /*await getUserCountryId(user.NatId)*/;
-            result.AreaId = user.AreaId;
-            result.LastLogin = lastLog;
-            result.UserType = user.UserType;
-            result.RemoteUserId = user.UserId;
-            result.EntityId = user.EntityId;
-            result.RemoteEntityId = remoteEntityId;
-            
-            //result.ShowAadel = !await IsEmployee(user.Id);
-
-
-            return result;
-
+            await LogUserSignInEvent(user, otpLogInDto.UA);
+            return await PrepareUserLoggedInResponse(user);
         }
 
         public async Task<APIResult> ViewMyProfile(int currentUserId, string lang)
@@ -3056,6 +2879,97 @@ namespace VideoProjectCore6.Services.UserService
             {
 
                 return res.FailMe(-1, "Could update profile");
+            }
+        }
+
+        private async Task<LogInResultDto> PrepareUserLoggedInResponse(User user)
+        {
+            LogInResultDto result = new();
+
+            var lastUserLogIn = await _DbContext.UserLogins.Where(x => x.UserId == user.Id).OrderByDescending(x => x.LoginDate).Take(1).LastOrDefaultAsync();
+            DateTime? lastLogInDate = (lastUserLogIn != null) ? lastUserLogIn.LoginDate : DateTime.Now;
+
+            Claim[] claims = GenerateClaims(user);
+            string jwt = GenerateToken(claims, _jwt.Key);
+
+            try
+            {
+                // get user image.
+                if (user.Image != null/* && _IFilesUploaderRepository.FileExist(user.Image)*/)
+                {
+                    result.Image = user.Image;
+                }
+                else
+                {
+                    /* if (_IFilesUploaderRepository.FileExist("User_images", "default.jpg"))
+                     {
+                         result.Image = Path.Combine("User_images", "default.jpg");
+                     }*/
+                }
+            }
+            catch
+            {
+
+            }
+            var remoteEntityId = user.EntityId != null ? await _DbContext.Users.Where(x => x.Id == user.EntityId).Select(x => x.UserId).FirstOrDefaultAsync() : null;
+            result.StatusCode.Id = 1;
+            result.StatusCode.Code = APIResult.RESPONSE_CODE.OK;
+            result.StatusCode.Message.Add("Welcome");
+            result.StatusCode.Result = true;
+            result.Token = jwt;
+            result.UserId = user.Id;
+            result.UserName = user.UserName;
+            result.FullName = user.FullName;
+            result.Email = user.Email;
+            result.PhoneNumber = user.PhoneNumber;
+            result.EmirateId = user.EmiratesId;
+            result.BirthdayDate = user.BirthdayDate;
+            result.RolesName = await _userManager.GetRolesAsync(user);
+            result.RolesId = await _IRoleRepository.GetRolesIdByUserId(user.Id);
+            result.Address = user.Address;
+            result.CountryId = user.NatId /*await getUserCountryId(user.NatId)*/;
+            result.AreaId = user.AreaId;
+            result.LastLogin = lastLogInDate;
+            result.UserType = user.UserType;
+            result.RemoteUserId = user.UserId;
+            result.EntityId = user.EntityId;
+            result.RemoteEntityId = remoteEntityId;
+            //result.ShowAadel = !await IsEmployee(user.Id);
+
+            return result;
+        }
+
+        private async Task LogUserSignInEvent(User user, UserAgent ua)
+        {
+            try
+            {
+                bool UAData = ua != null;
+                UserLogin userLogin = new()
+                {
+                    Id = GetNewValueBySec(),
+                    LoginProvider = "Local",
+                    UserId = user.Id,
+                    ProviderDisplayName = user.UserName,
+                    ProviderKey = Guid.NewGuid().ToString(), //user.Id.ToString(),    // TODO get a key form the provider.
+                    LoginDate = DateTime.Now,
+                    Ip = UAData ? ua.IP : null,
+                    BrowserName = UAData ? ua.BrowserName : null,
+                    BrowserVersion = UAData ? ua.BrowserVersion : null,
+                    Device = UAData ? ua.Device : null,
+                    Os = UAData ? ua.OS : null,
+                };
+
+                await _DbContext.UserLogins.AddAsync(userLogin);
+                await _DbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                var message = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    message += " inner exception is " + ex.InnerException.Message;
+                }
+                _logger.LogWarning("Failed to log user sign in event due to error: {}", message);
             }
         }
     }
