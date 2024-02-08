@@ -1,8 +1,7 @@
-using Microsoft.AspNet.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Server.IISIntegration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -185,7 +184,6 @@ builder.Services.AddSwaggerGen(c =>
 
 
 
-builder.Services.AddAuthentication(IISDefaults.AuthenticationScheme);
 //---------------------token ----------------------------
 builder.Services.Configure<jwt>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<ChannelMailFirstSetting>(builder.Configuration.GetSection("ChannelMailFirstSetting"));
@@ -274,8 +272,6 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddSignalR(hubOptions => { hubOptions.EnableDetailedErrors = true; hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(10); hubOptions.HandshakeTimeout = TimeSpan.FromSeconds(5); });
-
-GlobalHost.DependencyResolver.Register(typeof(Microsoft.AspNet.SignalR.IUserIdProvider), () => new CustomUserIdProvider());
 
 
 var app = builder.Build();

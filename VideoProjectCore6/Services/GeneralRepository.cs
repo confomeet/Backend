@@ -1,11 +1,8 @@
 ﻿using JWT;
 using JWT.Algorithms;
 using JWT.Serializers;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Oracle.ManagedDataAccess.Client;
-using System.Data.SqlClient;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;

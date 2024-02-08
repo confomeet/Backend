@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+// using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-//using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNet.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using VideoProjectCore6.Attributes;
 using VideoProjectCore6.DTOs.CommonDto;

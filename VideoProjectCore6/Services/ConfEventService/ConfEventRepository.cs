@@ -1,8 +1,6 @@
 ﻿using Flurl;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using org.w3c.dom;
-using org.xml.sax;
 using System.Xml;
 using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.DTOs.ConfEventDto;

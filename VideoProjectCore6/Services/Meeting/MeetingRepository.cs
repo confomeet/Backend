@@ -4,7 +4,6 @@ using VideoProjectCore6.Models;
 using VideoProjectCore6.Repositories.IFilesUploader;
 using VideoProjectCore6.Repositories.IMeetingRepository;
 using VideoProjectCore6.Repositories.IUserRepository;
-using System.Data.SqlClient;
 using VideoProjectCore6.DTOs.CommonDto;
 using Microsoft.AspNetCore.Identity;
 using JWT.Algorithms;
@@ -990,16 +989,7 @@ namespace VideoProjectCore6.Services.Meeting
             //}
             return result.SuccessMe(1);
         }
-        private int GetNewValueByMeetingSecSqlServer()
-        {
-            var p = new SqlParameter("@result", System.Data.SqlDbType.Int)
-            {
-                Direction = System.Data.ParameterDirection.Output
-            };
-            _DbContext.Database.ExecuteSqlRaw("set @result = next value for SequenceForMeetingId", p);
-            int sequenceNum = (int)p.Value;
-            return sequenceNum;
-        }
+
         private int GetNewValueByMeetingSec()
         {
             int sequenceNum = 0;

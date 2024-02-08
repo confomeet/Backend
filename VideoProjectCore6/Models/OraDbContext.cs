@@ -82,10 +82,6 @@ namespace VideoProjectCore6.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseOracle("DATA SOURCE=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=dbsy.infostrategic.com)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLPP)));USER ID=PPVIDEO; Password=PPVIDEO123$;");
-            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
