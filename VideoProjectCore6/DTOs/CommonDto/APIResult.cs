@@ -13,13 +13,16 @@ namespace VideoProjectCore6.DTOs.CommonDto
             OK = 200,
             CREATED = 201,
             BadRequest = 400,
+            Unauthorized = 401,
             Locked = 423,
             NotAcceptable = 406,
             UnavailableForLegalReasons = 451,
             NoResponse = 444,
             ERROR = 500,
             NotImplemented = 501,
-            PageNotFound = 404
+            PageNotFound = 404,
+
+            SecondFactorRequired = 1001,
         }
         public APIResult()
         {

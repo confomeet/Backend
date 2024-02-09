@@ -1,5 +1,6 @@
 ﻿using Flurl;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -1483,7 +1484,8 @@ namespace VideoProjectCore6.Services.UserService
 
         public async Task<LogInResultDto> LocalSignIn(LogInDto logInDto, string lang)
         {
-            return await SignIn(new LogInDto { Email = logInDto.Email, PassWord = logInDto.PassWord, UA = logInDto.UA }, lang);
+            return null;
+            // return await SignIn(new LogInDto { Email = logInDto.Email, PassWord = logInDto.PassWord, UA = logInDto.UA }, lang);
         }
 
         public async Task<APIResult> RefreshToken()
@@ -1534,78 +1536,78 @@ namespace VideoProjectCore6.Services.UserService
             //var users = await _DbContext.UserLogin.Select(x => x.UserId).Distinct().ToListAsync();
             //return users.Count;
         }
-        private async Task<LogInResultDto> SignIn(LogInDto logInDto, string lang)
-        {
-            // using TransactionScope scope = new(TransactionScopeAsyncFlowOption.Enabled);
-            var user = await _userManager.FindByEmailAsync(logInDto.Email);
+        // private async Task<LogInResultDto> SignIn(LogInDto logInDto, string lang)
+        // {
+        //     // using TransactionScope scope = new(TransactionScopeAsyncFlowOption.Enabled);
+        //     var user = await _userManager.FindByEmailAsync(logInDto.Email);
 
-            var userRoles = user != null ? await _IRoleRepository.GetRolesIdByUserId(user.Id) : null;
+        //     var userRoles = user != null ? await _IRoleRepository.GetRolesIdByUserId(user.Id) : null;
 
-            var onlyAdminLogin = bool.Parse(_IConfiguration["EnableOnlyAdminLogin"]);
-
-
-            LogInResultDto result = new();
-
-            if(onlyAdminLogin && (userRoles != null && !userRoles.Contains(Int32.Parse(Constants.ADMIN)) 
-                && !userRoles.Contains(Int32.Parse(Constants.EXUSER))))
-            {
-                result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
-                result.StatusCode.Message.Add(Translation.getMessage(lang, "InActiveEmail"));
-                return result;
-            }
+        //     var onlyAdminLogin = bool.Parse(_IConfiguration["EnableOnlyAdminLogin"]);
 
 
-            if (user == null)
-            {
-                result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
-                result.StatusCode.Message.Add(Translation.getMessage(lang, "UserEmailError"));
-                return result;
-            }
-            var resSignin = await _signInManager.PasswordSignInAsync(user, logInDto.PassWord, false, lockoutOnFailure: true);
-            if (resSignin.IsNotAllowed)
-            {
-                if (user.ProfileStatus != null && user.ProfileStatus == Convert.ToInt32(PROFILE_STATUS.SUSPENDED))// User Is created without his knowing 
-                {
-                    if (!await SendActivation(user))
-                    {
-                        result.StatusCode.Code = APIResult.RESPONSE_CODE.NoResponse;
-                        result.StatusCode.Message.Add(Translation.getMessage(lang, "InActiveEmail"));
-                    }
-                    else
-                    {
-                        result.StatusCode.Code = APIResult.RESPONSE_CODE.OK;
-                        result.StatusCode.Message.Add("Check your mail please");
-                    }
-                    return result;
-                }
-                result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
-                result.StatusCode.Message.Add(Translation.getMessage(lang, "UserAccountInactive"));
-                return result;
-            }
-            if (resSignin.IsLockedOut)
-            {
-                result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
-                result.StatusCode.Message.Add(Translation.getMessage(lang, "UserAccountLocked"));
-                return result;
-            }
-            if (!resSignin.Succeeded)
-            {
-                //await _userManager.SetLockoutEnabledAsync(user, true);
-                result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
-                result.StatusCode.Message.Add(Translation.getMessage(lang, "wrongPassword"));
-                return result;
-            }
+        //     LogInResultDto result = new();
 
-            DateTime lastLog = DateTime.Now;
-            var info = await _DbContext.UserLogins.Where(x => x.UserId == user.Id).ToListAsync();
-            if (info.Count > 0)
-            {
-                lastLog = (DateTime)info.Last().LoginDate;
-            }
+        //     if(onlyAdminLogin && (userRoles != null && !userRoles.Contains(Int32.Parse(Constants.ADMIN)) 
+        //         && !userRoles.Contains(Int32.Parse(Constants.EXUSER))))
+        //     {
+        //         result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
+        //         result.StatusCode.Message.Add(Translation.getMessage(lang, "InActiveEmail"));
+        //         return result;
+        //     }
 
-            await LogUserSignInEvent(user, logInDto.UA);
-            return await PrepareUserLoggedInResponse(user);
-        }
+
+        //     if (user == null)
+        //     {
+        //         result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
+        //         result.StatusCode.Message.Add(Translation.getMessage(lang, "UserEmailError"));
+        //         return result;
+        //     }
+        //     var resSignin = await _signInManager.PasswordSignInAsync(user, logInDto.PassWord, false, lockoutOnFailure: true);
+        //     if (resSignin.IsNotAllowed)
+        //     {
+        //         if (user.ProfileStatus != null && user.ProfileStatus == Convert.ToInt32(PROFILE_STATUS.SUSPENDED))// User Is created without his knowing 
+        //         {
+        //             if (!await SendActivation(user))
+        //             {
+        //                 result.StatusCode.Code = APIResult.RESPONSE_CODE.NoResponse;
+        //                 result.StatusCode.Message.Add(Translation.getMessage(lang, "InActiveEmail"));
+        //             }
+        //             else
+        //             {
+        //                 result.StatusCode.Code = APIResult.RESPONSE_CODE.OK;
+        //                 result.StatusCode.Message.Add("Check your mail please");
+        //             }
+        //             return result;
+        //         }
+        //         result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
+        //         result.StatusCode.Message.Add(Translation.getMessage(lang, "UserAccountInactive"));
+        //         return result;
+        //     }
+        //     if (resSignin.IsLockedOut)
+        //     {
+        //         result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
+        //         result.StatusCode.Message.Add(Translation.getMessage(lang, "UserAccountLocked"));
+        //         return result;
+        //     }
+        //     if (!resSignin.Succeeded)
+        //     {
+        //         //await _userManager.SetLockoutEnabledAsync(user, true);
+        //         result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
+        //         result.StatusCode.Message.Add(Translation.getMessage(lang, "wrongPassword"));
+        //         return result;
+        //     }
+
+        //     DateTime lastLog = DateTime.Now;
+        //     var info = await _DbContext.UserLogins.Where(x => x.UserId == user.Id).ToListAsync();
+        //     if (info.Count > 0)
+        //     {
+        //         lastLog = (DateTime)info.Last().LoginDate;
+        //     }
+
+        //     await LogUserSignInEvent(user, logInDto.UA);
+        //     return await PrepareUserLoggedInResponse(user);
+        // }
 
 
         //private async Task<int> GetGenderIdAsync(string gender)
@@ -2626,138 +2628,73 @@ namespace VideoProjectCore6.Services.UserService
 
         }
 
-        /// <summary>
-        /// OTP Login verification
-        /// </summary>
-        /// <param name="logInDto"></param>
-        /// <param name="lang"></param>
-        /// <returns></returns>
-        public async Task<APIResult> VerifyUserCredentials(LogInDto logInDto, string lang)
+        public async Task<APIResult> LogIn(LogInDto logInDto, string lang)
         {
             var user = await _userManager.FindByEmailAsync(logInDto.Email);
 
-            APIResult result = new APIResult();
-
             if (user == null)
             {
-                result.Code = APIResult.RESPONSE_CODE.BadRequest;
-                result.Message.Add(Translation.getMessage(lang, "UserEmailError"));
-                return result;
+                return new APIResult(-1, null, APIResult.RESPONSE_CODE.PageNotFound, [Translation.getMessage(lang, "UserEmailError")]);
             }
-            var resSignin = await _signInManager.PasswordSignInAsync(user, logInDto.PassWord, false, lockoutOnFailure: true);
+            SignInResult resSignin = await _signInManager.PasswordSignInAsync(user, logInDto.PassWord, false, lockoutOnFailure: true);
             if (resSignin.IsNotAllowed)
             {
                 if (user.ProfileStatus != null && user.ProfileStatus == Convert.ToInt32(PROFILE_STATUS.SUSPENDED))// User Is created without his knowing 
                 {
                     if (!await SendActivation(user))
                     {
-                        result.Code = APIResult.RESPONSE_CODE.NoResponse;
-                        result.Message.Add(Translation.getMessage(lang, "InActiveEmail"));
+                        return new APIResult(-1, null, APIResult.RESPONSE_CODE.NoResponse, [Translation.getMessage(lang, "InActiveEmail")]);
                     }
                     else
                     {
-                        result.Code = APIResult.RESPONSE_CODE.OK;
-                        result.Message.Add("Check your mail please");
+                        return new APIResult(1, null, APIResult.RESPONSE_CODE.OK, ["Check your mail please"]);
                     }
-                    return result;
                 }
-                result.Code = APIResult.RESPONSE_CODE.BadRequest;
-                result.Message.Add(Translation.getMessage(lang, "UserAccountInactive"));
-                return result;
+                return new APIResult(-1, null, APIResult.RESPONSE_CODE.BadRequest, [Translation.getMessage(lang, "UserAccountInactive")]);
             }
             if (resSignin.IsLockedOut)
             {
-                result.Code = APIResult.RESPONSE_CODE.BadRequest;
-                result.Message.Add(Translation.getMessage(lang, "OTPUserAccountLocked"));
-                return result;
+                return new APIResult(-1, null, APIResult.RESPONSE_CODE.BadRequest, [Translation.getMessage(lang, "OTPUserAccountLocked")]);
             }
+            if (resSignin.RequiresTwoFactor)
+            {
+                var token = await _userManager.GenerateTwoFactorTokenAsync(user, "mock");
+                SendNotificationRepository sender = new (_DbContext, _mailSetting, _smsSetting, _iGeneralRepository, _iNotificationLogRepository);
+                var send_otp_result = await sender.SendOTPCode(user.Id, token, user.PhoneNumber, user.Email, lang);
+                if (send_otp_result.Code == APIResult.RESPONSE_CODE.OK)
+                    return new APIResult(1, new TwoFactorRequiredDto{userId = user.Id}, APIResult.RESPONSE_CODE.SecondFactorRequired, ["Second factor required"]);
+                return send_otp_result;
+            }
+
             if (!resSignin.Succeeded)
-            {
-                //await _userManager.SetLockoutEnabledAsync(user, true);
-                result.Code = APIResult.RESPONSE_CODE.BadRequest;
-                result.Message.Add(Translation.getMessage(lang, "wrongPassword"));
-                return result;
-            }
+                return new APIResult(-1, false, APIResult.RESPONSE_CODE.Unauthorized, [Translation.getMessage(lang, "wrongPassword")]);
 
-            if (resSignin.Succeeded)
-            {
-
-                SendNotificationRepository sendNotificationRepository = new(_DbContext, _mailSetting, _smsSetting, _iGeneralRepository, _iNotificationLogRepository, _IConfiguration);
-
-                APIResult otpCode = await sendNotificationRepository.SendOTPCode(user.Id, user.PhoneNumber, user.Email, lang);
-                
-                if (otpCode.Result == true)
-                {
-                    result.Id = user.Id;
-                    result.Code = APIResult.RESPONSE_CODE.OK;
-                    result.Message.Add(Translation.getMessage(lang, "Success"));
-                    return result;
-                }
-                else
-                {
-                    result.Code = APIResult.RESPONSE_CODE.BadRequest;
-                    result.Message.Add(Translation.getMessage(lang, "OTPNotSent"));
-                    return result;
-                }
-            }
-            return result;
+            await LogUserSignInEvent(user, logInDto.UA);
+            return await PrepareUserLoggedInResponse(user);
         }
 
-        public async Task<LogInResultDto> VerifyOTP(OtpLogInDto otpLogInDto, string lang)
+        public async Task<APIResult> VerifyOTP(OtpLogInDto otpLogInDto, string lang)
         {
-            APIResult apiResult = new();
-
-            LogInResultDto result = new();
+            APIResult result = new();
+            var signInResult = await _signInManager.TwoFactorSignInAsync("mock", otpLogInDto.Number, true, false);
+            if (!signInResult.Succeeded)
+            {
+                _logger.LogInformation("Log in failed: lockedOut={} allowed={}", signInResult.IsLockedOut, !signInResult.IsNotAllowed);
+                var apiResult = new APIResult(-1, false, APIResult.RESPONSE_CODE.Unauthorized, []);
+                if (signInResult.IsLockedOut)
+                    apiResult.Message.Add("2FA failed. Account is locked out");
+                else if (signInResult.IsNotAllowed)
+                    apiResult.Message.Add("2FA failed. Authentication is disabled for this account");
+                else
+                    apiResult.Message.Add("2FA failed. Incorrect OTP");
+                _logger.LogInformation("{}", apiResult.Message[0]);
+                return result;
+            }
 
             var user = await _userManager.FindByIdAsync(otpLogInDto.userId.ToString());
-
             if (user == null)
             {
-                result.StatusCode = apiResult.FailMe(-1, "User Not Found");
-                return result;
-            }
-
-            int otpPeriodInMinutes = Constants.OTP_PERIOD_If_MISSED_IN_APP_SETTING;
-
-            if (_IConfiguration["OtpPeriodInMinutes"] == null)
-            {
-                _logger.LogInformation("Warning!!! OtpPeriodInMinutes is missing");
-            }
-            else
-            {
-                bool success = int.TryParse(_IConfiguration["OtpPeriodInMinutes"], out int settingPeriod);
-                if (!success || settingPeriod < 1)
-                {
-                    _logger.LogInformation("Warning OtpPeriodInMinutes is invalid number or < 1 minute");
-                }
-                else
-                {
-                    otpPeriodInMinutes = settingPeriod;
-                }
-            }
-
-            var lastOtp = await _DbContext.OtpLogs.Where(x => x.UserId == otpLogInDto.userId).FirstOrDefaultAsync();
-
-            //if(lastOtp.ResendNum == Constants.OTP_MAX_TRY)
-            //{
-            //    result.StatusCode = apiResult.FailMe(-1, "Resend is locked for "+ Constants.OTP_MAX_TRY+" minutes");
-            //    return result;
-            //}
-
-            if (lastOtp == null || lastOtp.GeneratedDate.AddMinutes(otpPeriodInMinutes) < DateTime.Now)
-            {
-                result.StatusCode = apiResult.FailMe(-1, Translation.getMessage(lang, "ExpiredOTP"));
-                return result;
-            }
-
-            if (lastOtp.OtpCode.Trim() != otpLogInDto.Number.Trim())
-            {
-
-                //lastOtp.ResendNum += 1;
-                //_DbContext.OtpLogs.Update(lastOtp);
-                //await _DbContext.SaveChangesAsync();
-
-                result.StatusCode = apiResult.FailMe(-1, Translation.getMessage(lang, "IncorrectOTP"));
+                _logger.LogError("User logged in sucessfully but not found in db");
                 return result;
             }
 
@@ -2882,7 +2819,7 @@ namespace VideoProjectCore6.Services.UserService
             }
         }
 
-        private async Task<LogInResultDto> PrepareUserLoggedInResponse(User user)
+        private async Task<APIResult> PrepareUserLoggedInResponse(User user)
         {
             LogInResultDto result = new();
 
@@ -2912,10 +2849,6 @@ namespace VideoProjectCore6.Services.UserService
 
             }
             var remoteEntityId = user.EntityId != null ? await _DbContext.Users.Where(x => x.Id == user.EntityId).Select(x => x.UserId).FirstOrDefaultAsync() : null;
-            result.StatusCode.Id = 1;
-            result.StatusCode.Code = APIResult.RESPONSE_CODE.OK;
-            result.StatusCode.Message.Add("Welcome");
-            result.StatusCode.Result = true;
             result.Token = jwt;
             result.UserId = user.Id;
             result.UserName = user.UserName;
@@ -2936,6 +2869,26 @@ namespace VideoProjectCore6.Services.UserService
             result.RemoteEntityId = remoteEntityId;
             //result.ShowAadel = !await IsEmployee(user.Id);
 
+            return new APIResult(1, result, APIResult.RESPONSE_CODE.OK, ["Welcome"]);
+        }
+
+        private static APIResult PrepareUserLogInFailedResponse(APIResult.RESPONSE_CODE code)
+        {
+            APIResult result = new();
+            string msg;
+            if (code == APIResult.RESPONSE_CODE.Unauthorized)
+                msg = "Invalid credentials";
+            else if (code == APIResult.RESPONSE_CODE.Locked)
+                msg = "Account is locked";
+            else
+                msg = "Internal Server Error";
+            result.FailMe(-1, msg, false, code);
+            return result;
+        }
+
+        private static APIResult PrepareTwoFactorRequiredResponse() {
+            APIResult result = new();
+            ;
             return result;
         }
 
@@ -2946,7 +2899,6 @@ namespace VideoProjectCore6.Services.UserService
                 bool UAData = ua != null;
                 UserLogin userLogin = new()
                 {
-                    Id = GetNewValueBySec(),
                     LoginProvider = "Local",
                     UserId = user.Id,
                     ProviderDisplayName = user.UserName,

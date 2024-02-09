@@ -4,7 +4,6 @@ namespace VideoProjectCore6.DTOs.AccountDto
 {
     public class LogInResultDto
     {
-        public APIResult StatusCode { get; set; }
         public string Token { get; set; }
         public int UserId { get; set; }
         public int? GenderId { get; set; }
@@ -30,7 +29,6 @@ namespace VideoProjectCore6.DTOs.AccountDto
 
         public LogInResultDto()
         {
-            StatusCode = new();
             RolesId = new();
         }
     }

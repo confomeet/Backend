@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace VideoProjectCore6.Models
 {
-    public partial class OraDbContext : IdentityDbContext<User, Role, int, UserClaim, UserRole, UserLogin, RoleClaim, IdentityUserToken<int>>
+    public partial class OraDbContext : IdentityDbContext<User, Role, int, UserClaim, UserRole, UserLogin, RoleClaim, UserToken>
     {
         private readonly IConfiguration _IConfiguration;
         public OraDbContext(IConfiguration iConfiguration)
@@ -1102,7 +1102,7 @@ namespace VideoProjectCore6.Models
                     .HasColumnName("generated_date");
 
                 entity.Property(e => e.OtpCode)
-                    .HasMaxLength(10)
+                    .HasMaxLength(6)
                     .HasColumnName("otp_code")
                     .IsFixedLength();
 
@@ -1879,7 +1879,7 @@ namespace VideoProjectCore6.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(10)
-                    .ValueGeneratedNever()
+                    .ValueGeneratedOnAdd()
                     .HasColumnName("id");
 
                 entity.Property(e => e.BrowserName)
@@ -2282,9 +2282,6 @@ namespace VideoProjectCore6.Models
 
             modelBuilder.HasSequence("egroup_seq");
 
-            OnModelCreatingPartial(modelBuilder);
         }
-
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

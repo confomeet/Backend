@@ -21,10 +21,8 @@ namespace VideoProjectCore6.Repositories.INotificationRepository
         /// </summary>
         /// <returns></returns>
         Task ReSend(string channelName, int size);
-        Task<string> GenerateUrlToken(int userId, string meetingId, string lang);
         Task<APIResult> VerifyOTP(int userId, string number, string lang);
         Task<bool> SendOTP(int userId, string mobile, string email, int eventId, string lang);
-        Task<UserAppDto> VerifyToken(Guid guid, string lang);
         Task SendMailToAdmin(int userId, string extraText);
 
         // Task<List<NotificationLogPostDto>> GetScheduleNotifications(List<NotificationLogPostDto> responseNotification, List<Receiver> receivers, string meetingId, string lang);
@@ -32,6 +30,6 @@ namespace VideoProjectCore6.Repositories.INotificationRepository
         Task<List<MeetingUserLink>> FillAndSendNotification(List<NotificationLogPostDto> notifications, List<Receiver> receivers, Dictionary<string, string> Parameters, string meetingId, bool addAppLink, string lang, bool send, bool isDirectInvitation,string cisco=null);
         Task<APIResult> InvokeSMSService(SMSDto sms);
 
-        Task<APIResult> SendOTPCode(int userId, string mobile, string email, string lang);
+        Task<APIResult> SendOTPCode(int userId, string otpCode, string mobile, string email, string lang);
     }
 }

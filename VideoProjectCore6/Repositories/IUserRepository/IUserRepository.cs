@@ -67,8 +67,8 @@ namespace VideoProjectCore6.Repositories.IUserRepository
                                                        int pageIndex = 1, int pageSize = 25, string lang = "ar");
         //Task<APIResult> AuthenticateUserExternal(int v);
         // public Task<APIResult> GetLocalUserId(int userId);
-        Task<LogInResultDto> VerifyOTP(OtpLogInDto otpLogInDto, string lang);
-        Task<APIResult> VerifyUserCredentials(LogInDto logInDto, string lang);
+        Task<APIResult> VerifyOTP(OtpLogInDto otpLogInDto, string lang);
+        Task<APIResult> LogIn(LogInDto logInDto, string lang);
 
         Task<APIResult> ViewMyProfile(int currentUserId, string lang);
 

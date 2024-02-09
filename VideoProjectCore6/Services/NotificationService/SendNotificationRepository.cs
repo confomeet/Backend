@@ -23,20 +23,19 @@ using VideoProjectCore6.Repositories.INotificationRepository;
 using VideoProjectCore6.Repositories.IUserRepository;
 
 using VideoProjectCore6.Services.Meeting;
-#nullable disable
 namespace VideoProjectCore6.Services.NotificationService
 {
     public class UserInfo
     {
         public int UserId { get; set; }
-        public List<UserInfoDetails> Adresses { get; set; }
-        public string UserName { get; set; }
+        public List<UserInfoDetails> Adresses { get; set; } = [];
+        public string UserName { get; set; } = "";
     }
 
     public class UserInfoDetails
     {
         public int ChannelNo { get; set; }
-        public string Address { get; set; }
+        public string Address { get; set; } = "";
     }
 
     public class SendNotificationRepository : ISendNotificationRepository
@@ -45,23 +44,22 @@ namespace VideoProjectCore6.Services.NotificationService
         private readonly IOptions<ChannelSMSSetting> _smsSetting;
         private readonly OraDbContext _DbContext;
         private readonly INotificationLogRepository _iNotificationLogRepository;
-        private readonly ILogger<SendNotificationRepository> _logger;
-        private readonly ILogger<MeetingRepository> _loggerM;
+        private readonly ILogger<SendNotificationRepository>? _logger;
+        private readonly ILogger<MeetingRepository>? _loggerM;
         private readonly IGeneralRepository _generalRepository;
-        private readonly jwt _jwt;
-        private readonly IConfiguration _configuration;
-        private readonly IUserRepository _iUserRepository;
+        private readonly IConfiguration? _configuration;
+        private readonly IUserRepository? _iUserRepository;
 
 
-        ValidatorException _exception;
-        private readonly IFilesUploaderRepository _IFilesUploaderRepository;
+        private readonly ValidatorException? _exception;
+        private readonly IFilesUploaderRepository? _IFilesUploaderRepository;
 
 
-        public SendNotificationRepository(OraDbContext DBContext, IOptions<jwt> jwt,
-            IOptions<ChannelMailFirstSetting> mailSettings, 
+        public SendNotificationRepository(OraDbContext DBContext,
+            IOptions<ChannelMailFirstSetting> mailSettings,
             IOptions<ChannelSMSSetting> smsSettings,
             INotificationLogRepository iNotificationLogRepository,
-            ILogger<SendNotificationRepository> logger,
+            ILogger<SendNotificationRepository>? logger,
             IGeneralRepository generalRepository,
             IConfiguration configuration,
             IUserRepository iUserRepository,
@@ -74,13 +72,11 @@ namespace VideoProjectCore6.Services.NotificationService
             _iNotificationLogRepository = iNotificationLogRepository;
             _logger = logger;
             _generalRepository = generalRepository;
-            _jwt = jwt.Value;
             _configuration = configuration;
             _iUserRepository = iUserRepository;
             _exception = new ValidatorException();
             _IFilesUploaderRepository = iFilesUploaderRepository;
             _loggerM = iloggerM;
-
         }
 
         public SendNotificationRepository(OraDbContext dBContext,
@@ -94,20 +90,11 @@ namespace VideoProjectCore6.Services.NotificationService
             _smsSetting = smsSettings;
             _generalRepository = generalRepository;
             _iNotificationLogRepository = iNotificationLogRepository;
-        }
-
-        public SendNotificationRepository(OraDbContext dBContext,
-            IOptions<ChannelMailFirstSetting> mailSettings,
-            IOptions<ChannelSMSSetting> smsSettings,
-            IGeneralRepository generalRepository,
-            INotificationLogRepository iNotificationLogRepository, IConfiguration configuration)
-        {
-            _DbContext = dBContext;
-            _mailSetting = mailSettings;
-            _smsSetting = smsSettings;
-            _generalRepository = generalRepository;
-            _iNotificationLogRepository = iNotificationLogRepository;
-            _configuration = configuration;
+            _logger = null;
+            _loggerM = null;
+            _iUserRepository = null;
+            _configuration = null;
+            _IFilesUploaderRepository = null;
         }
 
         public async Task DoSend(List<NotificationLogPostDto> notifications, bool sendImmediately, bool addOrUpdateNotificationslog, string key)
@@ -432,188 +419,6 @@ namespace VideoProjectCore6.Services.NotificationService
             //return logInResultDto;
         }
 
-        public async Task<string> GenerateUrlToken(int userId, string meetingId, string lang)
-        {
-            var user = await _DbContext.Users.Where(x => x.Id == userId).AsNoTracking().FirstOrDefaultAsync();
-            if (user == null)
-            {
-                _exception.AttributeMessages.Add(Translation.getMessage(lang, "UserNotExistedBefore"));
-                throw _exception;
-            }
-
-            Claim[] claims = GenerateClaims(user, meetingId);
-            string jwt = GenerateToken(claims, _jwt.Key);
-            Guid guid = Guid.NewGuid();
-            ShortenUrl shortenUrl = new()
-            {
-                GuidUrl = guid,
-                Url = jwt
-            };
-
-            await _DbContext.ShortenUrls.AddAsync(shortenUrl);
-            if (await _DbContext.SaveChangesAsync() > 0)
-            {
-                return guid.ToString();
-            }
-
-            _exception.AttributeMessages.Add(Translation.getMessage(lang, "FailToken"));
-            throw _exception;
-        }
-        public async Task<UserAppDto> VerifyToken(Guid guid, string lang)
-        {
-            IdentityModelEventSource.ShowPII = true;
-            SecurityToken validatedToken;
-            TokenValidationParameters validationParameters = new TokenValidationParameters()
-            {
-                ValidateLifetime = true,
-                ValidAudience = _configuration["Jwt:Audience"].ToLower(),
-                ValidIssuer = _configuration["Jwt:Issuer"].ToLower(),
-                IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key))
-            };
-            var jwt = await _DbContext.ShortenUrls.Where(x => x.GuidUrl == guid).Select(x => x.Url).FirstOrDefaultAsync();
-            if (jwt == null)
-            {
-                _exception.AttributeMessages.Add(Translation.getMessage(lang, "MissedGUID"));
-                throw _exception;
-            }
-
-            ClaimsPrincipal principal = new ClaimsPrincipal();
-            try
-            {
-                principal = new JwtSecurityTokenHandler().ValidateToken(jwt, validationParameters, out validatedToken);
-            }
-            catch
-            {
-                _exception.AttributeMessages.Add(Translation.getMessage(lang, "ExpiredToken"));
-                throw _exception;
-            }
-
-            if (validatedToken.ValidTo < DateTime.Now)
-            {
-                _exception.AttributeMessages.Add(Translation.getMessage(lang, "ExpiredToken"));
-                throw _exception;
-            }
-
-            if (validatedToken.ValidFrom > DateTime.Now)
-            {
-                _exception.AttributeMessages.Add(Translation.getMessage(lang, "NotActivatedToken"));
-                throw _exception;
-            }
-
-            if (principal.FindFirst(ClaimTypes.NameIdentifier) == null)
-            {
-                _exception.AttributeMessages.Add(Translation.getMessage(lang, "InvalidToken"));
-                throw _exception;
-            }
-
-            var userId = int.Parse(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            string EmirateId = principal.Claims.Where(x => x.Type == "EmirateId").Select(x => x.Value).FirstOrDefault();
-            //string serviceId = principal.Claims.Where(x => x.Type == "serviceId").Select(x => x.Value).FirstOrDefault();
-
-            if (userId == 0)
-            {
-                _exception.AttributeMessages.Add(Translation.getMessage(lang, "UserNotExistedBefore"));
-                throw _exception;
-            }
-
-
-            if (EmirateId == null /*|| serviceId == null || appId == null || pnsClaims == null*/)
-            {
-                _exception.AttributeMessages.Add(Translation.getMessage(lang, "InvalidToken"));
-                throw _exception;
-            }
-
-            string partyEmail = null;
-            string partyPhone = null;
-            string partyAlternativeEmail = null;
-            var emails = new List<string>();
-            var phones = new List<string>();
-            var masterUser = await _DbContext.Users.Where(x => x.Id == userId).FirstOrDefaultAsync();
-
-            if (masterUser.Email != null)
-            {
-                emails.Add(masterUser.Email);
-            }
-
-            if (!string.IsNullOrEmpty(partyAlternativeEmail))
-            {
-                if (!emails.Contains(partyAlternativeEmail))
-                {
-                    emails.Add(partyAlternativeEmail);
-                }
-            }
-
-            if (!string.IsNullOrEmpty(partyEmail))
-            {
-                if (!emails.Contains(partyEmail))
-                {
-                    emails.Add(partyEmail);
-                }
-            }
-
-            if (masterUser.PhoneNumber != null)
-            {
-                phones.Add(masterUser.PhoneNumber);
-            }
-
-            if (!string.IsNullOrEmpty(partyPhone))
-            {
-                if (!phones.Contains(partyPhone))
-                {
-                    phones.Add(partyPhone);
-                }
-            }
-
-
-            if (emails == null && phones == null)
-            {
-                _exception.AttributeMessages.Add(Translation.getMessage(lang, "userHasNotAddresses"));
-                throw _exception;
-            }
-            /****   Stop by yhab *****/
-            // the token is valid, Send OTP.
-            //if (!await SendOTP(userId, phones, emails, Int32.Parse("1"/*appId*/), false, lang))  
-            //{
-            //    _exception.AttributeMessages.Add(Translation.getMessage(lang, "FiledInsendingOTP"));
-            //    throw _exception;
-            //}
-
-            UserAppDto res = new UserAppDto
-            {
-                ApplicationId = "1",
-                ServiceId = "1",
-                UserId = userId,
-                PNS = false
-            };
-
-            return res;
-        }
-        private string GenerateToken(Claim[] claims, string key)
-        {
-            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-            var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-            var jwt = new JwtSecurityToken(
-                _configuration["jwt:Issuer"].ToLower(),
-                _configuration["jwt:Audience"].ToLower(),
-                //_configuration["jwt:Sub"].ToLower(),
-                signingCredentials: signingCredentials,
-                claims: claims,
-                expires: DateTime.Now.AddDays(365));
-
-            return new JwtSecurityTokenHandler().WriteToken(jwt);
-        }
-        private Claim[] GenerateClaims(User user, string meetingId)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim("MeetingId", meetingId),
-                new Claim(ClaimTypes.Expiration, new DateTimeOffset().ToUniversalTime().ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
-            };
-            return claims.ToArray();
-        }
         public async Task SendMailToAdmin(int userId, string extraText)
         {
             int mailChannel = await _DbContext.SysLookupValues.Where(x => x.Shortcut == Constants.NOTIFICATION_MAIL_CHANNEL).Select(x => x.Id).FirstOrDefaultAsync();
@@ -860,68 +665,12 @@ namespace VideoProjectCore6.Services.NotificationService
         }
 
         
-        public async Task<APIResult> SendOTPCode(int userId, string mobile, string email, string lang)
+        public async Task<APIResult> SendOTPCode(int userId, string otpCode, string mobile, string email, string lang)
         {
             APIResult result = new APIResult();
 
             try
             {
-                int otpPeriodInMinutes = Constants.OTP_PERIOD_If_MISSED_IN_APP_SETTING;
-
-                if (_configuration["OtpPeriodInMinutes"] == null)
-                {
-                    return result.FailMe(-1, "Warning!!! OtpPeriodInMinutes is missing");
-                }
-                else
-                {
-                    bool success = int.TryParse(_configuration["OtpPeriodInMinutes"], out int settingPeriod);
-                    if (!success || settingPeriod < 1)
-                    {
-                        return result.FailMe(-1, "Warning OtpPeriodInMinutes is invalid number or < 1 minute");
-                    }
-                    else
-                    {
-                        otpPeriodInMinutes = settingPeriod;
-                    }
-                }
-
-                var totp = new Totp(Base32Encoding.ToBytes(Constants.otpBase32Secret));
-                var code = totp.ComputeTotp();
-                var oldOtp = await _DbContext.OtpLogs.Where(x => x.UserId == userId).FirstOrDefaultAsync();
-                if (oldOtp != null)
-                {
-                    if (oldOtp.GeneratedDate.AddMinutes(otpPeriodInMinutes) > DateTime.Now /*|| oldOtp.TriedNum == Constants.OTP_MAX_TRY*/)
-                    {
-                        code = oldOtp.OtpCode;
-                        oldOtp.GeneratedDate = DateTime.Now;
-                        _DbContext.OtpLogs.Update(oldOtp);
-                        await _DbContext.SaveChangesAsync();
-                    }
-                    //else if(oldOtp.TriedNum == Constants.OTP_MAX_TRY)
-                    //{
-
-                    //}
-                    else
-                    {
-                        oldOtp.OtpCode = code;
-                        oldOtp.GeneratedDate = DateTime.Now;
-                        //oldOtp.ResendNum = 0;
-                        _DbContext.OtpLogs.Update(oldOtp);
-                        await _DbContext.SaveChangesAsync();
-                    }
-                }
-                else
-                {
-                    OtpLog otp = new OtpLog
-                    {
-                        GeneratedDate = DateTime.Now,
-                        OtpCode = code,
-                        UserId = userId,
-                    };
-                    await _DbContext.OtpLogs.AddAsync(otp);
-                    await _DbContext.SaveChangesAsync();
-                }
-
                 var notificationsDto = new List<NotificationLogPostDto>();
                 //var defLang = "en";
                 //if (lang != null)
@@ -961,7 +710,7 @@ namespace VideoProjectCore6.Services.NotificationService
                         UserId = userId,
                         Lang = "en",
                         NotificationTitle = Constants.OTP_TITLE_EN,
-                        NotificationBody = (Constants.OTP_BODY_EN + code).Trim(),
+                        NotificationBody = (Constants.OTP_BODY_EN + otpCode).Trim(),
                         ToAddress = mobile
                     });
 
@@ -989,7 +738,7 @@ namespace VideoProjectCore6.Services.NotificationService
                         UserId = userId,
                         Lang = "en",
                         NotificationTitle = Constants.OTP_TITLE_EN,
-                        NotificationBody = Constants.OTP_BODY_EN + code + " ",
+                        NotificationBody = Constants.OTP_BODY_EN + otpCode + " ",
                         ToAddress = email,
                         Template = Constants.DEFAULT_TEMPLATE
                     });

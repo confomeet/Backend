@@ -9,6 +9,7 @@ using VideoProjectCore6.Repositories.IUserRepository;
 using VideoProjectCore6.Attributes;
 using VideoProjectCore6.Services;
 using VideoProjectCore6.DTOs.FileDto;
+using System.Security.Claims;
 #nullable disable
 namespace VideoProjectCore6.Controllers.Account
 {
@@ -20,24 +21,19 @@ namespace VideoProjectCore6.Controllers.Account
         // private readonly IStringLocalizer<UserController> _localizer;
         //  private readonly SignInWithUGateSettings _SignInWithUGateSettings;
         private readonly IWebHostEnvironment _IWebHostEnvironment;
+        private readonly ILogger _ILogger;
         public UserController(IWebHostEnvironment iWebHostInviroment,
                               /// IStringLocalizer<UserController> localizer,
-                              IUserRepository iUserRepository /*,IOptions<SignInWithUGateSettings> signInWithUGateSettings*/)
+                              IUserRepository iUserRepository, /*,IOptions<SignInWithUGateSettings> signInWithUGateSettings*/
+                              ILogger<UserController> logger)
         {
             _IUserRepository = iUserRepository;
             //  _SignInWithUGateSettings = signInWithUGateSettings.Value;
             _IWebHostEnvironment = iWebHostInviroment;
             //_localizer = localizer;
+            _ILogger = logger;
         }
 
-
-
-        [HttpPost("signIn")]
-        public async Task<IActionResult> SignIn(LogInDto logInDto, [FromHeader] string lang)
-        {
-            var obj = await _IUserRepository.LocalSignIn(logInDto, lang);
-            return obj.StatusCode.Id > 0 ? Ok(obj) : BadRequest(obj);
-        }
 
         //[HttpPost("SignOut")]
         //public IActionResult SignOut(bool WithUnifiedgate)
@@ -376,13 +372,13 @@ namespace VideoProjectCore6.Controllers.Account
             return Ok(await _IUserRepository.GetRelatedUsers(_IUserRepository.GetUserID(), lang));
         }
 
-        [HttpPost("VerifyUserCredentials")]
-        public async Task<IActionResult> VerifyUserCredentials(LogInDto logInDto, [FromHeader] string lang)
+        [HttpPost("LogIn")]
+        public async Task<IActionResult> LogIn(LogInDto logInDto, [FromHeader] string lang)
         {
-            var obj = await _IUserRepository.VerifyUserCredentials(logInDto, lang);
+            var obj = await _IUserRepository.LogIn(logInDto, lang);
             if (obj.Id < 0)
             {
-                return NotFound(obj);
+                return Unauthorized(obj);
             }
             return Ok(obj);
         }
@@ -390,8 +386,9 @@ namespace VideoProjectCore6.Controllers.Account
         [HttpPost("VerifyOTP")]
         public async Task<IActionResult> VerifyOTP(OtpLogInDto otpLogInDto, [FromHeader] string lang)
         {
+            _ILogger.LogInformation("User.type={},  User.Identity.Name={},  User.Identity.AuthType={}", User.GetType(), User.Identity.Name, User.Identity.AuthenticationType);
             var obj = await _IUserRepository.VerifyOTP(otpLogInDto, lang);
-            if (obj.StatusCode.Id < 0)
+            if (obj.Id < 0)
             {
                 return NotFound(obj);
             }

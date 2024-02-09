@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -250,7 +251,8 @@ builder.Services.AddIdentity<User, Role>(opt =>
     opt.Password.RequireUppercase = false;
     opt.User.RequireUniqueEmail = true;
     opt.SignIn.RequireConfirmedEmail = true;
-   }).AddEntityFrameworkStores<OraDbContext>().AddDefaultTokenProviders();
+   }).AddEntityFrameworkStores<OraDbContext>()
+   .AddTokenProvider<Token2FAProvider>("mock");
 
 
 builder.Services.AddSwaggerGen(options =>
