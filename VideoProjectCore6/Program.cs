@@ -102,10 +102,9 @@ var currentHostName = environmentVar != null ? environmentVar : "http://localhos
 
 
 //builder.Services.AddDbContext<OraDbContext>(options => options.UseOracle(connectionString));
-builder.Services.AddEntityFrameworkNpgsql().AddDbContext<OraDbContext>(opt =>
-        opt.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection"))
-
-        );
+builder.Services.AddDbContext<OraDbContext>(opt => {
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection"));
+});
 
 builder.Services.AddCors(opt =>
 {
