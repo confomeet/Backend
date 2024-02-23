@@ -273,6 +273,8 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddSignalR(hubOptions => { hubOptions.EnableDetailedErrors = true; hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(10); hubOptions.HandshakeTimeout = TimeSpan.FromSeconds(5); });
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 var app = builder.Build();
 
