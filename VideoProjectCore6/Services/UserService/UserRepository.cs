@@ -1277,6 +1277,8 @@ namespace VideoProjectCore6.Services.UserService
             user.UserName = dto.UserName;
             user.FullName = dto.FullName;
             user.LastUpdatedDate = DateTime.Now;
+            if (dto.Enable2FA != null)
+                await _userManager.SetTwoFactorEnabledAsync(user, (bool)dto.Enable2FA);
 
             var result = await _userManager.UpdateAsync(user);
             var resUpdateRole = IdentityResult.Success;
@@ -2239,7 +2241,8 @@ namespace VideoProjectCore6.Services.UserService
                             UserName = u.UserName,
                             Locked = CheckLockState(u.LockoutEnabled, u.LockoutEnd),
                             Confirmed = u.EmailConfirmed,
-                            Roles = u.UserRoles.Select(r => r.RoleId).ToList()
+                            Roles = u.UserRoles.Select(r => r.RoleId).ToList(),
+                            Enable2FA = u.TwoFactorEnabled,
 
                         }).Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
             int total = await _DbContext.Users.CountAsync();
@@ -2263,6 +2266,7 @@ namespace VideoProjectCore6.Services.UserService
                             UserName = u.UserName,
                             Locked = CheckLockState(u.LockoutEnabled, u.LockoutEnd),
                             Confirmed = u.EmailConfirmed,
+                            Enable2FA = u.TwoFactorEnabled,
 
                         }).ToListAsync();
 
@@ -2337,7 +2341,8 @@ namespace VideoProjectCore6.Services.UserService
                             Locked = CheckLockState(u.LockoutEnabled, u.LockoutEnd),
                             Confirmed = u.EmailConfirmed,
                             Roles = u.UserRoles.Select(r => r.RoleId).ToList(),
-                            UserGroups = u.UserGroups.Select(o => o.Group.GroupName).ToList().Count > 0 ? u.UserGroups.Select(o => new ValueId { Id = o.GroupId, Value = o.Group.GroupName }).ToList() : defaultGroup
+                            UserGroups = u.UserGroups.Select(o => o.Group.GroupName).ToList().Count > 0 ? u.UserGroups.Select(o => new ValueId { Id = o.GroupId, Value = o.Group.GroupName }).ToList() : defaultGroup,
+                            Enable2FA = u.TwoFactorEnabled
                         }).ToListAsync();
 
             if(userFilterDto.userType?.Count() > 0 || userFilterDto.userGroups?.Count() > 0 || userFilterDto.isLocked != null || userFilterDto.isConfirmed != null)
@@ -2388,6 +2393,7 @@ namespace VideoProjectCore6.Services.UserService
                             UserName = u.UserName,
                             Locked = CheckLockState(u.LockoutEnabled, u.LockoutEnd),
                             Confirmed = u.EmailConfirmed,
+                            Enable2FA = u.TwoFactorEnabled,
 
                         }).ToListAsync();
 
@@ -2415,6 +2421,7 @@ namespace VideoProjectCore6.Services.UserService
                             UserName = u.UserName,
                             Locked = CheckLockState(u.LockoutEnabled, u.LockoutEnd),
                             Confirmed = u.EmailConfirmed,
+                            Enable2FA = u.TwoFactorEnabled,
                         }).FirstOrDefaultAsync();
             int total = await _DbContext.Users.CountAsync();
             return query;

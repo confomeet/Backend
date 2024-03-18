@@ -12,5 +12,6 @@
         public bool Confirmed { get; set; }
         public List<int> Roles { get; set; }
         public List<int> Groups { get; set; }
+        public bool? Enable2FA { get; set; }
     }
 }

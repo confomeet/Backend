@@ -15,5 +15,6 @@ namespace VideoProjectCore6.DTOs.AccountDto
         public bool Confirmed { get; set; }
         public List<int> Roles { get; set; }
         public List<ValueId> UserGroups { get; set; }
+        public bool? Enable2FA { get; set; }
     }
 }
