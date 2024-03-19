@@ -1209,6 +1209,7 @@ public class EventRepository : IEventRepository
             {
                 e.ToHide = true;
             }
+            e.VideoLogs = await FetchVideoLogs(e.MeetingId, _DbContext, null);
         }
         if (events != null && events.Any())
         {
@@ -1943,7 +1944,6 @@ public class EventRepository : IEventRepository
                 Type = e.Type,
                 MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, "en", allRooms),
                 EventLogs = _IUserRepository.IsAdmin() ? EventLog(e.Id, e.MeetingId, allUsers, allRooms, "en", timeZoneId) : new List<ConfEventCompactGet>(),
-                VideoLogs = _IUserRepository.IsAdmin() ? VideoLogs(e.MeetingId, videoRecords, timeZoneId) : new List<RecordingLog>(),
                 ParentEventId = e.ParentEvent,
                 EGroup = e.EGroup,
                 Participants = e.Participants.Select(p => new ParticipantView
@@ -2008,6 +2008,7 @@ public class EventRepository : IEventRepository
             }).FirstOrDefaultAsync();
         if (e != null)
         {
+            e.VideoLogs = await FetchVideoLogs(e.MeetingId, _DbContext, timeZoneId);
             e.SubEventCount = e.SubEvents.Count();
             var usersId1 = e.Participants.Select(p => p.UserId).Distinct().ToList();
             usersId1.Add(e.CreatedBy);
@@ -2742,30 +2743,18 @@ public class EventRepository : IEventRepository
         return eventLogs;
     }
 
-    private static List<RecordingLog> VideoLogs(string meetingId, List<RecordingLog> videoRecords, string timeZoneId)
+    private static async Task<List<RecordingLog>> FetchVideoLogs(string meetingId, OraDbContext dbContext, string timeZoneId)
     {
-
-        List<RecordingLog> recordingLogs = new List<RecordingLog>();
-
-
+        // FIXME: we need meeting_id in table RecordingLogs or at least index for RecordingLogs.RecordingFileName
+        var videoRecords = await dbContext.RecordingLogs.Where(rl => rl.RecordingfileName.StartsWith(meetingId)).ToListAsync();
         foreach (var log in videoRecords)
         {
-            var meetingIdName = log.RecordingfileName.Split('_', System.StringSplitOptions.None);
+            var logTime = log.CreatedDate;
 
-            if (meetingIdName.Count() > 0)
-            {
-                if (meetingIdName[0].Equals(meetingId))
-                {
-                    var logTime = log.CreatedDate;
-
-                    log.CreatedDate = timeZoneId != null ? TimeConverter.ConvertFromUtc(logTime, timeZoneId) : logTime;
-                    recordingLogs.Add(log);
-                }
-            }
+            log.CreatedDate = timeZoneId != null ? TimeConverter.ConvertFromUtc(logTime, timeZoneId) : logTime;
 
         }
-
-        return recordingLogs;
+        return videoRecords;
     }
 
     //public async Task<APIResult> GetCiscoMeetingLink( CiscoRequest cisco)
