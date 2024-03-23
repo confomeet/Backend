@@ -1637,7 +1637,7 @@ namespace VideoProjectCore6.Services.UserService
         {
             int tokenPeriodInMinutes = 200;
 
-            int tokenPeriodOutDays = 7;
+            int tokenPeriodOutDays = 30;
 
             if (_IConfiguration["jwt:TokenInMinutes"] == null)
             {
@@ -2680,6 +2680,33 @@ namespace VideoProjectCore6.Services.UserService
             return await PrepareUserLoggedInResponse(user);
         }
 
+        public async Task<APIResult> LogInWithToken(string token)
+        {
+            APIResult result = new();
+            JwtSecurityTokenHandler validator = new();
+            ClaimsPrincipal claims = null;
+            try {
+                claims = validator.ValidateToken(token, new TokenValidationParameters {
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key)),
+                }, out _);
+            } catch (SecurityTokenException e) {
+                _logger.LogInformation("Failed LogInWithToken attempt, token={}, error={}", token, e.Message);
+                return result.FailMe(-1);
+            }
+            var user_id_claim = claims.FindFirst((claim) => claim.Type == "user_id");
+            if (user_id_claim == null)
+                return result.FailMe(-1);
+            _ = int.TryParse(user_id_claim.Value, out int user_id);
+            var user = _DbContext.Users.Find(user_id);
+            if (user == null)
+                return result.FailMe(-1);
+            await _signInManager.SignInAsync(user, false);
+            return await PrepareUserLoggedInResponse(user);
+        }
+
         public async Task<APIResult> VerifyOTP(OtpLogInDto otpLogInDto, string lang)
         {
             APIResult result = new();
@@ -2709,11 +2736,21 @@ namespace VideoProjectCore6.Services.UserService
             return await PrepareUserLoggedInResponse(user);
         }
 
-        public async Task<APIResult> ViewMyProfile(int currentUserId, string lang)
+        private string BuildCreateConfUrl(int userId, string pathToTokenLogin) {
+            var createConfAuthToken = GenerateToken([new Claim("user_id", userId.ToString())], _jwt.Key, true);
+            var redirectUrl = _IConfiguration["Meeting:host"] + "/meet/panel/events";
+
+            // var baseUrl = _IConfiguration["Meeting:host"] + pathToTokenLogin;
+            var baseUrl = "http://localhost:5000" + pathToTokenLogin;
+            var urlParams = System.Web.HttpUtility.ParseQueryString(string.Empty);
+            urlParams["token"] = createConfAuthToken;
+            urlParams["redirectUrl"] = redirectUrl;
+            return baseUrl + "?" + urlParams.ToString();
+        }
+
+        public async Task<APIResult> ViewMyProfile(int currentUserId, string pathToTokenLogin, string lang)
         {
             APIResult res = new APIResult();
-
-
             try
             {
                 List<ValueId> defaultGroup = new List<ValueId>();
@@ -2742,7 +2779,8 @@ namespace VideoProjectCore6.Services.UserService
                         FileName = w.FileName,
                         FileSize = w.FileSize
                     }),
-                    UserGroups = currentUser.UserGroups.Select(o => o.Group.GroupName).ToList().Count > 0 ? currentUser.UserGroups.Select(o => new ValueId { Id = o.GroupId, Value = o.Group.GroupName }).ToList() : defaultGroup
+                    UserGroups = currentUser.UserGroups.Select(o => o.Group.GroupName).ToList().Count > 0 ? currentUser.UserGroups.Select(o => new ValueId { Id = o.GroupId, Value = o.Group.GroupName }).ToList() : defaultGroup,
+                    CreateConfLink = BuildCreateConfUrl(currentUserId, pathToTokenLogin),
                 };
 
                 return res.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, userProfileGetDto);

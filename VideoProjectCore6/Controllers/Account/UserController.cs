@@ -10,6 +10,9 @@ using VideoProjectCore6.Attributes;
 using VideoProjectCore6.Services;
 using VideoProjectCore6.DTOs.FileDto;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using System.Text.Json;
+using System.Text;
 #nullable disable
 namespace VideoProjectCore6.Controllers.Account
 {
@@ -395,6 +398,27 @@ namespace VideoProjectCore6.Controllers.Account
             return Ok(obj);
         }
 
+        [HttpGet("LoginWithToken")]
+        public async Task<IActionResult> LoginWithToken([FromQuery] string redirectUrl, [FromQuery] string token) {
+            if (string.IsNullOrEmpty(token)) {
+                return Unauthorized();
+            }
+            var signedIn = await _IUserRepository.LogInWithToken(token);
+            if (signedIn.Id <= 0) {
+                return Unauthorized();
+            }
+            var authUser = JsonSerializer.Serialize(signedIn.Result, signedIn.Result.GetType(), new JsonSerializerOptions{
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+            var b64AuthUser = Convert.ToBase64String(Encoding.UTF8.GetBytes(authUser));
+            Response.Cookies.Append("authUser", b64AuthUser, new CookieOptions{
+                HttpOnly = false,
+                SameSite = SameSiteMode.None,
+                Secure = true,
+            });
+            return Redirect(redirectUrl);
+        }
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("RefreshToken")]
         public async Task<IActionResult> RefreshToken()
@@ -407,7 +431,10 @@ namespace VideoProjectCore6.Controllers.Account
         [HttpGet("MyProfile")]
         public async Task<IActionResult> MyProfile([FromHeader] string lang = "ar")
         {
-            var obj = await _IUserRepository.ViewMyProfile(_IUserRepository.GetUserID(), lang);
+            _ILogger.LogInformation("path={} : {}", Request.PathBase, Request.Path);
+            var currentPath = Request.Path.Value;
+            var pathToTokenLogin = currentPath.Replace("MyProfile", "LoginWithToken");
+            var obj = await _IUserRepository.ViewMyProfile(_IUserRepository.GetUserID(), pathToTokenLogin, lang);
             return Ok(obj);
         }
 

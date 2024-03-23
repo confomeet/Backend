@@ -15,5 +15,7 @@ namespace VideoProjectCore6.DTOs.AccountDto
         public IEnumerable<FileGetDto> File { get; set; }
 
         public List<ValueId> UserGroups { get; set; }
+
+        public string CreateConfLink { get; set; }
     }
 }

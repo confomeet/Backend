@@ -69,8 +69,9 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         // public Task<APIResult> GetLocalUserId(int userId);
         Task<APIResult> VerifyOTP(OtpLogInDto otpLogInDto, string lang);
         Task<APIResult> LogIn(LogInDto logInDto, string lang);
+        Task<APIResult> LogInWithToken(string token);
 
-        Task<APIResult> ViewMyProfile(int currentUserId, string lang);
+        Task<APIResult> ViewMyProfile(int currentUserId, string pathToTokenLogin, string lang);
 
         Task<APIResult> EditProfilePhoto(int id, FilePostDto filePostDto, bool fromUg, bool updateRoles, string lang);
     }
