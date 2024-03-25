@@ -28,6 +28,23 @@ namespace VideoProjectCore6.Controllers.Recording
                 return Ok(await _IRecordingRepository.AddRecordingLog(dto));
             }
 
+            // FIXME: request must be authorized
+            [HttpPost("AddS3VideoRecording")]
+            public async Task<ActionResult> AddS3VideoRecording([FromBody] S3RecordingPostDto recording) {
+                var result = await _IRecordingRepository.AddS3Recording(recording);
+                if (result.Id < 0)
+                    return Problem(result.Message[0], null, StatusCodes.Status500InternalServerError, "Failed to save S3 recording");
+                return Ok(result);
+            }
+
+            [HttpGet("DownloadS3Record/{recordingId}")]
+            public async Task<ActionResult> DownloadS3Record(Guid recordingId) {
+                var downloadUrl = await _IRecordingRepository.GetS3RedirectUrl(recordingId);
+                if (downloadUrl == null)
+                    return NotFound();
+                return Redirect(downloadUrl);
+            }
+
             //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
             //[HttpGet("GetById")]
             //public async Task<ActionResult> GetById([FromHeader] int id, [FromHeader] string lang = "ar")

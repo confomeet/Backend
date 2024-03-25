@@ -80,6 +80,8 @@ namespace VideoProjectCore6.Models
 
         public virtual DbSet<AclGroups> AclGroups { get; set; } = null!;
 
+        public virtual DbSet<S3Recording> S3Recordings { get; set; } = null!;
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
         }
@@ -2272,6 +2274,29 @@ namespace VideoProjectCore6.Models
                 entity.Property(e => e.UpdatedById)
                     .HasColumnName("updatedById");
 
+            });
+
+            modelBuilder.Entity<S3Recording>(entity =>
+            {
+                entity.ToTable("s3_recordings");
+
+                entity.Property(e => e.Uuid)
+                    .HasColumnName("uuid");
+
+                entity.Property(e => e.RecordingLog)
+                    .HasColumnName("recording_log");
+
+                entity.Property(e => e.FileName)
+                    .HasColumnName("file_name");
+
+                entity.Property(e => e.FileSize)
+                    .HasColumnName("file_size");
+
+                entity.Property(e => e.Bucket)
+                    .HasColumnName("bucket");
+
+                entity.Property(e => e.Key)
+                    .HasColumnName("key");
             });
 
             modelBuilder.HasSequence("sequence_login");
