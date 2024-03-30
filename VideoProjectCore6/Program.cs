@@ -252,6 +252,7 @@ builder.Services.AddIdentity<User, Role>(opt =>
     opt.User.RequireUniqueEmail = true;
     opt.SignIn.RequireConfirmedEmail = true;
    }).AddEntityFrameworkStores<OraDbContext>()
+   .AddDefaultTokenProviders()  // Using Default token provider
    .AddTokenProvider<Token2FAProvider>("mock");
 
 
