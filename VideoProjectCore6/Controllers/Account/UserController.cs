@@ -381,7 +381,6 @@ namespace VideoProjectCore6.Controllers.Account
         [HttpPost("VerifyOTP")]
         public async Task<IActionResult> VerifyOTP(OtpLogInDto otpLogInDto, [FromHeader] string lang)
         {
-            _ILogger.LogInformation("User.type={},  User.Identity.Name={},  User.Identity.AuthType={}", User.GetType(), User.Identity.Name, User.Identity.AuthenticationType);
             var obj = await _IUserRepository.VerifyOTP(otpLogInDto, lang);
             if (obj.Id < 0)
             {
@@ -423,7 +422,6 @@ namespace VideoProjectCore6.Controllers.Account
         [HttpGet("MyProfile")]
         public async Task<IActionResult> MyProfile([FromHeader] string lang = "ar")
         {
-            _ILogger.LogInformation("path={} : {}", Request.PathBase, Request.Path);
             var currentPath = Request.Path.Value;
             var pathToTokenLogin = currentPath.Replace("MyProfile", "LoginWithToken");
             var obj = await _IUserRepository.ViewMyProfile(_IUserRepository.GetUserID(), pathToTokenLogin, lang);
