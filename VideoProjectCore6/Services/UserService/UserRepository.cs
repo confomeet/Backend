@@ -843,6 +843,8 @@ namespace VideoProjectCore6.Services.UserService
             user.EmailConfirmed = false;
             user.ProfileStatus = Convert.ToInt32(PROFILE_STATUS.ENABLED);
             user.meetingId = sumDigits < 10 ? userMeetingId.ToString() + "0" + sumDigits.ToString() + "0" + sumDigits.ToString() + "0" + sumDigits.ToString() : userMeetingId.ToString() + "0" + sumDigits.ToString() + sumDigits.ToString();
+            if (AddByAdmin && sendNotification)
+                user.EmailConfirmed = true;
 
             var password = string.IsNullOrEmpty(registerDTO.Password) ? "qvgzSeAHjrxp54F!" : registerDTO.Password;
             var createUser = await _userManager.CreateAsync(user, password);
@@ -904,8 +906,6 @@ namespace VideoProjectCore6.Services.UserService
             }
             else if (sendNotification && AddByAdmin)
             {
-                await ActivateAccount(user.Id, lang);
-
                 MultiLangMessage multiLangMessage = new MultiLangMessage
                 {
                     En = "You have been added to the system, please reset your password",
