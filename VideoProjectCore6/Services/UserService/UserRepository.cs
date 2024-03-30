@@ -846,8 +846,18 @@ namespace VideoProjectCore6.Services.UserService
             if (AddByAdmin && sendNotification)
                 user.EmailConfirmed = true;
 
-            var password = string.IsNullOrEmpty(registerDTO.Password) ? "qvgzSeAHjrxp54F!" : registerDTO.Password;
-            var createUser = await _userManager.CreateAsync(user, password);
+            IdentityResult createUser = null;
+            if (AddByAdmin) {
+                createUser = await _userManager.CreateAsync(user);
+            } else if (!string.IsNullOrEmpty(registerDTO.Password)) {
+                createUser = await _userManager.CreateAsync(user, registerDTO.Password);
+            } else {
+                _logger.LogError("Failed to register new user because password is required but registerDTO.Password is empty");
+                res.Id = -1;
+                res.Code = APIResult.RESPONSE_CODE.BadRequest;
+                res.Message.Add(Translation.getMessage(lang, "PasswordIsRequired"));
+                return res;
+            }
             if (!createUser.Succeeded)
             {
                 var errors = createUser.Errors.Select(x => x.Description).ToList();

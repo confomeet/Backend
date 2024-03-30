@@ -146,6 +146,7 @@
             { "CabinNotExisted",   new string[]   { "كبينة غير موجودة", "Cabinet not existed" } } ,
             { "Charge",   new string[]   { " بتهمة ", " accused of " } } ,
             { "Suspended",   new string[]   { " حسابك معلق ", "Your account is suspended" } } ,
+            { "PasswordIsRequired", ["no translation to arabic", "Password is required"] },
 
         };
 
