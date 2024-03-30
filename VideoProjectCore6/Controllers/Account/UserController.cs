@@ -128,14 +128,6 @@ namespace VideoProjectCore6.Controllers.Account
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
         }
 
-        [HttpPost("AddUser")]
-        public async Task<IActionResult> AddeUser([FromBody] UserPostDto UserPostDto, [FromHeader] string lang)
-        {
-            string ImageUrl = null; //"wwwroot/transactions/UsersPhoto/" + SaveImage(UserPostDto.ImageFile);
-            APIResult result = await _IUserRepository.CreateUser(UserPostDto, ImageUrl, false, "ar", true);
-            return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
-        }
-
         [HttpGet("Check")]
         public async Task<IActionResult> CheckUserIfExist([FromQuery] int userId, [FromQuery] int userType)
         {
