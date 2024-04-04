@@ -252,11 +252,11 @@ if (!string.IsNullOrEmpty(builder.Configuration["oidc:authority"]))
     {
         options.Authority = builder.Configuration["oidc:authority"];
         options.ClientId = builder.Configuration["oidc:client_id"];
-        options.CallbackPath = VideoProjectCore6.Utility.Uri.CombineUri(AuthController.ControllerRoute, "/oidc-signin");
+        options.CallbackPath = VideoProjectCore6.Utility.Uri.CombineUri(OIDCAuthController.ControllerRoute, "/oidc-signin");
         options.MapInboundClaims = false;
         options.SaveTokens = true;
         options.SignOutScheme = IdentityConstants.ApplicationScheme;
-        options.SignedOutCallbackPath = VideoProjectCore6.Utility.Uri.CombineUri(AuthController.ControllerRoute, "/oidc-signout");
+        options.SignedOutCallbackPath = VideoProjectCore6.Utility.Uri.CombineUri(OIDCAuthController.ControllerRoute, "/oidc-signout");
     });
 }
 

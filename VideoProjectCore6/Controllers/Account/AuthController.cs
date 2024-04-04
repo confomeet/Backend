@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,35 +24,29 @@ namespace VideoProjectCore6.Controllers.Account
     [AllowAnonymous]
     [Controller]
     [Route(ControllerRoute)]
-    public class AuthController(ILogger<AuthController> logger, IUserRepository userRepository, IConfiguration configuration) : ControllerBase
+    public class OIDCAuthController(ILogger<OIDCAuthController> logger, IUserRepository userRepository, IConfiguration configuration) : ControllerBase
     {
-        private readonly ILogger<AuthController> _logger = logger;
+        private readonly ILogger<OIDCAuthController> _logger = logger;
         private readonly IUserRepository _userRepository = userRepository;
         private readonly IConfiguration _configuration = configuration;
         private readonly string _backendBaseUrl = configuration["CurrentHostName"]!;
         public const string ControllerRoute = "/api/v1/web/Auth";
         private const string OIDCLogInAction = "OIDCLogIn";
         public const string OIDCLoggedOutAction = "SuccessLoggedOut";
-        public const string OIDCLoggedInAction = "Success";
+        public const string OIDCLoggedInAction = "SuccessLoggedIn";
 
         [HttpGet(OIDCLogInAction)]
-        public IActionResult OIDCLogIn()
+        public IActionResult OIDCLogIn([FromQuery] string RedirectUri)
         {
             AuthenticationProperties authProp = new()
             {
-                RedirectUri = Utility.Uri.CombineUri(_backendBaseUrl, ControllerRoute, OIDCLoggedInAction)
+                RedirectUri = BuildRouteToActionWithRedirect(OIDCLoggedInAction, RedirectUri),
             };
             return Challenge(authProp, "oidc");
         }
 
-        [HttpGet(OIDCLoggedOutAction)]
-        public IActionResult SuccessLoggedOut()
-        {
-            return Redirect(_configuration["CurrentHostName"]!);
-        }
-
         [HttpGet(OIDCLoggedInAction)]
-        public async Task<IActionResult> Success() {
+        public async Task<IActionResult> SuccessLoggedIn([FromQuery] string ConfomeetRedirectUri) {
             var authResult = await HttpContext.AuthenticateAsync("oidc");
             if (!authResult.Succeeded) {
                 return BadRequest("Authentication failed");
@@ -78,7 +73,8 @@ namespace VideoProjectCore6.Controllers.Account
             var logInResultDto = await _userRepository.LogInExternal(sub!, "oidc", email!, name!);
             FillSessionWithUserInfo(logInResultDto);
 
-            return Redirect("/meet");
+            var redirectUri = !string.IsNullOrEmpty(ConfomeetRedirectUri) ? ConfomeetRedirectUri : _configuration["CurrentHostName"]!;
+            return Redirect(redirectUri);
         }
 
         [HttpGet("ExternalAuthProviders")]
@@ -96,23 +92,29 @@ namespace VideoProjectCore6.Controllers.Account
         }
 
         [HttpGet("LogOut")]
-        public async Task<IActionResult> LogOut() {
+        public async Task<IActionResult> LogOut([FromQuery] string RedirectUri) {
             if (HttpContext.User.Identity != null && HttpContext.User.Identity.IsAuthenticated) {
                 string id_token = (await HttpContext.GetTokenAsync("oidc", "id_token"))!;
 
                 AuthenticationProperties authProp = new()
                 {
-                    RedirectUri = Utility.Uri.CombineUri(_backendBaseUrl, ControllerRoute, OIDCLoggedOutAction)
+                    RedirectUri = BuildRouteToActionWithRedirect(OIDCLoggedOutAction, RedirectUri),
                 };
                 await HttpContext.SignOutAsync("oidc", authProp);
 
                 string redirectLocation = Response.Headers.Location!;
                 redirectLocation += "&id_token_hint=" + id_token;
                 Response.Headers.Location = redirectLocation;
-
                 return Redirect(Response.Headers.Location!);
             }
-            return Ok(new APIResult().SuccessMe(1));
+            return Redirect(RedirectUri);
+        }
+
+        [HttpGet(OIDCLoggedOutAction)]
+        public IActionResult SuccessLoggedOut([FromQuery] string ConfomeetRedirectUri)
+        {
+            var redirectUri = !string.IsNullOrEmpty(ConfomeetRedirectUri) ? ConfomeetRedirectUri : _configuration["CurrentHostName"]!;
+            return Redirect(redirectUri);
         }
 
         private static readonly JsonSerializerOptions AuthInfoSerializeOptions = new()
@@ -127,6 +129,15 @@ namespace VideoProjectCore6.Controllers.Account
                 SameSite = SameSiteMode.Lax,
                 Secure = true,
             });
+        }
+
+        private string BuildRouteToActionWithRedirect(string actionName, string redirectUri) {
+            var uri = Utility.Uri.CombineUri(Request.PathBase, ControllerRoute, actionName);
+            if (!string.IsNullOrEmpty(redirectUri)) {
+                uri += "?ConfomeetRedirectUri=";
+                uri += HttpUtility.UrlEncode(redirectUri);
+            }
+            return uri;
         }
     }
 }
