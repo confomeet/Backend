@@ -871,13 +871,8 @@ namespace VideoProjectCore6.Services.UserService
 
             IdentityResult assignRole = IdentityResult.Failed();
 
-            if (AddByAdmin)
+            if (AddByAdmin && !registerDTO.Roles.IsNullOrEmpty())
             {
-                if (registerDTO.Roles == null)
-                {
-                    return res.FailMe(-1, "Roles is required");
-                }
-
                 List<string> roles = new List<string>();
                 roles = await _roleManager.Roles.Where(x => registerDTO.Roles.Contains(x.Id)).Select(x => x.Name).ToListAsync();
                 assignRole = await _userManager.AddToRolesAsync(user, roles);
@@ -932,6 +927,7 @@ namespace VideoProjectCore6.Services.UserService
             }
 
             scope.Complete();
+            await _DbContext.SaveChangesAsync();
             res.Id = user.Id;
             res.Code = APIResult.RESPONSE_CODE.OK;
             res.Message.Add(sendNotification ? Translation.getMessage(lang, "ActivateAccount") : Translation.getMessage(lang, "RegOk"));
@@ -2978,6 +2974,26 @@ namespace VideoProjectCore6.Services.UserService
                 }
                 _logger.LogWarning("Failed to log user sign in event due to error: {}", message);
             }
+        }
+
+        public async Task<LogInResultDto> LogInExternal(string externalId, string providerName, string email, string fullName)
+        {
+            // FIXME. It needs to be refactored.
+            // We must use _signInManager.ExternalLoginSignInAsync. But currently backend uses UserLogin model for logging sign in events.
+            // Becase of this I cannot store `externalId` in persistent storage.
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) {
+                RegisterDTO registerDTO = new()
+                {
+                    Email = email,
+                    FullName = fullName,
+                    Roles = []
+                };
+                _ = await RegisterAsync(registerDTO, "", true, true);
+                user = await _userManager.FindByEmailAsync(email);
+            }
+            await _signInManager.SignInAsync(user, false);
+            return (await PrepareUserLoggedInResponse(user)).Result;
         }
     }
 }

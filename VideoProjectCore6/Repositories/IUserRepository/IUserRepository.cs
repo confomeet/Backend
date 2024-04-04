@@ -74,5 +74,7 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         Task<APIResult> ViewMyProfile(int currentUserId, string pathToTokenLogin, string lang);
 
         Task<APIResult> EditProfilePhoto(int id, FilePostDto filePostDto, bool fromUg, bool updateRoles, string lang);
+
+        public Task<LogInResultDto> LogInExternal(string externalId, string providerName, string email, string fullName);
     }
 }

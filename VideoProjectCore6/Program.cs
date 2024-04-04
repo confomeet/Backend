@@ -58,6 +58,8 @@ using VideoProjectCore6.Repositories.ISmtpConfigRepository;
 using VideoProjectCore6.Services.SmtpConfigService;
 using VideoProjectCore6.Repositories.IAclRepository;
 using VideoProjectCore6.Services.AclRepository;
+using VideoProjectCore6.Controllers.Account;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -113,6 +115,7 @@ builder.Services.AddCors(opt =>
         builder =>
         {
             builder.WithOrigins("null",
+                "https://localhost:4400",
                 "http://localhost:4400",
                 "http://localhost:6500",
                 "https://lilacmeet.infostrategic.com",
@@ -206,12 +209,14 @@ if (successRead && lockedTempTimeInMinutes > 1)
     lockedTimeInMinutes = lockedTempTimeInMinutes;
 }
 
-builder.Services.AddAuthentication(au =>
+var authenticationBuilder = builder.Services.AddAuthentication(au =>
 {
     au.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     au.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
-}).AddJwtBearer(jwt =>
+});
+
+authenticationBuilder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwt =>
 {
     jwt.RequireHttpsMetadata = false;
     jwt.SaveToken = true;
@@ -239,8 +244,22 @@ builder.Services.AddAuthentication(au =>
             return Task.CompletedTask;
         }
     };
+});
+
+if (!string.IsNullOrEmpty(builder.Configuration["oidc:authority"]))
+{
+    authenticationBuilder.AddOpenIdConnect("oidc", options =>
+    {
+        options.Authority = builder.Configuration["oidc:authority"];
+        options.ClientId = builder.Configuration["oidc:client_id"];
+        options.CallbackPath = VideoProjectCore6.Utility.Uri.CombineUri(AuthController.ControllerRoute, "/oidc-signin");
+        options.MapInboundClaims = false;
+        options.SaveTokens = true;
+        options.SignOutScheme = IdentityConstants.ApplicationScheme;
+        options.SignedOutCallbackPath = VideoProjectCore6.Utility.Uri.CombineUri(AuthController.ControllerRoute, "/oidc-signout");
+    });
 }
-);
+
 builder.Services.AddIdentity<User, Role>(opt =>
 {
     opt.Lockout.AllowedForNewUsers = true;
@@ -290,6 +309,10 @@ EventHub.Current = app.Services.GetRequiredService<Microsoft.AspNetCore.SignalR.
 app.UseSwagger();
 app.UseSwaggerUI();
 //}
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedPrefix
+});
 app.UseCors("AllowAll");
 
 app.UseClientRateLimiting();

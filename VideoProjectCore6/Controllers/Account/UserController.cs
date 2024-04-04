@@ -17,9 +17,10 @@ using System.Text;
 namespace VideoProjectCore6.Controllers.Account
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route(ControllerRoute)]
     public class UserController : ControllerBase
     {
+        public const string ControllerRoute = "/api/v1/User";
         private readonly IUserRepository _IUserRepository;
         // private readonly IStringLocalizer<UserController> _localizer;
         //  private readonly SignInWithUGateSettings _SignInWithUGateSettings;
@@ -398,15 +399,7 @@ namespace VideoProjectCore6.Controllers.Account
             if (signedIn.Id <= 0) {
                 return Unauthorized();
             }
-            var authUser = JsonSerializer.Serialize(signedIn.Result, signedIn.Result.GetType(), new JsonSerializerOptions{
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
-            var b64AuthUser = Convert.ToBase64String(Encoding.UTF8.GetBytes(authUser));
-            Response.Cookies.Append("authUser", b64AuthUser, new CookieOptions{
-                HttpOnly = false,
-                SameSite = SameSiteMode.None,
-                Secure = true,
-            });
+            FillSessionWithUserInfo(signedIn.Result);
             return Redirect(redirectUrl);
         }
 
@@ -439,5 +432,20 @@ namespace VideoProjectCore6.Controllers.Account
             }
             return Ok(obj);
         }
+
+        private static readonly JsonSerializerOptions AuthInfoSerializeOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+        private void FillSessionWithUserInfo(LogInResultDto logInResult) {
+            var authUser = JsonSerializer.Serialize(logInResult, typeof(LogInResultDto), AuthInfoSerializeOptions);
+            var b64AuthUser = Convert.ToBase64String(Encoding.UTF8.GetBytes(authUser));
+            Response.Cookies.Append("authUser", b64AuthUser, new CookieOptions{
+                HttpOnly = false,
+                SameSite = SameSiteMode.None,
+                Secure = true,
+            });
+        }
+
     }
 }
