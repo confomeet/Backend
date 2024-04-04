@@ -305,6 +305,10 @@ EventHub.Current = app.Services.GetRequiredService<Microsoft.AspNetCore.SignalR.
 // Configure the HTTP request pipeline.
 //if (!app.Environment.IsProduction())
 //{
+app.UseForwardedHeaders(new ForwardedHeadersOptions()
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedPrefix | ForwardedHeaders.XForwardedProto
+});
 
 app.UseSwagger();
 app.UseSwaggerUI();
