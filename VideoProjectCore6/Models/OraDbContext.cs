@@ -50,7 +50,6 @@ namespace VideoProjectCore6.Models
         public virtual DbSet<Tab> Tabs { get; set; } = null!;
         // public virtual DbSet<User> Users { get; set; } = null!;
         // public virtual DbSet<UserClaim> UserClaims { get; set; } = null!;
-        public virtual DbSet<UserLogger> UserLoggers { get; set; } = null!;
         // public virtual DbSet<UserLogin> UserLogins { get; set; } = null!;
         // public virtual DbSet<UserToken> UserTokens { get; set; } = null!;
 
@@ -1852,27 +1851,6 @@ namespace VideoProjectCore6.Models
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("user_claim_user_id");
-            });
-
-            modelBuilder.Entity<UserLogger>(entity =>
-            {
-                entity.ToTable("user_logger");
-
-                entity.Property(e => e.Id)
-                    .HasPrecision(10)
-                    .HasColumnName("id");
-
-                entity.Property(e => e.LoggingDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("logging_date");
-
-                entity.Property(e => e.StartWorkForEmployee)
-                    .HasPrecision(1)
-                    .HasColumnName("start_work_for_employee");
-
-                entity.Property(e => e.UserId)
-                    .HasPrecision(10)
-                    .HasColumnName("user_id");
             });
 
             modelBuilder.Entity<UserLogin>(entity =>
