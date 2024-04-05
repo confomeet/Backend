@@ -408,7 +408,7 @@ namespace VideoProjectCore6.Services.ConfEventService
                 return res;
             } 
             
-            catch (Exception e)
+            catch (Exception)
             {
 
             }

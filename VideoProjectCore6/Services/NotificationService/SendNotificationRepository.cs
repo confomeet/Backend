@@ -194,7 +194,7 @@ namespace VideoProjectCore6.Services.NotificationService
                 objFilestream.Close();
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }

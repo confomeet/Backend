@@ -782,7 +782,7 @@ public class ParticipantRepository : IParticipantRepository
             await _DbContext.SaveChangesAsync();
             return result.SuccessMe(participantId, "تم التعديل بنجاح");
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return result.FailMe(-1, "خطأ في التعديل");
         }

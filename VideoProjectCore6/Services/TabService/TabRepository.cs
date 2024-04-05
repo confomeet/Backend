@@ -52,7 +52,7 @@ namespace VideoProjectCore6.Services.TabService
 
             }
 
-            catch (Exception ex)
+            catch (Exception)
             {
                 
                 return result.FailMe(-1, "Failed to update. Role id is not correct or error when adding entity");

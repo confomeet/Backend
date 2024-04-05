@@ -145,7 +145,7 @@ namespace VideoProjectCore6.Services.FilesUploader
                 //  }
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 failurMessage.Message = "Error . File not uploaded!";
                 return failurMessage;

@@ -81,11 +81,10 @@ namespace VideoProjectCore6.Services.NotificationService
                     }
                     catch (Exception ex)
                     {
-                        string mes = "";
                         notify.IsSent = (byte?)Constants.NOTIFICATION_STATUS.ERROR;
                         notify.SentCount += 1;
                         notify.UpdatedDate = DateTime.Now;
-                        notify.SendReportId += string.Format(" Error at attempt {0}, : {1} ", notify.SentCount, ex.Message/*, mes*/);
+                        notify.SendReportId += string.Format(" Error at attempt {0}, : {1} ", notify.SentCount, ex.Message);
                     }
                 }
                 else

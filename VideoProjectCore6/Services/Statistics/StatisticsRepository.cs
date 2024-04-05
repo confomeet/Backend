@@ -202,7 +202,6 @@ namespace VideoProjectCore6.Services.Statistics
 
         int AnyAny(HashSet<string> A, HashSet<string> B)
         {
-            int count = 0;
             //foreach (string i in A)
             //    if (B.Any(b => !b.Equals(i)))
             //    {

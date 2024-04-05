@@ -1285,7 +1285,6 @@ namespace VideoProjectCore6.Services.UserService
                 throw _exception;
             }
 
-            string target = "Signature";
             // pathSign = _IFilesUploaderRepository.FromBase64ToImage(signatureBase64, target);
             try
             {

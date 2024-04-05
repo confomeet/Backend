@@ -37,7 +37,7 @@ namespace VideoProjectCore6.Attributes
                 {   
                    client = await _DbContext.ClientInfos.Where(x => x.AppName == appId.ToString()).FirstOrDefaultAsync();
                 }
-                catch (Exception e) 
+                catch (Exception)
                 {
                     context.Result = new ContentResult()
                     {

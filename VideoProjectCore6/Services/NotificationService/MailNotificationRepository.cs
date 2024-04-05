@@ -342,8 +342,6 @@ namespace VideoProjectCore6.Services.NotificationService
                        _notifications[i + 1].LinkCaption + " | " + _notifications[i].LinkCaption));
             }
 
-            var ptr = 0;
-
             string hostSetting = "Host: " + _mailSettings.Host + "Sender: " + _mailSettings.Mail + "Port: " + _mailSettings.Port;
 
             if (sendImmediately)
@@ -681,7 +679,7 @@ namespace VideoProjectCore6.Services.NotificationService
 
                             }
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             strBuilder.Append(notify.NotificationBody);
                             strBuilder.Append(" <br> ");
