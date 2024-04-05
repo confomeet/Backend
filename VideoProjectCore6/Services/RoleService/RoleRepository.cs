@@ -219,29 +219,8 @@ namespace VideoProjectCore6.Services.RoleService
               }*/
 
             scope.Complete();
-            return IdentityResult.Success;
+            return await Task.FromResult(IdentityResult.Success);
         }
-
-        public async Task<IdentityResult> AddUpdatePnsActionToRoles(int actionId, List<int> roles)
-        {
-            using TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-
-            /* if (await _OraDBContext.PnsAdmAction.AnyAsync(x => x.Id == actionId))
-             {
-                 var oldCalims = _OraDBContext.RoleClaims.Where(x => x.ClaimType == CustomClaimTypes.PnsAction && x.ClaimValue == actionId.ToString());
-                 _OraDBContext.RoleClaims.RemoveRange(oldCalims);
-
-                 foreach (var role in roles)
-                 {
-                     var newClaim = new Claim(CustomClaimTypes.PnsAction, actionId.ToString());
-                     await AddPermissionToRole(role, newClaim);
-                 }
-             }*/
-
-            scope.Complete();
-            return IdentityResult.Success;
-        }
-
 
         public async Task<IdentityResult> AddUpdatePermissionsToRole(RolePermissionsPostDTO rolePermissionsDTO, string lang)
         {

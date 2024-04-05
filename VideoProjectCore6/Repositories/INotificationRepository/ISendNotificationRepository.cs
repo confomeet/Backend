@@ -27,7 +27,7 @@ namespace VideoProjectCore6.Repositories.INotificationRepository
 
         // Task<List<NotificationLogPostDto>> GetScheduleNotifications(List<NotificationLogPostDto> responseNotification, List<Receiver> receivers, string meetingId, string lang);
         Task<List<NotificationLogPostDto>> BuildNotifications(List<NotificationLogPostDto> notifications, List<Receiver> receivers, List<string> notyBody,bool addPublicLink=true);
-        Task<List<MeetingUserLink>> FillAndSendNotification(List<NotificationLogPostDto> notifications, List<Receiver> receivers, Dictionary<string, string> Parameters, string? meetingId, bool addAppLink, string lang, bool send, bool isDirectInvitation,string cisco=null);
+        Task<List<MeetingUserLink>> FillAndSendNotification(List<NotificationLogPostDto> notifications, List<Receiver> receivers, Dictionary<string, string> Parameters, string? meetingId, bool addAppLink, string lang, bool send, bool isDirectInvitation,string? cisco=null);
         Task<APIResult> InvokeSMSService(SMSDto sms);
 
         Task<APIResult> SendOTPCode(int userId, string otpCode, string mobile, string email, string lang);

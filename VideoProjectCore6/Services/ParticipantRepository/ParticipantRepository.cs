@@ -497,7 +497,7 @@ public class ParticipantRepository : IParticipantRepository
     //    }
     //}
     public async Task<List<MeetingUserLink>> NotifyParticipants(List<Receiver> participants, string? mettingId, List<NotificationLogPostDto> notifications_,
-        Dictionary<string, string> parameters, string template, bool send, bool isDirectInvitation ,string cisco=null)
+        Dictionary<string, string> parameters, string template, bool send, bool isDirectInvitation ,string? cisco=null)
     {
         foreach (var n in notifications_)
         {

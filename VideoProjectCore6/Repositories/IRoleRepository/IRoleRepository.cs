@@ -12,7 +12,6 @@ namespace VideoProjectCore6.Repositories.IRoleRepository
         Task<IdentityResult> DeleteRoleAsync(int roleId, string lang);
         Task<int> UpdateRole(RolePostDto rolePostDto, int roleId, string lang);
         Task<IdentityResult> AddUpdateActionToRoles(int actionId, List<int> roles);
-        Task<IdentityResult> AddUpdatePnsActionToRoles(int actionId, List<int> roles);
         Task<IdentityResult> AddUpdatePermissionsToRole(RolePermissionsPostDTO rolePermissionsDTO, string lang);
 
         Task<List<int>> GetRolesIdByUserId(int userId);

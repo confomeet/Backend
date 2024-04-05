@@ -64,16 +64,6 @@ namespace VideoProjectCore6.Controllers.Meeting
             return result != null ? StatusCode(StatusCodes.Status200OK, result) : StatusCode(StatusCodes.Status404NotFound, "error occurred");
         }
 
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("{meetingId}")]
-        public async Task<ActionResult> GetMeeting(string meetingId, [FromHeader] string lang)
-        {
-            var result = await _IMeetingRepository.GetMeetingByMeetingId(meetingId, lang);
-            return result != null ? StatusCode(StatusCodes.Status200OK, result) : StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
-
-
         [HttpGet("GetMeetingInfo")]
         public async Task<ActionResult> GetMeetingInfo(string meetingId, string password, [FromHeader] string lang)
         {

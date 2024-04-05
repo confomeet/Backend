@@ -1,17 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-// using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using VideoProjectCore6.Attributes;
 using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.DTOs.ConfEventDto;
-using VideoProjectCore6.DTOs.ContactDto;
 using VideoProjectCore6.Hubs;
 using VideoProjectCore6.Repositories.IConfEventRepository;
-using VideoProjectCore6.Repositories.IContactRepository;
-using VideoProjectCore6.Repositories.IUserRepository;
 using VideoProjectCore6.Services;
-using VideoProjectCore6.Services.ConfEventService;
 
 namespace VideoProjectCore6.Controllers.ConfEvent
 {
@@ -20,13 +13,10 @@ namespace VideoProjectCore6.Controllers.ConfEvent
     public class ConfEventController : ControllerBase
     {
         private readonly IConfEventRepository _IConfEventRepository;
-        private readonly IUserRepository _IUserRepository;
-     
     
         public ConfEventController(IConfEventRepository iConfEventRepository)
         {
             _IConfEventRepository = iConfEventRepository;
-            //  _IUserRepository = iUserRepository;
 
             
      

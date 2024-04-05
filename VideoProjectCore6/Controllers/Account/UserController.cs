@@ -182,6 +182,7 @@ namespace VideoProjectCore6.Controllers.Account
         }
 
         [HttpPost]
+        #pragma warning disable ASP0023  // See https://github.com/dotnet/aspnetcore/issues/49777
         [Route("[action]")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDTO resetPasswordObject, [FromHeader] string lang)
         {
@@ -190,6 +191,7 @@ namespace VideoProjectCore6.Controllers.Account
         }
 
         [HttpPost]
+        #pragma warning disable ASP0023  // See https://github.com/dotnet/aspnetcore/issues/49777
         [Route("[action]")]
         public async Task<IActionResult> SendResetPasswordEmail(string email, [FromHeader] string lang)
         {

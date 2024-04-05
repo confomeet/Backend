@@ -518,7 +518,7 @@ namespace VideoProjectCore6.Services.NotificationService
             return ToSendNotification;
         }
         public async Task<List<MeetingUserLink>> FillAndSendNotification(List<NotificationLogPostDto> notifications, List<Receiver> receivers, Dictionary<string, string> Parameters,
-            string? meetingId, bool addAppLink, string lang, bool send, bool isDirectInvitation, string cisco = null)
+            string? meetingId, bool addAppLink, string lang, bool send, bool isDirectInvitation, string? cisco = null)
         {
 
             List<MeetingUserLink> links = new List<MeetingUserLink>();
@@ -607,7 +607,7 @@ namespace VideoProjectCore6.Services.NotificationService
             }
             catch
             {
-                return null;
+                return [];
             }
 
         }

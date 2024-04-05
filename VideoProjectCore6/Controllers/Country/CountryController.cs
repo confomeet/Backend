@@ -1,16 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using VideoProjectCore6.Attributes;
-using VideoProjectCore6.DTOs.CommonDto;
-using VideoProjectCore6.DTOs.ConfEventDto;
-using VideoProjectCore6.DTOs.ContactDto;
-using VideoProjectCore6.Repositories.IConfEventRepository;
-using VideoProjectCore6.Repositories.IContactRepository;
+﻿using Microsoft.AspNetCore.Mvc;
 using VideoProjectCore6.Repositories.ICountryRepository;
-using VideoProjectCore6.Repositories.IUserRepository;
-using VideoProjectCore6.Services;
 
 namespace VideoProjectCore6.Controllers.ConfEvent
 {
@@ -19,12 +8,10 @@ namespace VideoProjectCore6.Controllers.ConfEvent
     public class CountryController : ControllerBase
     {
         private readonly ICountryRepsository _ICountryRepository;
-        private readonly IUserRepository _IUserRepository;
 
-        public CountryController(ICountryRepsository iCountryRepository, IUserRepository iUserRepository)
+        public CountryController(ICountryRepsository iCountryRepository)
         {
             _ICountryRepository = iCountryRepository;
-          //  _IUserRepository = iUserRepository;
         }
 
         [HttpGet]

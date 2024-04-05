@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VideoProjectCore6.DTOs.RecordingDto;
 using VideoProjectCore6.Repositories.IRecordingRepository;
-using VideoProjectCore6.Repositories.IUserRepository;
-using VideoProjectCore6.Services.RecordingService;
 
 namespace VideoProjectCore6.Controllers.Recording
 {
@@ -13,12 +11,10 @@ namespace VideoProjectCore6.Controllers.Recording
         public class RecordingController : ControllerBase
         {
             private readonly IRecordingRepository _IRecordingRepository;
-            private readonly IUserRepository _IUserRepository;
 
-            public RecordingController(IRecordingRepository iRecordingRepository, IUserRepository iUserRepository)
+            public RecordingController(IRecordingRepository iRecordingRepository)
             {
             _IRecordingRepository = iRecordingRepository;
-                //  _IUserRepository = iUserRepository;
             }
 
             //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

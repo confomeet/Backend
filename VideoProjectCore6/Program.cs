@@ -188,7 +188,7 @@ builder.Services.AddSwaggerGen(c =>
 
 
 //---------------------token ----------------------------
-builder.Services.Configure<jwt>(builder.Configuration.GetSection("Jwt"));
+builder.Services.Configure<JWTDto>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<ChannelMailFirstSetting>(builder.Configuration.GetSection("ChannelMailFirstSetting"));
 builder.Services.Configure<ChannelSMSSetting>(builder.Configuration.GetSection("ChannelSMSSetting"));
 

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-#nullable disable
-namespace VideoProjectCore6.Models
+﻿namespace VideoProjectCore6.Models
 {
     public partial class Country
     {

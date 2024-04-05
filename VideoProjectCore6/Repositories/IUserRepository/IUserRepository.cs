@@ -18,14 +18,10 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         public bool IsAdmin();
         public bool IsInspector();
         public bool IsEmployee();
-        public Task<bool> IsEmployee(int userId);
-        public Task<bool> HasRole(int userId, string policy);
         public string GetUserEid();
         public string GetUserEmail();
         public Task<APIResult> FindUserById(int id, string lang);
-        public Task<int> VisitorsCount();
         public Task<APIResult> RefreshToken();
-        public Task<LogInResultDto> LocalSignIn(LogInDto logInDto, string lang);
         public Task<List<RoleGetDto>> GetUserRoles(int userId, string lang);
         public Task<List<UserDto>> GetUsersRoles(string blindSearch, string lang);
         public Task<APIResult> EditProfile(int id, UserPostDto UserPostDto, bool fromUg, bool updateRoles, string lang);
@@ -36,7 +32,7 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         public Task<bool> EditPassword(EditUserPasswordDTO editUserPasswordDTO, string lang);
         public Task<APIResult> RegisterAsync(RegisterDTO registerDTO, string lang, bool sendNotification, bool AddByAdmin = false);
         public Task<APIResult> ConfirmEmail(string token, string email, string lang);
-        public Task<APIResult> ResendActivation(string email, string lang);     
+        public Task<APIResult> ResendActivation(string email, string lang);
         public Task<APIResult> SendResetPasswordEmail(MultiLangMessage multiLangMessage, string email, string lang);
         public Task<APIResult> CreateUser(UserPostDto UserPostDto, string ImageUrl, bool updateRoles, string lang, bool FromUg);
         public Task<APIResult> DeleteUser(int id);

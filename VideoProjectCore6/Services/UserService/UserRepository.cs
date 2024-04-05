@@ -50,8 +50,8 @@ namespace VideoProjectCore6.Services.UserService
         private readonly IFileRepository _IFileRepository;
 
         ValidatorException _exception;
-        private readonly jwt _jwt;
-        public UserRepository(IRoleRepository iRoleRepository, IOptions<jwt> jwt, SignInManager<User> signInManager,
+        private readonly JWTDto _jwt;
+        public UserRepository(IRoleRepository iRoleRepository, IOptions<JWTDto> jwt, SignInManager<User> signInManager,
                              OraDbContext OraDbContext, IHttpContextAccessor httpContext,
                              IGeneralRepository iGeneralRepository,
                              UserManager<User> userManager,
@@ -128,32 +128,6 @@ namespace VideoProjectCore6.Services.UserService
         //{
         //    return _httpContext.HttpContext.User.IsInRole(Constants.PNSEmployeePolicy);
         //}
-
-        public async Task<bool> IsEmployee(int userId)
-        {
-            bool isEmployee = false;
-            //TODO join user with user role in oracle.
-            //var user = await _userManager.Users.Include(x => x.UserRole).ThenInclude(x => x.Role).FirstOrDefaultAsync(u => u.Id == userId);
-            //var roleEmployee = await _roleManager.FindByNameAsync(Constants.EmployeePolicy);
-            //if (user != null && roleEmployee != null)
-            //{
-            //    isEmployee = user.UserRole.Any(x => x.RoleId == roleEmployee.Id);
-            //}
-            return isEmployee;
-        }
-
-        public async Task<bool> HasRole(int userId, string policy)
-        {
-            bool hasRole = false;
-            //TODO join user with user role in oracle.
-            //var user = await _userManager.Users.Include(x => x.UserRole).ThenInclude(x => x.Role).FirstOrDefaultAsync(u => u.Id == userId);
-            //var roleEmployee = await _roleManager.FindByNameAsync(policy);
-            //if (user != null && roleEmployee != null)
-            //{
-            //    hasRole = user.UserRole.Any(x => x.RoleId == roleEmployee.Id);
-            //}
-            return hasRole;
-        }
 
         public async Task<List<RoleGetDto>> GetUserRoles(int userId, string lang)
         {
@@ -1490,12 +1464,6 @@ namespace VideoProjectCore6.Services.UserService
             else return new UserResultDto { Message = result.Errors.FirstOrDefault().Description, User = null };
         }
 
-        public async Task<LogInResultDto> LocalSignIn(LogInDto logInDto, string lang)
-        {
-            return null;
-            // return await SignIn(new LogInDto { Email = logInDto.Email, PassWord = logInDto.PassWord, UA = logInDto.UA }, lang);
-        }
-
         public async Task<APIResult> RefreshToken()
         {
             APIResult result = new APIResult();
@@ -1536,14 +1504,6 @@ namespace VideoProjectCore6.Services.UserService
             }
         }
 
-        public async Task<int> VisitorsCount()
-        {
-
-            // TODO
-            return 1;
-            //var users = await _DbContext.UserLogin.Select(x => x.UserId).Distinct().ToListAsync();
-            //return users.Count;
-        }
         // private async Task<LogInResultDto> SignIn(LogInDto logInDto, string lang)
         // {
         //     // using TransactionScope scope = new(TransactionScopeAsyncFlowOption.Enabled);
@@ -2448,25 +2408,25 @@ namespace VideoProjectCore6.Services.UserService
             APIResult result = new();
             try
             {
-                MailAddress addr = new MailAddress(email);
-                return result.SuccessMe(1, "Ok", false, APIResult.RESPONSE_CODE.OK, addr.User);
+                MailAddress addr = new(email);
+                result.SuccessMe(1, "Ok", false, APIResult.RESPONSE_CODE.OK, addr.User);
             }
 
             catch (ArgumentNullException)
             {
-                return result.FailMe(-1, Translation.getMessage(lang, "EmptyEmail"), true);
+                result.FailMe(-1, Translation.getMessage(lang, "EmptyEmail"), true);
             }
 
             catch (FormatException)
             {
-                return result.FailMe(-1, Translation.getMessage(lang, "InvalidEmailFormat") + " : " + email, true);
+                result.FailMe(-1, Translation.getMessage(lang, "InvalidEmailFormat") + " : " + email, true);
             }
 
             catch
             {
-                return result.FailMe(-1, Translation.getMessage(lang, "EmailError") + " : " + email, true);
+                result.FailMe(-1, Translation.getMessage(lang, "EmailError") + " : " + email, true);
             }
-
+            return await Task.FromResult(result);
         }
 
         public static bool CheckLockState(bool lockoutEnabled, DateTimeOffset? lockoutEnd)

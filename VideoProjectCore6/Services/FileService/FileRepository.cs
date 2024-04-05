@@ -89,45 +89,6 @@ namespace VideoProjectCore6.Services.FileService
             }
         }
 
-        public async Task<APIResult> CreateExAttachment(MimePart file)
-        {
-            APIResult result = new APIResult();
-
-
-            try
-            {
-
-                //FileUploaderDto fileUploaderDto;
-                //try
-                //{
-                //    fileUploaderDto = await _fileUploaderService.SaveExAttachment(file, _attachmentsPath);
-                //}
-                //catch
-                //{
-                //    return result.FailMe(-1, "Error while uploading a file");
-                //}
-
-                //var attachment = new Attachment()
-                //{
-                //    FilePath = fileUploaderDto.TargetPath,
-                //    FileName = file.ContentDisposition.FileName,
-                //    FileSize = fileUploaderDto.Size,
-                //};
-
-                //_context.Attachments.Add(attachment);
-
-                //await _context.SaveChangesAsync();
-
-                return result.SuccessMe(1, "Success", true);
-
-            }
-
-            catch
-            {
-                return result.FailMe(-1, "Error creating the attachment");
-            }
-        }
-
         public async Task<KeyValuePair<byte[], string>> Download(int fileId)
         {
             APIResult result = new APIResult();

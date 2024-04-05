@@ -1351,7 +1351,7 @@ namespace VideoProjectCore6.Services.ContactService
 
         public async Task<APIResult> ContactClasses(string lang)
         {
-            APIResult result = new APIResult();
+            APIResult result = new();
 
             try
             {
@@ -1368,13 +1368,14 @@ namespace VideoProjectCore6.Services.ContactService
 
                 }
 
-                return result.SuccessMe(1, "Success", false, APIResult.RESPONSE_CODE.OK, valueIdList);
+                result.SuccessMe(1, "Success", false, APIResult.RESPONSE_CODE.OK, valueIdList);
 
             }
             catch
             {
-                return result.FailMe(-1, "Failed to get classes");
+                result.FailMe(-1, "Failed to get classes");
             }
+            return await Task.FromResult(result);
         }
 
         public async Task<APIResult> EditProfilePhoto(int id, FilePostDto filePostDto, bool fromUg, bool updateRoles, string lang)

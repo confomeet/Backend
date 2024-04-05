@@ -19,10 +19,10 @@ namespace VideoProjectCore6.Utility.APIRateLimit
                 //    request.QueryString.ToString());
             if (!string.IsNullOrWhiteSpace(request.ToString()) && request.ToString() != "0")
             {
-                return request.ToString();
+                return await Task.FromResult(request.ToString());
             }
 
-            return Guid.NewGuid().ToString();
+            return await Task.FromResult(Guid.NewGuid().ToString());
         }
     }
 }

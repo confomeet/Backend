@@ -1,13 +1,6 @@
-﻿using FirebaseAdmin;
-using FirebaseAdmin.Messaging;
-using Flurl;
-using Google.Apis.Auth.OAuth2;
+﻿using Flurl;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Transactions;
 using VideoProjectCore6.DTOs;
 using VideoProjectCore6.DTOs.AccountDto;
@@ -20,16 +13,12 @@ using VideoProjectCore6.DTOs.ParticipantDto;
 
 using VideoProjectCore6.Models;
 using VideoProjectCore6.Repositories;
-using VideoProjectCore6.Repositories.IConfEventRepository;
-using VideoProjectCore6.Repositories.IEventLogRepository;
 using VideoProjectCore6.Repositories.IEventRepository;
-using VideoProjectCore6.Repositories.IFilesUploader;
 using VideoProjectCore6.Repositories.IMeetingRepository;
 using VideoProjectCore6.Repositories.INotificationRepository;
 using VideoProjectCore6.Repositories.IParticipantRepository;
 using VideoProjectCore6.Repositories.IUserRepository;
 using VideoProjectCore6.Services.Common;
-using VideoProjectCore6.Services.Meeting;
 using VideoProjectCore6.Utilities.Time;
 using static VideoProjectCore6.Services.Constants;
 
@@ -37,37 +26,27 @@ namespace VideoProjectCore6.Services.Event;
 
 public class EventRepository(IMeetingRepository iMeetingRepository
         , OraDbContext DBContext
-        , ISendNotificationRepository iNotificationRepository
         , IParticipantRepository iParticipantRepository
         , IUserRepository userRepository
         , IConfiguration iConfiguration
         , INotificationSettingRepository iNotificationSettingRepository
         , ISendNotificationRepository iSendNotificationRepository
-        , ILogger<MeetingRepository> _iLogger
-        , IFilesUploaderRepository iFilesUploaderRepository
         , ISysValueRepository iSysValueRepository
         , IGeneralRepository iGeneralRepository
-        , IEventLogRepository iEventLogRepository
-        , IConfEventRepository iConfEventRepository
         , IGroupRepository iGroupRepository
 ) : IEventRepository
 {
     private readonly OraDbContext _DbContext = DBContext;
     private readonly IMeetingRepository _IMeetingRepository = iMeetingRepository;
-    private readonly ISendNotificationRepository _INotificationRepository = iNotificationRepository;
     private readonly INotificationSettingRepository _INotificationSettingRepository = iNotificationSettingRepository;
     private readonly ISendNotificationRepository _ISendNotificationRepository = iSendNotificationRepository;
     private readonly IParticipantRepository _IParticipantRepository = iParticipantRepository;
     private readonly IUserRepository _IUserRepository = userRepository;
     private readonly IConfiguration _IConfiguration = iConfiguration;
-    private readonly ILogger<MeetingRepository> _ILogger = _iLogger;
-    private readonly IFilesUploaderRepository _IFilesUploaderRepository = iFilesUploaderRepository;
     private readonly ISysValueRepository _ISysValueRepository = iSysValueRepository;
-    private readonly IEventLogRepository _IEventLogRepository = iEventLogRepository;
     private readonly IGroupRepository _IGroupRepository = iGroupRepository;
     private readonly IGeneralRepository _IGeneralRepository = iGeneralRepository;
 
-    private readonly IConfEventRepository _IConfEventRepository = iConfEventRepository;
     private const string defaultTimeZone = "UTC+4";
 
     public async Task<APIResult> AddEvent(EventPostDto dto, int addBy, string lang)
@@ -1231,9 +1210,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             var userName = _DbContext.Users.Where(u => usersId1.Contains(u.Id)).Select(x => new { x.Id, x.FullName }).ToDictionary(x => x.Id, x => x.FullName);
             foreach (var e in events)
             {
-                bool b = false;
-                string v;
-                e.CreatedByName = userName.TryGetValue(e.CreatedBy, out v) ? v : string.Empty;
+                e.CreatedByName = userName.TryGetValue(e.CreatedBy, out string? v) ? v : string.Empty;
 
                 foreach (var par in e.Participants)
                 {

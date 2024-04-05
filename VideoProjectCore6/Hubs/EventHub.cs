@@ -3,12 +3,9 @@ using Microsoft.AspNetCore.SignalR;
 using VideoProjectCore6.Repositories.IEventRepository;
 using VideoProjectCore6.Repositories.IUserRepository;
 using VideoProjectCore6.Models;
-using VideoProjectCore6.DTOs.EventDto;
 using VideoProjectCore6.Repositories.IConfEventRepository;
-using SignalRSwaggerGen.Attributes;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using VideoProjectCore6.Utility;
 
 namespace VideoProjectCore6.Hubs
 {
@@ -55,16 +52,6 @@ namespace VideoProjectCore6.Hubs
             //UserHandler.ConnectedIds.Remove(Context.UserIdentifier);
             await base.OnDisconnectedAsync(exception);
         }
-
-
-        public async static Task Notify(List<ConfEvent> Notifications)
-        {
-            if (Notifications != null)
-            {
-                _Notifications = Notifications;
-            }
-        }
-
 
         public async Task StatusUpdated(ConfEvent confEvent)
         {
