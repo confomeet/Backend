@@ -121,24 +121,6 @@ namespace VideoProjectCore6.Controllers.Event
         //    return StatusCode(StatusCodes.Status404NotFound, "error occurred");
         //}
 
-
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("Types")]
-        public async Task<ActionResult> GetTypes([FromHeader] string lang = "ar")
-        {
-            try
-            {
-                var result = await _IEventRepository.GetEventType(lang);
-                return Ok(result);
-            }
-
-            catch
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error occurred");
-            }
-        }
-
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
         [HttpPost("{id}/Unlink")]
         public async Task<ActionResult> Unlink([FromRoute] int id)

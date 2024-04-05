@@ -31,7 +31,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         , IConfiguration iConfiguration
         , INotificationSettingRepository iNotificationSettingRepository
         , ISendNotificationRepository iSendNotificationRepository
-        , ISysValueRepository iSysValueRepository
         , IGeneralRepository iGeneralRepository
         , IGroupRepository iGroupRepository
 ) : IEventRepository
@@ -43,7 +42,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
     private readonly IParticipantRepository _IParticipantRepository = iParticipantRepository;
     private readonly IUserRepository _IUserRepository = userRepository;
     private readonly IConfiguration _IConfiguration = iConfiguration;
-    private readonly ISysValueRepository _ISysValueRepository = iSysValueRepository;
     private readonly IGroupRepository _IGroupRepository = iGroupRepository;
     private readonly IGeneralRepository _IGeneralRepository = iGeneralRepository;
 
@@ -1343,27 +1341,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         };
     }
 
-    public async Task<List<EventTypeValues>> GetEventType(string lang)
-    {
-        var q = await _ISysValueRepository.GetTypeAll(lang, "event_type");
-
-        var result = q.Where(t => t.Lang == lang).ToList();
-
-        foreach(var element in result)
-        {
-            Dictionary<string, string> translations = new Dictionary<string, string>();
-
-            var eventTypeTrans = q.Where(t => t.Id == element.Id).ToList();
-            
-            foreach(var trans in eventTypeTrans)
-            {
-                translations.Add(trans.Lang, trans.Value);
-            }
-
-            element.Captions = translations;
-        }
-        return result;
-    }
     private async Task<bool> isOkSubEventDate(DateTime start, DateTime end, int parentEvtId)
     {
         var parentEvt = await _DbContext.Events.Where(x => x.Id == parentEvtId).FirstOrDefaultAsync();

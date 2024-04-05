@@ -20,7 +20,6 @@ namespace VideoProjectCore6.Repositories.IEventRepository
         Task<List<EventGetDto>> GetEventByMeetingId(string MeetingId);
         Task<List<EventFullView>> GetAllOfUser(int userId,EventSearchObject obj=null,bool withRelatedUserEvents=false,string lang="ar");
         Task<ListCount> GetAll(int CurrentUserId, EventSearchObject obj = null, int pageIndex = 1, int pageSize = 25, string lang = "ar");
-        Task<List<EventTypeValues>> GetEventType(string lang);
         Task<APIResult> UnlinkSubEvent(int id, int byUserId);
 
         Task<EventStatOfMeetings> GetNumOfMeetingsDone(DateTime startDate, DateTime endDate);

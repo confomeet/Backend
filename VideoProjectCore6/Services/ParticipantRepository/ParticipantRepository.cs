@@ -24,18 +24,16 @@ public class ParticipantRepository : IParticipantRepository
     private readonly OraDbContext _DbContext;
     private readonly IUserRepository _IUserRepository;
     //private readonly IWorkRepository _IWorkRepository;
-    private readonly ISysValueRepository _ISysValueRepository;
     private readonly ISendNotificationRepository _ISendNotificationRepository;
     private readonly INotificationSettingRepository _INotificationSettingRepository;
     private readonly IConfiguration _IConfiguration;
     private readonly IEventLogRepository _IEventLogRepository;
-    public ParticipantRepository(OraDbContext OraDbContext, IUserRepository iUserRepository, ISendNotificationRepository iNotificationRepository, ISysValueRepository iSysValueRepository, /*IWorkRepository iWorkRepository,*/ IConfiguration iConfiguration
+    public ParticipantRepository(OraDbContext OraDbContext, IUserRepository iUserRepository, ISendNotificationRepository iNotificationRepository, /*IWorkRepository iWorkRepository,*/ IConfiguration iConfiguration
         , INotificationSettingRepository iNotificationSettingRepository, IEventLogRepository iEventLogRepository)
     {
         _DbContext = OraDbContext;
         _IUserRepository = iUserRepository;
         _ISendNotificationRepository = iNotificationRepository;
-        _ISysValueRepository = iSysValueRepository;
         //_IWorkRepository = iWorkRepository;
         _IConfiguration = iConfiguration;
         _INotificationSettingRepository = iNotificationSettingRepository;

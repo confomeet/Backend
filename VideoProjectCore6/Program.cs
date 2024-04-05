@@ -77,7 +77,6 @@ builder.Services.AddScoped<INotificationSettingRepository, NotificationSettingRe
 builder.Services.AddScoped<IParticipantRepository, ParticipantRepository>();
 //builder.Services.AddScoped<IWorkRepository, WorkRepository>();
 builder.Services.AddScoped<IContactRepository, ContactRepository>();
-builder.Services.AddScoped<ISysValueRepository, SysValueRepository>();
 builder.Services.AddScoped<IChannelRepository, ChannelRepository>();
 builder.Services.AddScoped<ITabRepository, TabRepository>();
 builder.Services.AddScoped<IConfEventRepository, ConfEventRepository>();

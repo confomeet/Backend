@@ -46,7 +46,6 @@ namespace VideoProjectCore6.Services.UserService
         private readonly INotificationLogRepository _iNotificationLogRepository;
         private readonly ILogger<UserRepository> _logger;
         private readonly INotificationSettingRepository _INotificationSettingRepository;
-        private readonly ISysValueRepository _ISysValueRepository;
         private readonly IFileRepository _IFileRepository;
 
         ValidatorException _exception;
@@ -62,7 +61,7 @@ namespace VideoProjectCore6.Services.UserService
                              /*IFilesUploaderRepositiory iFilesUploaderRepository,*/ IWebHostEnvironment iWebHostEnvironment,
                              ILogger<UserRepository> logger,
                              INotificationSettingRepository iNotificationSettingRepository,
-                             ISysValueRepository iSysValueRepository, IFileRepository fileRepository)
+                             IFileRepository fileRepository)
         {
             _DbContext = OraDbContext;
             _httpContext = httpContext;
@@ -81,7 +80,6 @@ namespace VideoProjectCore6.Services.UserService
             _jwt = jwt.Value;
             _exception = new ValidatorException();
             _INotificationSettingRepository = iNotificationSettingRepository;
-            _ISysValueRepository = iSysValueRepository;
             _IFileRepository = fileRepository;
         }
 
