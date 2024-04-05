@@ -95,7 +95,6 @@ builder.Services.AddScoped<IAclRepository, AclRepository>();
 
 // Add services to the container.
 builder.Services.AddMvc(option => option.EnableEndpointRouting = false)
-    .SetCompatibilityVersion(CompatibilityVersion.Latest)
     .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
