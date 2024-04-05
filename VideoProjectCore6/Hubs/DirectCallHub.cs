@@ -39,6 +39,8 @@ namespace VideoProjectCore6.Hubs
 
         public override async Task OnConnectedAsync()
         {
+            if (Context.UserIdentifier == null)
+                return;
             UserHandler.ConnectedIds.Add(Context.UserIdentifier);
 
             await Clients.All.SendAsync("UserConnected", Context.UserIdentifier);
@@ -49,6 +51,9 @@ namespace VideoProjectCore6.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
+            if (Context.UserIdentifier == null)
+                return;
+
             UserHandler.ConnectedIds.Remove(Context.UserIdentifier);
 
             await Clients.All.SendAsync("UserDisconnected", Context.UserIdentifier);

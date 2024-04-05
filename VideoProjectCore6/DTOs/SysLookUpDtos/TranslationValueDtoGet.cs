@@ -7,22 +7,22 @@ namespace VideoProjectCore6.DTOs.SysLookUpDtos
         [Required]
         public int Id { get; set; }
         [Required]
-        public string Type { get; set; }
-        public string Value { get; set; }
+        public string Type { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
         [Required]
-        public string translationType { get; set; }//translationValue
-        public string translationValue { get; set; }//translationValue
+        public string translationType { get; set; } = string.Empty;
+        public string translationValue { get; set; } = string.Empty;
     }
     public class AllTranslationValueDtoGet
     {
         [Required]
         public int Id { get; set; }
         [Required]
-        public string Type { get; set; }
-        public string Value { get; set; }
+        public string Type { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
         [Required]
-        public string translationType { get; set; }//translationValue
-        public string translationValue { get; set; }//translationValue
-        public string lang { get; set; }//translationValue
+        public string translationType { get; set; } = string.Empty;
+        public string translationValue { get; set; } = string.Empty;
+        public string lang { get; set; } = string.Empty;
     }
 }

@@ -3,14 +3,13 @@ using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.DTOs.ParticipantDto;
 using VideoProjectCore6.Models;
 using VideoProjectCore6.DTOs;
-#nullable disable
 namespace VideoProjectCore6.Repositories.IEventRepository
 {
     public interface IEventRepository
     {
         Task<APIResult> AddEvent(EventPostDto EventPostDto, int addBy, string lang);
         Task<APIResult> AddMeetingEvent(EventWParticipant dto, int addBy, bool sendNotification, string lang);
-        Task<APIResult> AddConnectedEvents(FullEventPostDto EventPostDto, int addBy, string lang,bool justCreatorLink,bool checkUserTime = false, bool sendNotification=false,  bool checkWorkTime = false,string appId = null);
+        Task<APIResult> AddConnectedEvents(FullEventPostDto EventPostDto, int addBy, string lang,bool justCreatorLink,bool checkUserTime = false, bool sendNotification=false,  bool checkWorkTime = false,string? appId = null);
         Task<APIResult> AddParticipantsToEvents(List<ParicipantDto> dtos, int eventId, int addBy, string lang, bool sendNotification, bool sendToAll);
         Task<APIResult> AddParticipantsToEventsScoped(List<ParicipantDto> dtos, int eventId, int addBy, string lang, bool sendNotification, bool sendToAll);
         Task<APIResult> AddParticipantsToEventsScoped(ParticipantsAsObj participants, int eventId, int addBy, string lang, bool sendNotification, bool sendToAll);
@@ -18,8 +17,8 @@ namespace VideoProjectCore6.Repositories.IEventRepository
         Task<int> DeleteEvent(int id);
         Task<List<EventGetDto>> GetEvent(int userId);
         Task<List<EventGetDto>> GetEventByMeetingId(string MeetingId);
-        Task<List<EventFullView>> GetAllOfUser(int userId,EventSearchObject obj=null,bool withRelatedUserEvents=false,string lang="ar");
-        Task<ListCount> GetAll(int CurrentUserId, EventSearchObject obj = null, int pageIndex = 1, int pageSize = 25, string lang = "ar");
+        Task<List<EventFullView>> GetAllOfUser(int userId,EventSearchObject? obj=null,bool withRelatedUserEvents=false,string lang="ar");
+        Task<ListCount> GetAll(int CurrentUserId, EventSearchObject? obj = null, int pageIndex = 1, int pageSize = 25, string lang = "ar");
         Task<APIResult> UnlinkSubEvent(int id, int byUserId);
 
         Task<EventStatOfMeetings> GetNumOfMeetingsDone(DateTime startDate, DateTime endDate);

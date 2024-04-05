@@ -24,7 +24,7 @@ namespace VideoProjectCore6.Hubs
         private readonly OraDbContext _DbContext;
 
 
-        public static IHubContext<EventHub> Current { get; set; }
+        public static IHubContext<EventHub>? Current { get; set; }
 
         public EventHub(IEventRepository eventRepository, IUserRepository usersService, IConfEventRepository confEvent, OraDbContext OraDbContext)
         {
@@ -55,7 +55,8 @@ namespace VideoProjectCore6.Hubs
 
         public async Task StatusUpdated(ConfEvent confEvent)
         {
-
+            if (Context.UserIdentifier == null)
+                return;
             await Clients.User(Context.UserIdentifier)
                    .SendAsync("NotifyEventStatus", confEvent);
 

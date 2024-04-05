@@ -3,6 +3,6 @@
     public class UserRolesDTO
     {
         public int UserId { get; set; }
-        public List<string> Roles { get; set; }
+        public List<string> Roles { get; set; } = [];
     }
 }

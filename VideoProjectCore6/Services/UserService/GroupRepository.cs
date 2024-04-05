@@ -111,7 +111,7 @@ namespace VideoProjectCore6.Services.UserService
             }
         }
 
-        public async Task<ListCount> GetGroups(string text, string name, string lang, int pageSize, int pageIndex)
+        public async Task<ListCount> GetGroups(string? text, string? name, string lang, int pageSize, int pageIndex)
         {
             var groups = await _DbContext.Groups.Include(i => i.AclGroups).Where(g => (name != null ? g.GroupName.Contains(name) : true)
             && (text != null ? (g.GroupName.ToLower().Contains(text.ToLower()) || g.Description.ToLower().Contains(text.ToLower())) : true)

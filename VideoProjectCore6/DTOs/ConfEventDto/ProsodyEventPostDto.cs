@@ -3,14 +3,14 @@
     public class ProsodyEventPostDto
     {
 
-        public string type { get; set; }
+        public string type { get; set; } = string.Empty;
 
-        public string from { get; set; }
+        public string from { get; set; } = string.Empty;
 
-        public string to { get; set; }
+        public string to { get; set; } = string.Empty;
 
         public int meetingId { get; set; }
 
-        public string message { get; set; }
+        public string message { get; set; } = string.Empty;
     }
 }

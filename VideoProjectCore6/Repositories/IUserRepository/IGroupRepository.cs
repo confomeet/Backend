@@ -5,7 +5,7 @@ namespace VideoProjectCore6.Repositories.IUserRepository
 {
     public interface IGroupRepository
     {
-        Task<ListCount> GetGroups(string text, string name, string lang, int pageSize, int pageIndex);
+        Task<ListCount> GetGroups(string? text, string? name, string lang, int pageSize, int pageIndex);
 
         Task<APIResult> AddGroup(UserGroupPostDto userGroupPostDto, int createdBy);
 

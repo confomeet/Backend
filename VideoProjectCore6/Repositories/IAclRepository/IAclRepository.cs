@@ -5,6 +5,6 @@ namespace VideoProjectCore6.Repositories.IAclRepository
 {
     public interface IAclRepository
     {
-        Task<APIResult> GetACLs(string name, string lang = "en");
+        Task<APIResult> GetACLs(string? name, string lang = "en");
     }
 }

@@ -25,7 +25,8 @@ namespace VideoProjectCore6.Hubs
 
         public override async Task OnConnectedAsync()
         {
-
+            if (Context.UserIdentifier == null)
+                return;
             UserHandler.ConnectedIds.Add(Context.UserIdentifier);
             await Clients.All.SendAsync("UserConnected", UserHandler.ConnectedIds);
             await base.OnConnectedAsync();
@@ -34,6 +35,8 @@ namespace VideoProjectCore6.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
+            if (Context.UserIdentifier == null)
+                return;
             UserHandler.ConnectedIds.Remove(Context.UserIdentifier);
 
             await Clients.All.SendAsync("UserDisconnected", UserHandler.ConnectedIds);
@@ -44,6 +47,8 @@ namespace VideoProjectCore6.Hubs
         public async Task UpdateNotification(NotificationFilterDto notificationFilterDto, int pageIndex = 1, int pageSize = 25, string lang = "ar")
         {
             var currentUserId = Context.UserIdentifier;
+            if (currentUserId == null)
+                return;
 
             //var entityId = await _DbContext.EmployeeSetting.Include(l => l.User).Include(q => q.InterEntity)
             //        .Where(o => o.UserId == Int32.Parse(currentUserId)).Select(q => q.InterEntity).FirstOrDefaultAsync();

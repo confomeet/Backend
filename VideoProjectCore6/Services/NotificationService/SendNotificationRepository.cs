@@ -47,7 +47,7 @@ namespace VideoProjectCore6.Services.NotificationService
         private readonly ILogger<SendNotificationRepository>? _logger;
         private readonly ILogger<MeetingRepository>? _loggerM;
         private readonly IGeneralRepository _generalRepository;
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration? _configuration;
         private readonly IUserRepository? _iUserRepository;
 
 
@@ -225,7 +225,7 @@ namespace VideoProjectCore6.Services.NotificationService
             {
                 int otpPeriodInMinutes = Constants.OTP_PERIOD_If_MISSED_IN_APP_SETTING;
 
-                if (_configuration["OtpPeriodInMinutes"] == null)
+                if (_configuration == null || _configuration["OtpPeriodInMinutes"] == null)
                 {
                     _logger?.LogInformation("Warning!!! OtpPeriodInMinutes is missing");
                 }
@@ -368,7 +368,7 @@ namespace VideoProjectCore6.Services.NotificationService
             int mailChannel = await _DbContext.SysLookupValues.Where(x => x.Shortcut == Constants.NOTIFICATION_MAIL_CHANNEL).Select(x => x.Id).FirstOrDefaultAsync();
 
             string adminEmail = "yhab.shaker@infostrategic.com";
-            if (_configuration["SupportEmail"] != null)
+            if (_configuration?["SupportEmail"] != null)
             {
                 try
                 {
@@ -410,7 +410,7 @@ namespace VideoProjectCore6.Services.NotificationService
             var ChargePlaceHolder = "@" + Constants.CHARGE;
             //--------------Send public link to moderator-------------------
             string publicLink = string.Empty;
-            var host = _configuration["CurrentHostName"];
+            var host = _configuration?["CurrentHostName"] ?? "";
             var evtMeetingId = await _DbContext.Events.Where(x => x.Id == notifications[0].EventId).Select(x => x.MeetingId).FirstOrDefaultAsync();
             if (evtMeetingId != null && addPublicLink)
             {
@@ -467,7 +467,7 @@ namespace VideoProjectCore6.Services.NotificationService
 
             List<MeetingUserLink> links = new List<MeetingUserLink>();
             MeetingRepository m = new MeetingRepository(_DbContext, _exception, _loggerM, _IFilesUploaderRepository, _configuration, _iUserRepository);
-            string host = _configuration["CurrentHostName"]!, meetingLink;
+            string host = _configuration?["CurrentHostName"] ?? "", meetingLink;
             List<string> meetingLinks = new List<string>();
             if (Parameters != null)
             {

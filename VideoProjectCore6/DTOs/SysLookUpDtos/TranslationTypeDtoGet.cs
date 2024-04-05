@@ -7,18 +7,18 @@ namespace VideoProjectCore6.DTOs.SysLookUpDtos
         [Required]
         public int TypeID { get; set; }
         [Required]
-        public string Shortcut { get; set; }
+        public string Shortcut { get; set; } = string.Empty;
 
-        public string TranslationValue { get; set; }
+        public string TranslationValue { get; set; } = string.Empty;
     }
     public class AllTranslationTypeDtoGet
     {
         [Required]
         public int TypeID { get; set; }
         [Required]
-        public string Shortcut { get; set; }
+        public string Shortcut { get; set; } = string.Empty;
 
-        public string TranslationValue { get; set; }
-        public string Lang { get; set; }
+        public string TranslationValue { get; set; } = string.Empty;
+        public string Lang { get; set; } = string.Empty;
     }
 }

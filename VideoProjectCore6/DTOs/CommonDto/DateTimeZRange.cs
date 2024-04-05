@@ -2,6 +2,6 @@
 {
     public class DateTimeZRange : DateTimeRange
     {
-        public string TimeZone { get; set; }
+        public string TimeZone { get; set; } = string.Empty;
     }
 }

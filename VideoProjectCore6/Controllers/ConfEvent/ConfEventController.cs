@@ -45,7 +45,7 @@ namespace VideoProjectCore6.Controllers.ConfEvent
         [HttpPost("AddProsodyEvent")]
         public async Task<ActionResult> AddProsodyEvent([FromBody] ProsodyEventPostDto prosodyEventPostDto)
         {
-            return Ok(await _IConfEventRepository.addProsodyEvent(prosodyEventPostDto, EventHub.Current));
+            return Ok(await _IConfEventRepository.addProsodyEvent(prosodyEventPostDto, EventHub.Current!));
         }
 
         [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]

@@ -3,6 +3,6 @@
     public class GroupPostUserDto
     {
         public int groupId { get; set; }
-        public List<int> userIds { get; set; }
+        public List<int> userIds { get; set; } = [];
     }
 }

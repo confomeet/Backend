@@ -5,7 +5,6 @@ namespace VideoProjectCore6.Models
 {
     public partial class UserClaim:IdentityUserClaim<int>
     {
-        public int Id { get; set; }
       //  public int UserId { get; set; }
        // public string ClaimType { get; set; } = null!;
        // public string ClaimValue { get; set; } = null!;

@@ -10,8 +10,6 @@ using VideoProjectCore6.Repositories.IContactRepository;
 using VideoProjectCore6.Repositories.IUserRepository;
 using VideoProjectCore6.DTOs.FileDto;
 
-#nullable disable
-
 namespace VideoProjectCore6.Controllers.Contant
 {
     [ApiController]

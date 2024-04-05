@@ -2,6 +2,6 @@
 {
     public class RolePostDto
     {
-        public Dictionary<string, string> RoleNameShortCut { get; set; }
+        public Dictionary<string, string> RoleNameShortCut { get; set; } = [];
     }
 }

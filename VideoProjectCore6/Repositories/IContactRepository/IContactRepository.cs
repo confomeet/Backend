@@ -24,7 +24,7 @@ namespace VideoProjectCore6.Repositories.IContactRepository
 
         //Task<List<ContactDto>> MyContact(int id, string lang)
         Task<List<ContactGetDto>> MyContact(int userId, int userType, string lang);
-        Task<ListCount> Search(int localUser, string name, string email, int pageIndex = 1, int pageSize = 25);
+        Task<ListCount> Search(int localUser, string? name, string? email, int pageIndex = 1, int pageSize = 25);
         Task<List<ContactSearchView>> Search(int userId, int userType, string toSearch);
 
         Task<object> MeetingJWT(string meetingId, string hash, string lang);

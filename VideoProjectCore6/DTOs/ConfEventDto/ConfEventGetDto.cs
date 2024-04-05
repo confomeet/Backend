@@ -11,7 +11,7 @@
 
         public int UserId { get; set; }
 
-        public string EventInfo { get; set; }
+        public string EventInfo { get; set; } = string.Empty;
 
     }
 }

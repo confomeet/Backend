@@ -8,11 +8,11 @@
 
         public int EventType { get; set; }
 
-        public string ConfId { get; set; }
+        public string ConfId { get; set; } = string.Empty;
 
         public string UserId { get; set; } = "string";
 
-        public string EventInfo { get; set; }
+        public string EventInfo { get; set; } = string.Empty;
 
         public int MeetingId { get; set; } = 10000;
 

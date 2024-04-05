@@ -5,6 +5,6 @@ namespace VideoProjectCore6.DTOs.SysLookUpDtos
     public class TranslationTypeDto
     {
         [Required]
-        public string shortcut { get; set; }
+        public string shortcut { get; set; } = string.Empty;
     }
 }

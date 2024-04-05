@@ -2,7 +2,7 @@
 {
     public class IanaWinMapper
     {
-        public string IanaTimeZoneToWinTimeZone(string timeInfo)
+        public string? IanaTimeZoneToWinTimeZone(string timeInfo)
         {
             var olsonWindowsTimes = new Dictionary<string, string>()
         {

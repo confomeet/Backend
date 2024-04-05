@@ -14,7 +14,7 @@ namespace VideoProjectCore6.Utilities.ExternalAPI
 
         public ExternalAPIService(IConfiguration configuration, ILogger<ExternalAPIService> logger)
         {
-            _host = configuration["MainSystemHost"];
+            _host = configuration["MainSystemHost"] ?? "";
             _logger = logger;
         }
 

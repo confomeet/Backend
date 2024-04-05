@@ -59,7 +59,7 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         public Task<APIResult> CreateParticipantUser(BasicUserInfo dto, string lang, bool outerReq);
 
         public Task Update(UserDto userDto);
-        public Task<ListCount> SearchFilterUsers(string text = null, string name = null, string email = null,
+        public Task<ListCount> SearchFilterUsers(string? text = null, string? name = null, string? email = null,
                                                        int pageIndex = 1, int pageSize = 25, string lang = "ar");
         //Task<APIResult> AuthenticateUserExternal(int v);
         // public Task<APIResult> GetLocalUserId(int userId);

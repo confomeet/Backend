@@ -15,7 +15,7 @@ namespace VideoProjectCore6.Services.AclRepository
             _OraDbContext = oraDbContext;
         }
 
-        public async Task<APIResult> GetACLs(string name, string lang = "en")
+        public async Task<APIResult> GetACLs(string? name, string lang = "en")
         {
             APIResult result = new APIResult();
 

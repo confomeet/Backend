@@ -56,6 +56,11 @@ namespace VideoProjectCore6.Services.RoleService
 
             // add permissions.
             var role = await _roleManager.FindByNameAsync(roleNameShortcut);
+            if (role == null)
+            {
+                scope.Complete();
+                return;
+            }
             foreach (var claim in rolePostDto.Permissions)
             {
                 foreach (var per in claim.Value)
