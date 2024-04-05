@@ -42,7 +42,7 @@ namespace VideoProjectCore6.Services
         /// <param name="startDate"></param>
         /// <param name="meetingId"></param>
         /// <returns>Status: 1 || 2 || 3 </returns>
-        public EventStatus CheckStatus(DateTime startDate, DateTime endDate, int id, string meetingId, string lang, List<ConfEvent> allRooms)
+        public EventStatus CheckStatus(DateTime startDate, DateTime endDate, int id, string? meetingId, string lang, List<ConfEvent> allRooms)
         {
             DateTime now = DateTime.Now;
 
@@ -115,7 +115,7 @@ namespace VideoProjectCore6.Services
 
 
         // Check if partici
-        public Boolean CheckParticipantStatus(string email, int id, string meetingId, List<ConfEvent> allRooms, List<ConfUser> allUsers)
+        public Boolean CheckParticipantStatus(string email, int id, string? meetingId, List<ConfEvent> allRooms, List<ConfUser> allUsers)
         {
 
             var entryPoint = (from ep in allRooms.OrderByDescending(x => x.Id)

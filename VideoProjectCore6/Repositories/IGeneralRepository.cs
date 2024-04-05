@@ -30,7 +30,7 @@ namespace VideoProjectCore6.Repositories
 
         Task<int> DeleteTranslation(string shortCut);
 
-        EventStatus CheckStatus(DateTime startDate, DateTime endDate, int id, string meetingId, string lang, List<ConfEvent> allRooms);
+        EventStatus CheckStatus(DateTime startDate, DateTime endDate, int id, string? meetingId, string lang, List<ConfEvent> allRooms);
         Task<AddNewTransResult> insertTranslation(string shortcut, string value, string currentLanguage);
 
         Task<List<SysTranslation>> InsertUpdateSingleTranslation(string shortCut, Dictionary<string, string> TranslationDictionary);
@@ -77,7 +77,7 @@ namespace VideoProjectCore6.Repositories
         Task<List<Dictionary<string, string>>> AddNewLookUpType(List<Dictionary<string, string>> eventTypePostDTO, string type);
 
         Task<DTOs.CommonDto.APIResult> DeleteLookUpType(int id, string type);
-        Boolean CheckParticipantStatus(string email, int id, string meetingId, List<ConfEvent> allRooms, List<ConfUser> allUsers);
+        Boolean CheckParticipantStatus(string email, int id, string? meetingId, List<ConfEvent> allRooms, List<ConfUser> allUsers);
 
         Task<Dictionary<int, string>> GetActions(string lang);
 

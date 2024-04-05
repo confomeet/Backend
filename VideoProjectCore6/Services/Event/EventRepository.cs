@@ -33,53 +33,42 @@ using VideoProjectCore6.Services.Meeting;
 using VideoProjectCore6.Utilities.Time;
 using static VideoProjectCore6.Services.Constants;
 
-
-#nullable disable
 namespace VideoProjectCore6.Services.Event;
 
-public class EventRepository : IEventRepository
-{
-    private readonly OraDbContext _DbContext;
-    private readonly IMeetingRepository _IMeetingRepository;
-    private readonly ISendNotificationRepository _INotificationRepository;
-    private readonly INotificationSettingRepository _INotificationSettingRepository;
-    private readonly ISendNotificationRepository _ISendNotificationRepository;
-    private readonly IParticipantRepository _IParticipantRepository;
-    private readonly IUserRepository _IUserRepository;
-    private readonly IConfiguration _IConfiguration;
-    private readonly ILogger<MeetingRepository> _ILogger;
-    private readonly IFilesUploaderRepository _IFilesUploaderRepository;
-    private readonly ISysValueRepository _ISysValueRepository;
-    private readonly IEventLogRepository _IEventLogRepository;
-    private readonly IGroupRepository _IGroupRepository;
-    private readonly IGeneralRepository _IGeneralRepository;
-
-    private readonly IConfEventRepository _IConfEventRepository;
-
-
-    public EventRepository(IMeetingRepository iMeetingRepository, OraDbContext DBContext, ISendNotificationRepository iNotificationRepository, IParticipantRepository iParticipantRepository, IUserRepository userRepository, IConfiguration iConfiguration, INotificationSettingRepository iNotificationSettingRepository, ISendNotificationRepository iSendNotificationRepository, ILogger<MeetingRepository> _iLogger
+public class EventRepository(IMeetingRepository iMeetingRepository
+        , OraDbContext DBContext
+        , ISendNotificationRepository iNotificationRepository
+        , IParticipantRepository iParticipantRepository
+        , IUserRepository userRepository
+        , IConfiguration iConfiguration
+        , INotificationSettingRepository iNotificationSettingRepository
+        , ISendNotificationRepository iSendNotificationRepository
+        , ILogger<MeetingRepository> _iLogger
         , IFilesUploaderRepository iFilesUploaderRepository
         , ISysValueRepository iSysValueRepository
         , IGeneralRepository iGeneralRepository
-        , IEventLogRepository iEventLogRepository, IConfEventRepository iConfEventRepository, IGroupRepository iGroupRepository)
-    {
-        _DbContext = DBContext;
-        _IMeetingRepository = iMeetingRepository;
-        _INotificationRepository = iNotificationRepository;
-        _IParticipantRepository = iParticipantRepository;
-        _IUserRepository = userRepository;
-        _IConfiguration = iConfiguration;
-        _INotificationSettingRepository = iNotificationSettingRepository;
-        _ISendNotificationRepository = iSendNotificationRepository;
-        _ILogger = _iLogger;
-        _IFilesUploaderRepository = iFilesUploaderRepository;
-        _ISysValueRepository = iSysValueRepository;
-        _IGeneralRepository = iGeneralRepository;
-        _IEventLogRepository = iEventLogRepository;
-        _IConfEventRepository = iConfEventRepository;
-        _IGroupRepository = iGroupRepository;
-    }
+        , IEventLogRepository iEventLogRepository
+        , IConfEventRepository iConfEventRepository
+        , IGroupRepository iGroupRepository
+) : IEventRepository
+{
+    private readonly OraDbContext _DbContext = DBContext;
+    private readonly IMeetingRepository _IMeetingRepository = iMeetingRepository;
+    private readonly ISendNotificationRepository _INotificationRepository = iNotificationRepository;
+    private readonly INotificationSettingRepository _INotificationSettingRepository = iNotificationSettingRepository;
+    private readonly ISendNotificationRepository _ISendNotificationRepository = iSendNotificationRepository;
+    private readonly IParticipantRepository _IParticipantRepository = iParticipantRepository;
+    private readonly IUserRepository _IUserRepository = userRepository;
+    private readonly IConfiguration _IConfiguration = iConfiguration;
+    private readonly ILogger<MeetingRepository> _ILogger = _iLogger;
+    private readonly IFilesUploaderRepository _IFilesUploaderRepository = iFilesUploaderRepository;
+    private readonly ISysValueRepository _ISysValueRepository = iSysValueRepository;
+    private readonly IEventLogRepository _IEventLogRepository = iEventLogRepository;
+    private readonly IGroupRepository _IGroupRepository = iGroupRepository;
+    private readonly IGeneralRepository _IGeneralRepository = iGeneralRepository;
 
+    private readonly IConfEventRepository _IConfEventRepository = iConfEventRepository;
+    private const string defaultTimeZone = "UTC+4";
 
     public async Task<APIResult> AddEvent(EventPostDto dto, int addBy, string lang)
     {
@@ -98,7 +87,7 @@ public class EventRepository : IEventRepository
         }
         try
         {
-            Models.Event e = new Models.Event
+            Models.Event e = new()
             {
                 ParentEvent = dto.ParentEventId,
                 CreatedBy = addBy,
@@ -130,7 +119,7 @@ public class EventRepository : IEventRepository
 
     public async Task<APIResult> AddMeetingEvent(EventWParticipant dto, int addBy, bool sendNotification, string lang)
     {
-        APIResult eventResult = new APIResult(); 
+        APIResult eventResult = new();
         if (dto.ParentEventId != null)
         {
             var parentEvt = await _DbContext.Events.Where(x => x.Id == dto.ParentEventId).FirstOrDefaultAsync();
@@ -139,8 +128,8 @@ public class EventRepository : IEventRepository
                 return eventResult.FailMe(-1, "تاريخ الحدث الفرعي يجب أن يكون متوافق مع تاريخ الحدث الأب");
             }
 
-            dto.MeetingId = parentEvt.MeetingId;
-            dto.AllDay = parentEvt.AllDay;
+            dto.MeetingId = parentEvt?.MeetingId;
+            dto.AllDay = parentEvt?.AllDay;
         }
 
         using var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted }, TransactionScopeAsyncFlowOption.Enabled);
@@ -207,11 +196,11 @@ public class EventRepository : IEventRepository
     }
 
     public async Task<APIResult> AddConnectedEvents(FullEventPostDto dto, int addBy, string lang, bool justCreatorLink,
-        bool checkUserTime = false, bool sendNotification = false, bool checkWorkTime = false, string appId = null)
+        bool checkUserTime = false, bool sendNotification = false, bool checkWorkTime = false, string? appId = null)
     {
         APIResult ParentEventAddParticipant = new(), result = new(), result1 = new(), validate = new(), addPEvent = new();
         var receivedMsgs = new List<string>();
-        List<MeetingUserLink> l1 = new(), l2 = new();
+        List<MeetingUserLink> l1 = [], l2 = [];
         var toUseCabins=new List<EntityCabine>();
         var parameters = new Dictionary<string, string>
              {
@@ -223,10 +212,10 @@ public class EventRepository : IEventRepository
         //string ciscoMeetingLink = null;
 
 
-        string eventMeetingID = null;
+        string? eventMeetingID = null;
 
-        string clearMeetingID = null;
-        string senderEmail = await _DbContext.Users.Where(u => u.Id == addBy).Select(u => u.Email).FirstOrDefaultAsync();
+        string? clearMeetingID = null;
+        string? senderEmail = await _DbContext.Users.Where(u => u.Id == addBy).Select(u => u.Email).FirstOrDefaultAsync();
 
 
         validate = ValidateEvent(dto, lang);
@@ -266,7 +255,7 @@ public class EventRepository : IEventRepository
             mdto.Status = (sbyte)MEETING_STATUS.PENDING;
             mdto.Topic = dto.Topic;
             mdto.Description = dto.Description;
-            mdto.TimeZone = dto.TimeZone == null ? "UTC+4" : dto.TimeZone;
+            mdto.TimeZone = dto.TimeZone ?? defaultTimeZone;
             mdto.RecordingReq = dto.RecordingReq;
             mdto.AutoLobby = dto.AutoLobby;
             mdto.SingleAccess = dto.SingleAccess;
@@ -305,7 +294,7 @@ public class EventRepository : IEventRepository
                 }
                 eventMeetingID = newMeet.Result;
                 dto.MeetingId = eventMeetingID;
-                clearMeetingID = clearMeetingID == null ? newMeet.Result : clearMeetingID;
+                clearMeetingID ??= newMeet.Result;
                 dto.MeetingId = eventMeetingID;
             }
 
@@ -326,16 +315,16 @@ public class EventRepository : IEventRepository
                 });
             }
 
-            ParentEventAddParticipant = await _IParticipantRepository.AddParticipants(dto.Participants, addPEvent.Id, addBy, lang,toUseCabins, new DateTimeRange { StartDateTime = dto.StartDate, EndDateTime = dto.EndDate }, eventMeetingID, checkUserTime, checkWorkTime,false);
+            ParentEventAddParticipant = await _IParticipantRepository.AddParticipants(dto.Participants, addPEvent.Id, addBy, lang,toUseCabins, new DateTimeRange { StartDateTime = dto.StartDate, EndDateTime = dto.EndDate }, eventMeetingID!, checkUserTime, checkWorkTime,false);
             if (ParentEventAddParticipant.Id < 0)
             {
                 return ParentEventAddParticipant;
             }
             //----------------- get extra message------------------
-            if (ParentEventAddParticipant.Message.Count()>1)
+            if (ParentEventAddParticipant.Message.Count > 1)
             {
                 receivedMsgs.AddRange(ParentEventAddParticipant.Message);
-                receivedMsgs.RemoveAt(receivedMsgs.Count() - 1);
+                receivedMsgs.RemoveAt(receivedMsgs.Count - 1);
             }
             //-----------------------------------------------------
 
@@ -352,16 +341,16 @@ public class EventRepository : IEventRepository
                     {
                         return result;
                     }
-                    result1 = await _IParticipantRepository.AddParticipants(event_.Participants, result.Id, addBy, lang, toUseCabins, new DateTimeRange { StartDateTime = event_.StartDate, EndDateTime = event_.EndDate }, eventMeetingID, checkUserTime, checkWorkTime,false);
+                    result1 = await _IParticipantRepository.AddParticipants(event_.Participants, result.Id, addBy, lang, toUseCabins, new DateTimeRange { StartDateTime = event_.StartDate, EndDateTime = event_.EndDate }, eventMeetingID!, checkUserTime, checkWorkTime,false);
                     if (result1.Id < 0)
                     {
                         return result1;
                     }
                     //----------------- get extra message------------------
-                    if (result1.Message.Count() > 1)
+                    if (result1.Message.Count > 1)
                     {
                         receivedMsgs.AddRange(result1.Message);
-                        receivedMsgs.RemoveAt(receivedMsgs.Count() - 1);
+                        receivedMsgs.RemoveAt(receivedMsgs.Count - 1);
                     }
                     //-
                     parameters[FROM_DATE] = event_.StartDate.ToString("dd-MM-yyyy");
@@ -370,7 +359,7 @@ public class EventRepository : IEventRepository
                     parameters[TO_TIME] = event_.EndDate.ToString("hh:mm tt");
                     parameters[TOPIC] = event_.Topic;
                     parameters[TIMEZONE] = event_.TimeZone;
-                    parameters[MEETING_ID] = clearMeetingID;
+                    parameters[MEETING_ID] = clearMeetingID!;
                     //parameters[MEETING_ID] = event_.MeetingId;
                     var currentSubEvtNotifications = new List<NotificationLogPostDto>();
                     foreach (var n in toSendNoti)
@@ -403,8 +392,8 @@ public class EventRepository : IEventRepository
             parameters[FROM_TIME] = dto.StartDate.ToString("hh:mm tt");
             parameters[TO_TIME] = dto.EndDate.ToString("hh:mm tt");
             parameters[TOPIC] = dto.Topic;
-            parameters[TIMEZONE] = dto.TimeZone;
-            parameters[MEETING_ID] = clearMeetingID;//dto.MeetingId;
+            parameters[TIMEZONE] = dto.TimeZone ?? defaultTimeZone;
+            parameters[MEETING_ID] = clearMeetingID!;
             l1 = await _IParticipantRepository.NotifyParticipants(ParentEventAddParticipant.Result, eventMeetingID, MainEvtNotifications, parameters, INVITATION_TEMPLATE, sendNotification, false/*, ciscoMeetingLink*/);
 
         }
@@ -413,7 +402,7 @@ public class EventRepository : IEventRepository
             return result.FailMe(-1, ex.Message, true);
         }
         scope.Complete();
-        MeetingUserLink linkToResult = null;
+        MeetingUserLink? linkToResult = null;
         if (justCreatorLink)
         {
             linkToResult = l1.Where(x => x.Id == addBy).FirstOrDefault();
@@ -422,7 +411,8 @@ public class EventRepository : IEventRepository
         {
             l1.AddRange(l2);
         }
-        if (receivedMsgs.Any()) result.Message.AddRange(receivedMsgs);
+        if (receivedMsgs.Count != 0)
+            result.Message.AddRange(receivedMsgs);
         result.SuccessMe(addPEvent.Id, Translation.getMessage(lang, "sucsessAdd"), false, APIResult.RESPONSE_CODE.CREATED, justCreatorLink ? linkToResult : l1);
         result.Message.Reverse();
         return result;
@@ -430,7 +420,7 @@ public class EventRepository : IEventRepository
     public async Task<APIResult> AddParticipantsToEvents(List<ParicipantDto> dtos, int eventId, int addBy, string lang, bool sendNotification, bool sendToAll)
     {
         var result = new APIResult();
-        List<Receiver> receivers = new();
+        List<Receiver> receivers = [];
 
         var e = await _DbContext.Events.Where(x => x.Id == eventId).AsNoTracking().FirstOrDefaultAsync();
         if (e == null)
@@ -604,13 +594,13 @@ public class EventRepository : IEventRepository
 
         //bool notifySubParticipant = false;
         List<Models.Event> subEvents = new();
-        Models.Event evt = await _DbContext.Events.Where(a => a.Id == id).FirstOrDefaultAsync();
+        Models.Event? evt = await _DbContext.Events.Where(a => a.Id == id).FirstOrDefaultAsync();
         if (evt == null)
         {
             return result.FailMe(-1, "الحدث غير موجود");
         }
         var originStartDate = evt.StartDate;
-        string newTimeZone = dto.TimeZone != evt.TimeZone ? dto.TimeZone : null;
+        string? newTimeZone = dto.TimeZone != evt.TimeZone ? dto.TimeZone : null;
 
         dateChanged = dto.StartDate.Date != evt.StartDate.Date || dto.EndDate.Date != evt.EndDate.Date;
         minuteChanged = dto.StartDate.TimeOfDay != evt.StartDate.TimeOfDay || dto.EndDate.TimeOfDay != evt.EndDate.TimeOfDay;
@@ -760,7 +750,7 @@ public class EventRepository : IEventRepository
                 }
             }
 
-            List<int?> newParticipant = new();
+            List<int?> newParticipant = [];
             using var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted }, TransactionScopeAsyncFlowOption.Enabled);
             {
                 await _DbContext.SaveChangesAsync();
@@ -805,15 +795,17 @@ public class EventRepository : IEventRepository
                     Mobile = x.Mobile,
                     ParticipantId = x.Id
                 }).ToListAsync();
-                var parameters = new Dictionary<string, string>();
-                parameters[FROM_DATE] = dto.StartDate.ToString("dd-MM-yyyy");
-                parameters[TO_DATE] = dto.EndDate.ToString("dd-MM-yyyy");
-                parameters[FROM_TIME] = dto.StartDate.ToString("hh:mm tt");
-                parameters[TO_TIME] = dto.EndDate.ToString("hh:mm tt");
-                parameters[TOPIC] = dto.Topic;
-                parameters[DESCRIPTION] = dto.Description;
-                parameters[TIMEZONE] = dto.TimeZone;
-                parameters[MEETING_ID] = dto.MeetingId;
+                var parameters = new Dictionary<string, string>
+                {
+                    [FROM_DATE] = dto.StartDate.ToString("dd-MM-yyyy"),
+                    [TO_DATE] = dto.EndDate.ToString("dd-MM-yyyy"),
+                    [FROM_TIME] = dto.StartDate.ToString("hh:mm tt"),
+                    [TO_TIME] = dto.EndDate.ToString("hh:mm tt"),
+                    [TOPIC] = dto.Topic,
+                    [DESCRIPTION] = dto.Description,
+                    [TIMEZONE] = dto.TimeZone,
+                    [MEETING_ID] = dto.MeetingId
+                };
 
                 var notification = await _INotificationSettingRepository.GetNotificationsForAction(actionId, id);
                 var n = await _IParticipantRepository.NotifyParticipants(receivers, evt.MeetingId, notification, parameters, INVITATION_TEMPLATE, true, false);
@@ -846,7 +838,7 @@ public class EventRepository : IEventRepository
             }
             result.SuccessMe(id, /*fixSubEventMsg != string.Empty ? fixSubEventMsg :*/ Translation.getMessage(lang, "sucsessUpdate"));
         }
-        catch (Exception e)
+        catch (Exception)
         {
             result.FailMe(-1, Translation.getMessage(lang, "faildUpdate"));
         }
@@ -855,7 +847,7 @@ public class EventRepository : IEventRepository
     public async Task<int> DeleteEvent(int id)
     {
         int res = 0;
-        Models.Event Event = await _DbContext.Events.Where(a => a.Id == id).FirstOrDefaultAsync();
+        Models.Event? Event = await _DbContext.Events.Where(a => a.Id == id).FirstOrDefaultAsync();
         if (Event == null)
         {
             return res;
@@ -1014,7 +1006,7 @@ public class EventRepository : IEventRepository
 
         return events;
     }
-    public async Task<List<EventFullView>> GetAllOfUser(int userId, EventSearchObject obj = null, bool withRelatedUserEvents = false, string lang = "ar")
+    public async Task<List<EventFullView>> GetAllOfUser(int userId, EventSearchObject? obj = null, bool withRelatedUserEvents = false, string lang = "ar")
     {
         bool applyRelatedEvent = false;
         bool serverSearch = obj != null && obj.HasDateSearch();
@@ -1025,7 +1017,7 @@ public class EventRepository : IEventRepository
         {
             //bool? isEntity = await _DbContext.Users.Where(x => x.Id == userId).Select(x => x.IsEntity).FirstOrDefaultAsync();
             relatedUsers = await _DbContext.Users.Where(u => u.EntityId == userId).Select(u => u.Id).ToListAsync();
-            if (relatedUsers.Any())
+            if (relatedUsers.Count != 0)
             {
                 applyRelatedEvent = true;
                 relatedUsers.Add(userId);
@@ -1045,9 +1037,10 @@ public class EventRepository : IEventRepository
             .Include(x => x.InverseParentEventNavigation)
             .Where(x =>
              //(!serverSearch || (obj.StartDate == null || x.StartDate >= obj.StartDate.Value.Date) && (obj.StartDate == null || x.StartDate < obj.EndDate.Value.AddDays(1).Date)) &&
-             (!serverSearch || (obj.StartDate == null || (x.StartDate >= obj.StartDate.Value.Date && x.StartDate < obj.EndDate.Value.AddDays(1).Date))
-             || (obj.EndDate == null || (x.EndDate > obj.StartDate.Value.Date && x.EndDate <= obj.EndDate.Value.AddDays(1).Date))
-             || (obj.StartDate.Value.Date >= x.StartDate && obj.EndDate.Value.Date <= x.EndDate) 
+             (!serverSearch
+                || (x.StartDate >= obj!.StartDate!.Value.Date && x.StartDate < obj!.EndDate!.Value.AddDays(1).Date)
+                || (x.EndDate > obj.StartDate.Value.Date && x.EndDate <= obj!.EndDate!.Value.AddDays(1).Date)
+                || (obj.StartDate.Value.Date >= x.StartDate && obj!.EndDate!.Value.Date <= x.EndDate)
              
              //|| (obj.Organizer != null && x.Organizer.Contains(obj.Organizer))
              //|| (obj.Participant != null && x.Participants.Select(e => e.User.FullName).Contains(obj.Participant))
@@ -1075,18 +1068,18 @@ public class EventRepository : IEventRepository
                 StartDate = e.StartDate,
                 EndDate = e.EndDate,
                 TimeZone = e.TimeZone,
-                Password = e.Meeting != null ? e.Meeting.Password != null ? e.Meeting.Password : null : null,
-                PasswordReq = e.Meeting != null ? e.Meeting.PasswordReq ? e.Meeting.PasswordReq : false : false,
-                RecordingReq = e.Meeting.RecordingReq != null ? e.Meeting.RecordingReq : false,
-                SingleAccess = e.Meeting.SingleAccess != null ? e.Meeting.SingleAccess : false,
-                AllDay = e.AllDay != null ? (bool)e.AllDay : false,
-                AutoLobby = e.Meeting != null ? e.Meeting.AutoLobby != null ? e.Meeting.AutoLobby : false : false,
+                Password = e.Meeting != null ? (e.Meeting.Password ?? null) : null,
+                PasswordReq = e.Meeting != null && e.Meeting.PasswordReq,
+                RecordingReq = e.Meeting != null && (e.Meeting.RecordingReq ?? false),
+                SingleAccess = e.Meeting != null && (e.Meeting.SingleAccess ?? false),
+                AllDay = e.AllDay != null && (bool)e.AllDay,
+                AutoLobby = e.Meeting != null && (e.Meeting.AutoLobby ?? false),
                 MeetingId = e.MeetingId,
                 Status = e.RecStatus,
                 Type = e.Type,
                 MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, lang, allRooms),
                 MeetingLink = e.MeetingId != null && e.CreatedBy == userId && e.ParentEvent == null ?
-                ((e.Meeting.MeetingLog != null) ? e.Meeting.MeetingLog : Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0") : null,
+                (e.Meeting != null ? e.Meeting.MeetingLog : null) ?? (Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0") : null,
 
                 EGroup = e.EGroup,
                 ParentEventId = e.ParentEvent,
@@ -1096,7 +1089,7 @@ public class EventRepository : IEventRepository
                     Id = p.Id,
                     UserId = p.UserId,
                     FullName = p.User.FullName,
-                    Email = !p.Email.ToLower().StartsWith(INVALID_EMAIL_PREFIX.ToLower()) ? p.Email : string.Empty,
+                    Email = !p.Email.StartsWith(INVALID_EMAIL_PREFIX, StringComparison.OrdinalIgnoreCase) ? p.Email : string.Empty,
                     Mobile = p.Mobile,
                     IsModerator = p.IsModerator,
                     Description = p.Description,
@@ -1105,7 +1098,7 @@ public class EventRepository : IEventRepository
                     GroupIn = p.GroupIn,
                     UserType = p.UserType,
                     //MeetingLink = e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
-                    MeetingLink = (e.Meeting.MeetingLog != null) ? e.Meeting.MeetingLog : e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
+                    MeetingLink = (e.Meeting != null ? e.Meeting.MeetingLog : null) ?? (e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null),
                     PartyId = p.PartyId,
                 }).ToList(),
                 SubEventCount = e.InverseParentEventNavigation != null ? e.InverseParentEventNavigation.Count() : 0,
@@ -1135,7 +1128,7 @@ public class EventRepository : IEventRepository
                 //    }).ToList(),
                 //}).ToList() : null,
             }).ToListAsync();
-        List<int> parentIds = events.Where(e => e.ParentEventId != null).Select(e => (int)e.ParentEventId).Distinct().ToList();
+        List<int> parentIds = events.Where(e => e.ParentEventId != null).Select(e => e.ParentEventId ?? -1).Distinct().ToList();
         var exitingParentIds = events.Where(e => e.SubEventCount > 0).Select(e => e.Id).Distinct().ToList();
         //---------------Show Parent Event Of subEvent THAT Contain cabins-------------------------
         var missedParentEvents = new List<EventFullView>();
@@ -1162,21 +1155,20 @@ public class EventRepository : IEventRepository
                     StartDate = e.StartDate,
                     EndDate = e.EndDate,
                     TimeZone = e.TimeZone,
-                    Password = e.Meeting != null ? e.Meeting.Password != null ? e.Meeting.Password : null : null,
-                    PasswordReq = e.Meeting != null ? e.Meeting.PasswordReq ? e.Meeting.PasswordReq : false : false,
-                    RecordingReq = e.Meeting.RecordingReq != null ? e.Meeting.RecordingReq : false,
-                    SingleAccess = e.Meeting.SingleAccess != null ? e.Meeting.SingleAccess : false,
-                    AllDay = e.AllDay != null ? (bool)e.AllDay : false,
-                    AutoLobby = e.Meeting != null ? e.Meeting.AutoLobby != null ? e.Meeting.AutoLobby : false : false,
+                    Password = e.Meeting != null ? (e.Meeting.Password ?? null) : null,
+                    PasswordReq = e.Meeting != null && e.Meeting.PasswordReq,
+                    RecordingReq = e.Meeting != null && (e.Meeting.RecordingReq ?? false),
+                    SingleAccess = e.Meeting != null && (e.Meeting.SingleAccess ?? false),
+                    AllDay = e.AllDay != null && (bool)e.AllDay,
+                    AutoLobby = e.Meeting != null && (e.Meeting.AutoLobby ?? false),
                     MeetingId = e.MeetingId,
                     Status = e.RecStatus,
                     Type = e.Type,
                     MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, lang, allRooms),
                     //MeetingLink = e.MeetingId != null && e.CreatedBy == userId && e.ParentEvent == null ?
                     //((e.Meeting.MeetingLog != null) ? e.Meeting.MeetingLog : 
-                    MeetingLink = (e.Meeting.MeetingLog != null) ? e.Meeting.MeetingLog : e.MeetingId != null && e.CreatedBy == userId && e.ParentEvent == null ?
-                    //Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0") : null,
-                    Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0" : null,
+                    MeetingLink = e.MeetingId != null && e.CreatedBy == userId && e.ParentEvent == null ?
+                    (e.Meeting != null ? e.Meeting.MeetingLog : null) ?? (Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0") : null,
                     EGroup = e.EGroup,
                     ParentEventId = e.ParentEvent,
                     StatusText = e.RecStatus == null ? string.Empty : EventStatusValue.ContainsKey((EVENT_STATUS)e.RecStatus) ? EventStatusValue[(EVENT_STATUS)e.RecStatus][lang] : string.Empty,
@@ -1185,7 +1177,7 @@ public class EventRepository : IEventRepository
                         Id = p.Id,
                         UserId = p.UserId,
                         FullName = p.User.FullName,
-                        Email = !p.Email.ToLower().StartsWith(INVALID_EMAIL_PREFIX.ToLower()) ? p.Email : string.Empty,
+                        Email = !p.Email.StartsWith(INVALID_EMAIL_PREFIX, StringComparison.OrdinalIgnoreCase) ? p.Email : string.Empty,
                         Mobile = p.Mobile,
                         IsModerator = p.IsModerator,
                         Description = p.Description,
@@ -1194,7 +1186,7 @@ public class EventRepository : IEventRepository
                         GroupIn = p.GroupIn,
                         UserType = p.UserType,
                         //MeetingLink = e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
-                        MeetingLink = (e.Meeting.MeetingLog != null) ? e.Meeting.MeetingLog : e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
+                        MeetingLink = (e.Meeting != null ? e.Meeting.MeetingLog : null) ?? (e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null),
                         PartyId = p.PartyId,
                     }).ToList(),
                     SubEventCount = e.InverseParentEventNavigation != null ? e.InverseParentEventNavigation.Count() : 0,
@@ -1211,24 +1203,24 @@ public class EventRepository : IEventRepository
             }
             e.VideoLogs = await FetchVideoLogs(e.MeetingId, _DbContext, null);
         }
-        if (events != null && events.Any())
+        if (events != null && events.Count > 0)
         {
             if (localSearch)
             {
                 events = events.Where(e =>
-                (string.IsNullOrWhiteSpace(obj.Topic) || e.Topic.ToLower().Contains(obj.Topic.ToLower()))
+                (string.IsNullOrWhiteSpace(obj?.Topic) || e.Topic.Contains(obj.Topic, StringComparison.CurrentCultureIgnoreCase))
                 &&
-                (string.IsNullOrWhiteSpace(obj.SubTopic) || (e.SubTopic != null && e.SubTopic.ToLower().Contains(obj.SubTopic.ToLower())))
+                (string.IsNullOrWhiteSpace(obj?.SubTopic) || (e.SubTopic != null && e.SubTopic.Contains(obj.SubTopic, StringComparison.CurrentCultureIgnoreCase)))
 
 
-             && (string.IsNullOrWhiteSpace(obj.MeetingId) || e.MeetingId.Equals(obj.MeetingId))
-             && (string.IsNullOrWhiteSpace(obj.Organizer) || (e.Organizer != null && e.Organizer.ToLower().Contains(obj.Organizer.ToLower())))
-             && (string.IsNullOrWhiteSpace(obj.Participant) || e.Participants.Select(e => e.FullName.ToLower()).Contains(obj.Participant.ToLower()))
-             && (string.IsNullOrWhiteSpace(obj.Email) || e.Participants.Select(e => e.Email).Contains(obj.Email))
-             && (string.IsNullOrWhiteSpace(obj.Entity) || (e.Organizer != null && e.CreatedByName.Contains(obj.Entity)))
-             && (string.IsNullOrWhiteSpace(obj.PhoneNumber) || e.Participants.Select(e => e.Mobile).Any(p => p.Equals(obj.PhoneNumber)))
+             && (string.IsNullOrWhiteSpace(obj?.MeetingId) || e.MeetingId.Equals(obj.MeetingId))
+             && (string.IsNullOrWhiteSpace(obj?.Organizer) || (e.Organizer != null && e.Organizer.Contains(obj.Organizer, StringComparison.CurrentCultureIgnoreCase)))
+             && (string.IsNullOrWhiteSpace(obj?.Participant) || e.Participants.Select(e => e.FullName.ToLower()).Contains(obj.Participant.ToLower()))
+             && (string.IsNullOrWhiteSpace(obj?.Email) || e.Participants.Select(e => e.Email).Contains(obj.Email))
+             && (string.IsNullOrWhiteSpace(obj?.Entity) || (e.Organizer != null && e.CreatedByName.Contains(obj.Entity)))
+             && (string.IsNullOrWhiteSpace(obj?.PhoneNumber) || e.Participants.Select(e => e.Mobile).Any(p => p.Equals(obj.PhoneNumber)))
 
-             && (obj.EventType == null || e.Type == obj.EventType)
+             && (obj?.EventType == null || e.Type == obj.EventType)
                 ).ToList();
             }
 
@@ -1267,18 +1259,18 @@ public class EventRepository : IEventRepository
             //    events = events.Where(e => e.Participants.Any(p => p!=null && p.FullName.Contains(obj.Participant) || p.Email.ToLower().Contains(obj.Participant.ToLower()))).ToList();
             //}
         }
-        events.AddRange(missedParentEvents);        
-        return events.OrderByDescending(x=>x.StartDate).ToList();
+        events!.AddRange(missedParentEvents);        
+        return [.. events.OrderByDescending(x=>x.StartDate)];
     }
 
-    public async Task<ListCount> GetAll(int CurrentUserId, EventSearchObject obj = null, int pageIndex = 1, int pageSize = 25, string lang = "ar")
+    public async Task<ListCount> GetAll(int CurrentUserId, EventSearchObject? obj = null, int pageIndex = 1, int pageSize = 25, string lang = "ar")
     {
         bool serverSearch = obj != null && obj.HasDateSearch();
         bool localSearch = obj != null && obj.HasStringSearch();
         var host = _IConfiguration["CurrentHostName"];
-        List<int> idsList = new List<int>();
+        List<int> idsList = [];
 
-        var allRooms = await _DbContext.ConfEvents.Where(cv => ((obj.StartDate == null || (cv.EventTime >= obj.StartDate.Value.Date && cv.EventTime < obj.EndDate.Value.AddDays(1).Date)))).ToListAsync();
+        var allRooms = await _DbContext.ConfEvents.Where(cv => obj == null || obj.EndDate == null || obj.StartDate == null || (cv.EventTime >= obj.StartDate.Value.Date && cv.EventTime < obj.EndDate.Value.AddDays(1).Date)).ToListAsync();
 
         var allUsers = await _DbContext.ConfUsers.ToListAsync();
 
@@ -1286,16 +1278,19 @@ public class EventRepository : IEventRepository
          .Include(x => x.Participants).ThenInclude(u => u.User)
          .Include(x => x.Meeting)
              .Include(x => x.InverseParentEventNavigation)
-         .Where(x => (!serverSearch || ((obj.StartDate == null || (x.StartDate >= obj.StartDate.Value.Date && x.StartDate < obj.EndDate.Value.AddDays(1).Date)) || (obj.EndDate == null || (x.EndDate > obj.StartDate.Value.Date && x.EndDate <= obj.EndDate.Value.AddDays(1).Date)) || (obj.StartDate.Value.Date >= x.StartDate && obj.EndDate.Value.Date <= x.EndDate)))
-         && (string.IsNullOrWhiteSpace(obj.Topic) || x.Topic.ToLower().Contains(obj.Topic.ToLower()))
-         && (string.IsNullOrWhiteSpace(obj.Entity) || (x.Organizer != null && x.User.FullName.ToLower().Contains(obj.Entity.ToLower())))
-         && (string.IsNullOrWhiteSpace(obj.SubTopic) || (x.SubTopic != null && x.SubTopic.ToLower().Contains(obj.SubTopic.ToLower())))
-         && (string.IsNullOrWhiteSpace(obj.MeetingId) || x.MeetingId.Equals(obj.MeetingId))
-         && (string.IsNullOrWhiteSpace(obj.Organizer) || (x.Organizer != null && x.Organizer.ToLower().Contains(obj.Organizer.ToLower())))
-         && (string.IsNullOrWhiteSpace(obj.Email) || x.Participants.Select(e => e.Email).Contains(obj.Email))
-         && (string.IsNullOrWhiteSpace(obj.PhoneNumber) || x.Participants.Select(e => e.Mobile).Any(p => p.Equals(obj.PhoneNumber)))
-         && (obj.EventType == null || x.Type == obj.EventType)
-         && (string.IsNullOrWhiteSpace(obj.Participant) || x.Participants.Select(e => e.User.FullName.ToLower()).Contains(obj.Participant.ToLower()))
+         .Where(x => (!serverSearch
+                || (x.StartDate >= obj!.StartDate!.Value.Date && x.StartDate < obj!.EndDate!.Value.AddDays(1).Date)
+                || (x.EndDate > obj.StartDate.Value.Date && x.EndDate <= obj!.EndDate!.Value.AddDays(1).Date)
+                || (obj.StartDate.Value.Date >= x.StartDate && obj!.EndDate!.Value.Date <= x.EndDate))
+         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.Topic) || x.Topic.Contains(obj!.Topic, StringComparison.CurrentCultureIgnoreCase))
+         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.Entity) || (x.Organizer != null && x.User.FullName.Contains(obj!.Entity, StringComparison.CurrentCultureIgnoreCase)))
+         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.SubTopic) || (x.SubTopic != null && x.SubTopic.Contains(obj!.SubTopic, StringComparison.CurrentCultureIgnoreCase)))
+         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.MeetingId) || x.MeetingId.Equals(obj!.MeetingId))
+         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.Organizer) || (x.Organizer != null && x.Organizer.Contains(obj!.Organizer, StringComparison.CurrentCultureIgnoreCase)))
+         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.Email) || x.Participants.Select(e => e.Email).Contains(obj!.Email))
+         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.PhoneNumber) || x.Participants.Select(e => e.Mobile).Any(p => p.Equals(obj!.PhoneNumber)))
+         && (obj == null || obj.EventType == null || x.Type == obj.EventType)
+         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.Participant) || x.Participants.Select(e => e.User.FullName.ToLower()).Contains(obj!.Participant.ToLower()))
          )
          .OrderByDescending(e => e.StartDate)
         .Select(e => new EventFullView
@@ -1313,9 +1308,9 @@ public class EventRepository : IEventRepository
            EndDate = e.EndDate,
            TimeZone = e.TimeZone,
            Password = e.Meeting.Password,
-           PasswordReq = e.Meeting != null ? e.Meeting.PasswordReq ? Convert.ToBoolean(e.Meeting.PasswordReq) : false : false,
-           RecordingReq = e.Meeting.RecordingReq != null ? Convert.ToBoolean(e.Meeting.RecordingReq) : false,
-           SingleAccess = e.Meeting.SingleAccess != null ? Convert.ToBoolean(e.Meeting.SingleAccess) : false,
+           PasswordReq = e.Meeting != null && e.Meeting.PasswordReq,
+           RecordingReq = e.Meeting != null && (e.Meeting.RecordingReq ?? false),
+           SingleAccess = e.Meeting != null && (e.Meeting.SingleAccess ?? false),
            MeetingId = e.MeetingId,
            Status = e.RecStatus,
            Type = e.Type,
@@ -1340,7 +1335,7 @@ public class EventRepository : IEventRepository
        }).ToListAsync();
 
         var total = events.Count;
-        var items = obj.Pagination ? PaginatedList<EventFullView>.Create(events.AsQueryable(), pageIndex > 0 ? pageIndex : 1, pageSize > 0 ? pageSize : 25, total) : events;
+        var items = (obj != null && obj.Pagination) ? PaginatedList<EventFullView>.Create(events.AsQueryable(), pageIndex > 0 ? pageIndex : 1, pageSize > 0 ? pageSize : 25, total) : events;
 
         var parentIds = items.Where(e => e.ParentEventId != null).Select(e => e.ParentEventId).ToHashSet();
         var exitingParentIds = items.Where(e => e.SubEventCount > 0).Select(e => e.Id).ToHashSet();
@@ -1577,7 +1572,7 @@ public class EventRepository : IEventRepository
     public async Task<APIResult> UpdateEventParticipants(ParticipantsAsObj dtos, int eventId, int addBy, string lang, bool sendNotification, bool sendToAll)
     {
 
-        APIResult result = null;
+        APIResult result = new();
         var eventParticipants = await _DbContext.Participants.Where(p => p.EventId == eventId).Select(p => p.Email).ToListAsync();
 
         var newEventParticipants = dtos.Participants.ToList();
@@ -1737,7 +1732,7 @@ public class EventRepository : IEventRepository
         return await _IGeneralRepository.EditLookUpType(value, id, "event_type");
     }
 
-    public async Task<EventFullView> EventDetails(int id, int userId, string timeZoneId)
+    public async Task<EventFullView?> EventDetails(int id, int userId, string timeZoneId)
     {
         var relatedUsers = await _DbContext.Users.Where(u => u.EntityId == userId).Select(u => u.Id).ToListAsync();
         var allRooms = await _DbContext.ConfEvents.ToListAsync();
@@ -1764,9 +1759,9 @@ public class EventRepository : IEventRepository
                 EndDate = e.EndDate,
                 TimeZone = e.TimeZone,
                 Password = e.Meeting.Password,
-                PasswordReq = e.Meeting != null ? e.Meeting.PasswordReq ? Convert.ToBoolean(e.Meeting.PasswordReq) : false : false,
-                RecordingReq = e.Meeting.RecordingReq != null ? Convert.ToBoolean(e.Meeting.RecordingReq) : false,
-                SingleAccess = e.Meeting.SingleAccess != null ? Convert.ToBoolean(e.Meeting.SingleAccess) : false,
+                PasswordReq = e.Meeting != null && e.Meeting.PasswordReq,
+                RecordingReq = e.Meeting != null && (e.Meeting.RecordingReq ?? false),
+                SingleAccess = e.Meeting != null && (e.Meeting.SingleAccess ?? false),
                 MeetingId = e.MeetingId,
                 Status = e.RecStatus,
                 AllDay = e.AllDay,
@@ -1780,7 +1775,7 @@ public class EventRepository : IEventRepository
                     Id = p.Id,
                     UserId = p.UserId,
                     FullName = _DbContext.Users.Where(u => u.Id == p.UserId).Select(x => x.FullName).First(),
-                    Email = !p.Email.ToLower().StartsWith(INVALID_EMAIL_PREFIX.ToLower()) ? p.Email : string.Empty,
+                    Email = !p.Email.StartsWith(INVALID_EMAIL_PREFIX, StringComparison.OrdinalIgnoreCase) ? p.Email : string.Empty,
                     Mobile = p.Mobile,
                     IsModerator = p.IsModerator,
                     Description = p.Description,
@@ -1807,9 +1802,9 @@ public class EventRepository : IEventRepository
                     EndDate = e.EndDate,
                     TimeZone = e.TimeZone,
                     Password = e.Meeting.Password,
-                    PasswordReq = e.Meeting != null ? e.Meeting.PasswordReq ? Convert.ToBoolean(e.Meeting.PasswordReq) : false : false,
-                    RecordingReq = e.Meeting.RecordingReq != null ? Convert.ToBoolean(e.Meeting.RecordingReq) : false,
-                    SingleAccess = e.Meeting.SingleAccess != null ? Convert.ToBoolean(e.Meeting.SingleAccess) : false,
+                    PasswordReq = e.Meeting != null && e.Meeting.PasswordReq,
+                    RecordingReq = e.Meeting != null && (e.Meeting.RecordingReq ?? false),
+                    SingleAccess = e.Meeting != null && (e.Meeting.SingleAccess ?? false),
                     MeetingId = e.MeetingId,
                     Status = e.RecStatus,
                     AllDay = e.AllDay,
@@ -1843,15 +1838,14 @@ public class EventRepository : IEventRepository
             usersId1.Add(e.CreatedBy);
             var userName = _DbContext.Users.Where(u => usersId1.Distinct().Contains(u.Id)).Select(x => new { x.Id, x.FullName }).ToDictionary(x => x.Id, x => x.FullName);
             bool b = false;
-            string v;
-            b = userName.TryGetValue(e.CreatedBy, out v);
-            e.CreatedByName = b ? v : string.Empty;
+            b = userName.TryGetValue(e.CreatedBy, out string? userFullName);
+            e.CreatedByName = b ? userFullName : string.Empty;
             bool isModerator = e.Participants.Where(x => x.UserId == userId).Select(x => x.IsModerator).FirstOrDefault();
             foreach (var par in e.Participants)
             {
                 par.Remind = isModerator && par.UserId != userId ? true : false;
-                b = userName.TryGetValue(par.UserId, out v);
-                par.FullName = b ? v : string.Empty;
+                b = userName.TryGetValue(par.UserId, out userFullName);
+                par.FullName = b ? userFullName : string.Empty;
             }
         }
         return e;
@@ -1871,7 +1865,7 @@ public class EventRepository : IEventRepository
                 UserType = x.UserType,
                 MeetingLink = Url.Combine(host, "join", Url.Combine(x.Id.ToString(), x.Guid.ToString())) + (x.PartyId != null ? "?partyId=" + x.PartyId.ToString() : string.Empty),
             }).ToListAsync();
-            return result.SuccessMe(id, $"عدد الروابط : {links.Count()}", false, APIResult.RESPONSE_CODE.OK, links);
+            return result.SuccessMe(id, $"عدد الروابط : {links.Count}", false, APIResult.RESPONSE_CODE.OK, links);
         }
         catch
         {
@@ -1886,7 +1880,7 @@ public class EventRepository : IEventRepository
         int? group = dates.Count > 0 ? _IGeneralRepository.GetNewValueBySec("egroup_seq") : null;
         if (group != null && group < 0)
         {
-            return null;
+            return [];
         }
         foreach (var d in dates)
         {
@@ -1907,7 +1901,7 @@ public class EventRepository : IEventRepository
 
                 if (meetingResult.Id < 0)
                 {
-                    return null;
+                    return [];
                 }
             }
             eventsList.Add(new EventWParticipant
@@ -1943,7 +1937,7 @@ public class EventRepository : IEventRepository
         }
         using var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted }, TransactionScopeAsyncFlowOption.Enabled);
         var eventsList = await BuildRecurrenceEventsListAsync(dto, rDates.Dates, dto.MeetingRequired, addBy, lang);
-        List<Models.Event> RecurrenceEvents = new();
+        List<Models.Event> RecurrenceEvents = [];
         try
         {
             foreach (var evt in eventsList)
@@ -1973,7 +1967,7 @@ public class EventRepository : IEventRepository
             await _DbContext.SaveChangesAsync();
             var eventsIds = RecurrenceEvents.Select(x => x.Id).ToList();
 
-            if (dto.Participants.Any())
+            if (dto.Participants.Count != 0)
             {
                 var ps = new List<Participant>();
                 var pu = await _IParticipantRepository.ParticipantsAsUser(dto.Participants.Where(d => d.Id == null).ToList(), addBy, lang);
@@ -1991,7 +1985,7 @@ public class EventRepository : IEventRepository
                             Description = p.Description,
                             Email = p.Email,
                             IsModerator = p.IsModerator,
-                            UserId = (int)p.LocalUserId,
+                            UserId = (int)p.LocalUserId!,
                             Mobile = p.Mobile,
                             Note = p.Note,
                             UserType = p.UserType,
@@ -2111,7 +2105,7 @@ public class EventRepository : IEventRepository
     }
 
     public async Task<APIResult> ShiftRecurrenceEvents(int eventId, int updatedBy, DateTime originStartDate, double daysStart, 
-        double daysEnd, double minutsStart, double minutsEnd, string timeZone, UpdateOption opt, bool updateThis = true, string lang = "ar")
+        double daysEnd, double minutsStart, double minutsEnd, string? timeZone, UpdateOption opt, bool updateThis = true, string lang = "ar")
     {
         APIResult result = new();
         var evt = await _DbContext.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
@@ -2171,7 +2165,10 @@ public class EventRepository : IEventRepository
     public async Task<APIResult> Reschedule(int id, MeetingEventDto dto, int updatedBy, string lang)
     {
         APIResult result = new();
-        Models.Event evt = await _DbContext.Events.Where(a => a.Id == id).Include(p => p.Participants).FirstOrDefaultAsync();
+        Models.Event? evt = await _DbContext.Events.Where(a => a.Id == id).Include(p => p.Participants).FirstOrDefaultAsync();
+        if (evt == null)
+            return result.FailMe(-1, "Not found", false, APIResult.RESPONSE_CODE.PageNotFound);
+
         evt.RecStatus = (sbyte?)EVENT_STATUS.RESCHEDULED;
         evt.LastUpdatedBy = updatedBy;
         evt.LastUpdatedDate = DateTime.Now;
@@ -2233,7 +2230,7 @@ public class EventRepository : IEventRepository
         APIResult result = new();
         var receivers = new List<Receiver>();
         var participants = await _DbContext.Participants.Where(x => x.EventId == eventId).AsNoTracking().ToListAsync();
-        if (participants.Any())
+        if (participants.Count != 0)
         {
             foreach (var participant in participants)
                 receivers.Add(new Receiver
@@ -2248,6 +2245,8 @@ public class EventRepository : IEventRepository
                 });
 
             var e = await _DbContext.Events.FindAsync(eventId);
+            if (e == null)
+                return result.FailMe(-1, "Event not found", false, APIResult.RESPONSE_CODE.PageNotFound);
             var parameters = new Dictionary<string, string>
                  {
                    { FROM_DATE, e.StartDate.ToString("dd-MM-yyyy")},
@@ -2328,7 +2327,7 @@ public class EventRepository : IEventRepository
         try
         {
 
-            if (participants.Any())
+            if (participants.Count != 0)
             {
                 foreach (var participant in participants)
                 {
@@ -2492,7 +2491,7 @@ public class EventRepository : IEventRepository
     }
     // Helper functions
     // auth: mikal
-    private async Task<APIResult> MeetingsStatus(DateTimeRange range, int status, string meetingId, string lang)
+    private async Task<APIResult> MeetingsStatus(DateTimeRange range, int status, string? meetingId, string lang)
     {
         APIResult result = new APIResult();
 
@@ -2572,7 +2571,7 @@ public class EventRepository : IEventRepository
         return eventLogs;
     }
 
-    private static async Task<List<RecordingLog>> FetchVideoLogs(string meetingId, OraDbContext dbContext, string timeZoneId)
+    private static async Task<List<RecordingLog>> FetchVideoLogs(string meetingId, OraDbContext dbContext, string? timeZoneId)
     {
         // FIXME: we need meeting_id in table RecordingLogs or at least index for RecordingLogs.RecordingFileName
         var videoRecords = await dbContext.RecordingLogs.Where(rl => rl.RecordingfileName.StartsWith(meetingId)).ToListAsync();

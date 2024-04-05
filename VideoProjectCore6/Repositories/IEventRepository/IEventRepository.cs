@@ -27,7 +27,7 @@ namespace VideoProjectCore6.Repositories.IEventRepository
         Task<EventStatOfMeetings> GetNumOfFutureMeetings(DateTime startDate, DateTime endDate);
 
         Task<APIResult> EventById(string eventId);
-        Task<EventFullView> EventDetails(int id,int userId, string timeZoneId);
+        Task<EventFullView?> EventDetails(int id,int userId, string timeZoneId);
 
         Task<APIResult> EventParticipantLinks(int id, int userId);
 

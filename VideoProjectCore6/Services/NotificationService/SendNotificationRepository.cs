@@ -97,7 +97,7 @@ namespace VideoProjectCore6.Services.NotificationService
             _IFilesUploaderRepository = null;
         }
 
-        public async Task DoSend(List<NotificationLogPostDto> notifications, bool sendImmediately, bool addOrUpdateNotificationslog, string key)
+        public async Task DoSend(List<NotificationLogPostDto> notifications, bool sendImmediately, bool addOrUpdateNotificationslog, string? key)
         {
             int mailChannel = await _DbContext.SysLookupValues.Where(x => x.Shortcut == Constants.NOTIFICATION_MAIL_CHANNEL).Select(x => x.Id).FirstOrDefaultAsync();
             int smsChannel = await _DbContext.SysLookupValues.Where(x => x.Shortcut == Constants.NOTIFICATION_SMS_CHANNEL).Select(x => x.Id).FirstOrDefaultAsync();
@@ -158,7 +158,7 @@ namespace VideoProjectCore6.Services.NotificationService
             }
 
 
-            var res = Con.ExecuteNotifier(sendImmediately, key);
+            var res = Con.ExecuteNotifier(sendImmediately, key ?? "");
 
             try
             {
@@ -518,7 +518,7 @@ namespace VideoProjectCore6.Services.NotificationService
             return ToSendNotification;
         }
         public async Task<List<MeetingUserLink>> FillAndSendNotification(List<NotificationLogPostDto> notifications, List<Receiver> receivers, Dictionary<string, string> Parameters,
-            string meetingId, bool addAppLink, string lang, bool send, bool isDirectInvitation, string cisco = null)
+            string? meetingId, bool addAppLink, string lang, bool send, bool isDirectInvitation, string cisco = null)
         {
 
             List<MeetingUserLink> links = new List<MeetingUserLink>();
