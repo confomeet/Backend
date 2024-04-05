@@ -192,7 +192,7 @@ builder.Services.Configure<ChannelMailFirstSetting>(builder.Configuration.GetSec
 builder.Services.Configure<ChannelSMSSetting>(builder.Configuration.GetSection("ChannelSMSSetting"));
 
 //var Key = Encoding.ASCII.GetBytes("this-is-my-secret-key");
-var Key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
+var Key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]!);
 
 int passFailureMaxCount = 3;
 bool successFailureAttempts = int.TryParse(builder.Configuration["PassworFailureAttempts"], out int passworFailureAttempts);

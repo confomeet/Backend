@@ -125,7 +125,7 @@ namespace VideoProjectCore6.Services.ConfEventService
             try
             {
 
-                ConfEvent confEvent = await toConferenceEvent(prosodyEventPostDto, dateTime);
+                ConfEvent? confEvent = await toConferenceEvent(prosodyEventPostDto, dateTime);
 
                 if (confEvent == null)
                 {
@@ -159,10 +159,10 @@ namespace VideoProjectCore6.Services.ConfEventService
 
         }
 
-        private async Task<ConfEvent> toConferenceEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
+        private async Task<ConfEvent?> toConferenceEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
         {
 
-            ConfEvent confEvent = null;
+            ConfEvent? confEvent = null;
 
             if (prosodyEventPostDto.type.Equals(Constants.PROSODY_EVENT_ROOM_CREATED))
             {
@@ -235,7 +235,7 @@ namespace VideoProjectCore6.Services.ConfEventService
             return null;
         }
 
-        private async Task<ConfEvent> processOccupantLeavingEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
+        private async Task<ConfEvent?> processOccupantLeavingEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
         {
 
             try
@@ -278,7 +278,7 @@ namespace VideoProjectCore6.Services.ConfEventService
             return null;
         }
 
-        private async Task<ConfEvent> processOccupantLeavingLobbyEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
+        private async Task<ConfEvent?> processOccupantLeavingLobbyEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
         {
 
             try
@@ -322,7 +322,7 @@ namespace VideoProjectCore6.Services.ConfEventService
         }
 
 
-        private async Task<ConfEvent> processOccupantJoinedEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
+        private async Task<ConfEvent?> processOccupantJoinedEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
         {
 
             try
@@ -344,17 +344,21 @@ namespace VideoProjectCore6.Services.ConfEventService
                 xDoc.LoadXml(prosodyEventPostDto.message);
 
 
-                XmlNodeList nodeList = xDoc.SelectNodes("./presence");
+                XmlNodeList? nodeList = xDoc.SelectNodes("./presence");
+                if (nodeList == null)
+                    return null;
 
 
                 ConfUser confUser = new ConfUser();
                 confUser.ProsodyId = prosodyEventPostDto.from;
                 confUser.ConfTime = DateTime.Now;
 
+                var eventClaims = nodeList.Item(0);
+                if (eventClaims == null)
+                    return null;
 
-                foreach (XmlNode node in nodeList.Item(0))
+                foreach (XmlNode node in eventClaims!)
                 {
-
                     if (node.Name.Equals("stats-id"))
                     {
                         confUser.ConfId = node.InnerText;
@@ -413,7 +417,7 @@ namespace VideoProjectCore6.Services.ConfEventService
         }
 
 
-        private ConfEvent processRoomCreatedEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
+        private ConfEvent? processRoomCreatedEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
         {
             try
             {
@@ -477,13 +481,9 @@ namespace VideoProjectCore6.Services.ConfEventService
 
               && c.MeetingId.ToString().Equals(pId)
 
-              && c.ConfId.Equals(meetingID) && !confEvents.Contains(
-                  
-                  confEvents.Where(p => p.EventType == 5 && p.MeetingId == c.MeetingId
-              && p.ConfId.Equals(c.ConfId) && c.UserId.Equals(p.UserId) && c.EventTime < p.EventTime).FirstOrDefault())
-              
-              
-              ).ToList();
+              && c.ConfId.Equals(meetingID)
+              && confEvents.Where(p => p.EventType == 5 && p.MeetingId == c.MeetingId && p.ConfId.Equals(c.ConfId) && c.UserId.Equals(p.UserId) && c.EventTime < p.EventTime).FirstOrDefault() != null
+            ).ToList();
 
 
             var confUsers = _DbContext.ConfUsers.ToList();
@@ -610,11 +610,13 @@ namespace VideoProjectCore6.Services.ConfEventService
 
             foreach(ConfEvent ev in openRooms)
             {
-                if(names.Contains(ev.ConfId) && (ev.EventType == 4) && 
-                    !openRooms.Contains(openRooms.OrderByDescending(x=>x.Id).FirstOrDefault(x => (x.EventType == 2 || x.EventType == 5)
-                    && x.ConfId.Equals(ev.ConfId))))
+                if(names.Contains(ev.ConfId) && (ev.EventType == 4))
                 {
-                    activeRooms.Add(ev);
+                    var lastEventInConf = openRooms.OrderByDescending(x=>x.Id).FirstOrDefault(
+                            x => (x.EventType == 2 || x.EventType == 5) && x.ConfId.Equals(ev.ConfId)
+                        );
+                    if (lastEventInConf != null)
+                        activeRooms.Add(ev);
                 }
             }
 
@@ -675,12 +677,12 @@ namespace VideoProjectCore6.Services.ConfEventService
                 StartDate = e.StartDate,
                 EndDate = e.EndDate,
                 TimeZone = e.TimeZone,
-                Password = e.Meeting != null ? e.Meeting.Password != null ? e.Meeting.Password : null : null,
-                PasswordReq = e.Meeting != null ? e.Meeting.PasswordReq ? e.Meeting.PasswordReq : false : false,
-                RecordingReq = e.Meeting.RecordingReq != null ? e.Meeting.RecordingReq : false,
-                SingleAccess = e.Meeting.SingleAccess != null ? e.Meeting.SingleAccess : false,
-                AllDay = e.AllDay != null ? (bool)e.AllDay : false,
-                AutoLobby = e.Meeting != null ? e.Meeting.AutoLobby != null ? e.Meeting.AutoLobby : false : false,
+                Password = e.Meeting != null ? (e.Meeting.Password ?? null) : null,
+                PasswordReq = e.Meeting != null && e.Meeting.PasswordReq,
+                RecordingReq = e.Meeting != null && (e.Meeting.RecordingReq ?? false),
+                SingleAccess = e.Meeting != null && (e.Meeting.SingleAccess ?? false),
+                AllDay = e.AllDay != null && (bool)e.AllDay,
+                AutoLobby = e.Meeting != null && (e.Meeting.AutoLobby ?? false),
                 MeetingId = e.MeetingId,
                 Status = e.RecStatus,
                 Type = e.Type,

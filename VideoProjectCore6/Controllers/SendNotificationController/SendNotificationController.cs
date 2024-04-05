@@ -26,12 +26,5 @@ namespace VideoProjectCore6.Controllers.SendNotificationController
             var result = await _ISendNotificationRepository.SendOTP((int)user.Id, user.Mobile, user.Email,  eventId,  lang);
             return result ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
         }
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("VerifyOTP")]
-        public async Task<ActionResult> VerifyOTP(int userId, [FromQuery] string otp, [FromHeader] string lang = "ar")
-        {
-            var result = await _ISendNotificationRepository.VerifyOTP(userId, otp, lang);
-            return result.Id>0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
-        }
     }
 }

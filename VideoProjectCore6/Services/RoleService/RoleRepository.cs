@@ -100,7 +100,7 @@ namespace VideoProjectCore6.Services.RoleService
         public async Task<int> UpdateRole(RolePostDto rolePostDto, int roleId, string lang)
         {
             int res = 0;
-            Role originalRole = await _OraDBContext.Roles.Where(a => a.Id == roleId).FirstOrDefaultAsync();
+            Role? originalRole = await _OraDBContext.Roles.Where(a => a.Id == roleId).FirstOrDefaultAsync();
             if (originalRole == null)
             {
                 return res;
@@ -130,6 +130,7 @@ namespace VideoProjectCore6.Services.RoleService
             {
                 // _exception.AttributeMessages.Add(Constants.getMessage(lang, "RoleNotFound"));
                 // throw _exception;
+                return await Task.FromResult(IdentityResult.Failed());
             }
 
             if (role.Name == Constants.AdminPolicy || role.Name == Constants.EmployeePolicy || role.Name == Constants.DefaultUserPolicy || role.Name == Constants.DefaultVisitorPolicy)
@@ -145,7 +146,8 @@ namespace VideoProjectCore6.Services.RoleService
             }
 
             using TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-            await _iGeneralRepository.DeleteTranslation(role.Name);
+            if (role.Name != null)
+                await _iGeneralRepository.DeleteTranslation(role.Name);
             var result = await _roleManager.DeleteAsync(role);
             scope.Complete();
             return result;
@@ -157,6 +159,8 @@ namespace VideoProjectCore6.Services.RoleService
             List<RoleGetDto> roles = new List<RoleGetDto>();
             foreach (var role in _roleManager.Roles.ToList())
             {
+                if (string.IsNullOrWhiteSpace(role.Name))
+                    continue;
                 var LangValue = await _iGeneralRepository.getTranslationsForShortCut(role.Name);
                 RoleGetDto roleDTO = new RoleGetDto()
                 {
@@ -285,11 +289,14 @@ namespace VideoProjectCore6.Services.RoleService
             List<string> oldNames = new List<string>();
             foreach (var name in names)
             {
-                var trans = await _iGeneralRepository.getTranslationsForShortCut(name);
-                oldNames.AddRange(trans.Values.ToList());
+                if (name != null)
+                {
+                    var trans = await _iGeneralRepository.getTranslationsForShortCut(name);
+                    oldNames.AddRange(trans.Values.ToList());
+                }
             }
 
-            if (oldNames.Intersect(newNames).Count() > 0)
+            if (oldNames.Intersect(newNames).Any())
             {
                 return true;
             }

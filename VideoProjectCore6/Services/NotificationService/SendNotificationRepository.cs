@@ -47,7 +47,7 @@ namespace VideoProjectCore6.Services.NotificationService
         private readonly ILogger<SendNotificationRepository>? _logger;
         private readonly ILogger<MeetingRepository>? _loggerM;
         private readonly IGeneralRepository _generalRepository;
-        private readonly IConfiguration? _configuration;
+        private readonly IConfiguration _configuration;
         private readonly IUserRepository? _iUserRepository;
 
 
@@ -179,7 +179,7 @@ namespace VideoProjectCore6.Services.NotificationService
                 {
                     await SendMailToAdmin(adminUser.Id, "dangerous error in notification log job resend " + ex.Message);
                 }*/
-                _logger.LogInformation(" Error important ****************************** needs admin in  DoSend is : " + ex.ToString());
+                _logger?.LogInformation(" Error important ****************************** needs admin in  DoSend is : " + ex.ToString());
             }
         }
 
@@ -216,7 +216,7 @@ namespace VideoProjectCore6.Services.NotificationService
                 notificationsDto.Add(NotificationLogPostDto.GetDto(fail));
             }
 
-            _logger.LogInformation("call resend for " + notificationsDto.Count + " notifications " + " on channel" + channelName + $"{DateTime.Now:hh:mm:ss} ============");
+            _logger?.LogInformation("call resend for " + notificationsDto.Count + " notifications " + " on channel" + channelName + $"{DateTime.Now:hh:mm:ss} ============");
             await DoSend(notificationsDto, true, false, null);
         }
         public async Task<bool> SendOTP(int userId, string mobile, string email, int eventId, string lang)
@@ -227,14 +227,14 @@ namespace VideoProjectCore6.Services.NotificationService
 
                 if (_configuration["OtpPeriodInMinutes"] == null)
                 {
-                    _logger.LogInformation("Warning!!! OtpPeriodInMinutes is missing");
+                    _logger?.LogInformation("Warning!!! OtpPeriodInMinutes is missing");
                 }
                 else
                 {
                     bool success = int.TryParse(_configuration["OtpPeriodInMinutes"], out int settingPeriod);
                     if (!success || settingPeriod < 1)
                     {
-                        _logger.LogInformation("Warning OtpPeriodInMinutes is invalid number or < 1 minute");
+                        _logger?.LogInformation("Warning OtpPeriodInMinutes is invalid number or < 1 minute");
                     }
                     else
                     {
@@ -358,65 +358,9 @@ namespace VideoProjectCore6.Services.NotificationService
             }
             catch (Exception ex)
             {
-                _logger.LogInformation("Error in generate OTP " + ex.Message);
+                _logger?.LogInformation("Error in generate OTP " + ex.Message);
                 return false;
             }
-        }
-
-        public async Task<APIResult> VerifyOTP(int userId, string number, string lang)
-        {
-            APIResult result = new();
-            int otpPeriodInMinutes = Constants.OTP_PERIOD_If_MISSED_IN_APP_SETTING;
-
-            if (_configuration["OtpPeriodInMinutes"] == null)
-            {
-                _logger.LogInformation("Warning!!! OtpPeriodInMinutes is missing");
-            }
-            else
-            {
-                bool success = int.TryParse(_configuration["OtpPeriodInMinutes"], out int settingPeriod);
-                if (!success || settingPeriod < 1)
-                {
-                    _logger.LogInformation("Warning OtpPeriodInMinutes is invalid number or < 1 minute");
-                }
-                else
-                {
-                    otpPeriodInMinutes = settingPeriod;
-                }
-            }
-
-            var lastOtp = await _DbContext.OtpLogs.Where(x => x.UserId == userId).FirstOrDefaultAsync();
-            if (lastOtp == null || lastOtp.GeneratedDate.AddMinutes(otpPeriodInMinutes) < DateTime.Now)
-            {
-                return result.FailMe(-1, Translation.getMessage(lang, "ExpiredOTP"));
-                //_exception.AttributeMessages.Add(Translation.getMessage(lang, "ExpiredOTP"));
-                //throw _exception;
-            }
-
-            if (lastOtp.OtpCode.Trim() != number.Trim())
-            {
-                return result.FailMe(-1, Translation.getMessage(lang, "IncorrectOTP"));
-                //_exception.AttributeMessages.Add(Translation.getMessage(lang, "IncorrectOTP"));
-                //throw _exception;
-            }
-            return result.SuccessMe(1);
-            // LogInResultDto logInResultDto = new LogInResultDto();
-
-            //var user = _DbContext.Users.Where(x => x.Id == userId).FirstOrDefault();
-
-            //if (user == null)
-            //{
-            //    return logInResultDto;
-            //}
-
-            //LogInDtoLocal userDto = new()
-            //{
-            //    Email = user.Email,
-            //    PassWord = "VerfiyByOTP"
-            //};
-
-            //logInResultDto = await _iUserRepository.VisitorSignIn(userDto, lang);
-            //return logInResultDto;
         }
 
         public async Task SendMailToAdmin(int userId, string extraText)
@@ -428,7 +372,7 @@ namespace VideoProjectCore6.Services.NotificationService
             {
                 try
                 {
-                    var addr = new System.Net.Mail.MailAddress(_configuration["SupportEmail"]);
+                    var addr = new System.Net.Mail.MailAddress(_configuration["SupportEmail"]!);
                     adminEmail = addr.Address;
                 }
                 catch
@@ -523,7 +467,7 @@ namespace VideoProjectCore6.Services.NotificationService
 
             List<MeetingUserLink> links = new List<MeetingUserLink>();
             MeetingRepository m = new MeetingRepository(_DbContext, _exception, _loggerM, _IFilesUploaderRepository, _configuration, _iUserRepository);
-            string host = _configuration["CurrentHostName"], meetingLink;
+            string host = _configuration["CurrentHostName"]!, meetingLink;
             List<string> meetingLinks = new List<string>();
             if (Parameters != null)
             {
@@ -539,13 +483,6 @@ namespace VideoProjectCore6.Services.NotificationService
                 {
                     foreach (Receiver r in receivers)
                     {
-
-                        JoinData data = null;
-                        if (!string.IsNullOrEmpty(r.Email))
-                        {
-                            data = new JoinData { Email = r.Email, Name = r.Name };
-                        }
-
                         var g = await _DbContext.Participants.Where(p => p.Id == r.ParticipantId).Select(p => p.Guid).FirstOrDefaultAsync();
 
                         if (isDirectInvitation)
@@ -612,59 +549,6 @@ namespace VideoProjectCore6.Services.NotificationService
 
         }
 
-        public async Task<APIResult> InvokeSMSService(SMSDto sms)
-        {
-            Console.WriteLine("TESTTEST", sms);
-
-            APIResult res = new APIResult();
-            using var client = new HttpClient();
-            string url = _configuration["SMSEndPoint"];
-            if (url == null)
-            {
-                return res.FailMe(-1, "SMS endpoint url not provided ");
-            }
-            string json = string.Empty;
-            try
-            {
-                json = JsonConvert.SerializeObject(sms);
-                if (json == string.Empty)
-                {
-                    return res.FailMe(-1, "Empty object");
-                }
-            }
-            catch (Exception ex)
-            {
-                return res.FailMe(-1, ex.Message);
-            }
-            var data = new StringContent(json, Encoding.UTF8, "application/json");
-            HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
-            try
-            {
-                httpResponseMessage = await client.PostAsync(url, data);
-                if (httpResponseMessage == null)
-                {
-                    return res.FailMe(-1, "connection error");
-                }
-            }
-            catch (HttpRequestException ex)
-            {
-                return res.FailMe(-1, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return res.FailMe(-1, ex.Message);
-            }
-
-            string result = await httpResponseMessage.Content.ReadAsStringAsync();
-            SMSResult s = JsonConvert.DeserializeObject<SMSResult>(result);
-
-            res.Id = s.pCode == 200 ? 1 : -1;
-            res.Code = s.pCode == 200 ? APIResult.RESPONSE_CODE.OK : APIResult.RESPONSE_CODE.BadRequest;
-            res.Message.Add(s.pStatus);
-            return res;
-        }
-
-        
         public async Task<APIResult> SendOTPCode(int userId, string otpCode, string mobile, string email, string lang)
         {
             APIResult result = new APIResult();
