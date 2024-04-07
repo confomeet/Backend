@@ -80,7 +80,6 @@ namespace VideoProjectCore6.Repositories.IMeetingRepository
         /// <returns>true if exist otherwise false</returns>
         Task<bool> IfExistMeeting(string meetingId);
 
-        Task GetMeetingLogger();
         Task<APIResult> MeetingJWT(int participantId,Guid guid,int? userId,List<Attendee> attendees , string lang);
         Task<object> MeetingJWT(string meetingId, int? userId,JoinData user,  string lang);
         /// <summary>
@@ -89,8 +88,6 @@ namespace VideoProjectCore6.Repositories.IMeetingRepository
         /// <param name="orderNo">the number of the order</param>
         /// <returns></returns>
         Task<List<MeetingGetDto>> GetMeetingByOrderNo(int orderNo);
-
-        Task<bool> ChangeMeetingStatusBackToPendingByAppId(int applicationId);
 
         Task<IsAttended> IsAttendedByAppNo(int orderNo);
 

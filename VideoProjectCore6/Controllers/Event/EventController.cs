@@ -39,12 +39,6 @@ namespace VideoProjectCore6.Controllers.Event
             return Ok(await _IEventRepository.AddMeetingEvent(dto, _IUserRepository.GetUserID(), true, lang));
         }
 
-        /* [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-         [HttpPost("MeetingEvent")]
-         public async Task<ActionResult> AddMeetingEvent([FromBody] EventPostDto dto, [FromHeader] string lang = "ar")
-         {
-             return Ok(await _IEventRepository.AddMeetingEvent(dto, _IUserRepository.GetUserID(), lang));
-         }*/
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet()]
         public async Task<ActionResult> GetLocal([FromHeader] string lang = "ar")

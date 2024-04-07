@@ -61,36 +61,6 @@ namespace VideoProjectCore6.Services.Meeting
             _iUserRepository = iUserRepository;
         }
 
-
-        public async Task<APIResult> AddMeeting(EventPostDto dto, int addBy, string lang)
-        {
-            APIResult result = new APIResult();
-            ValidateMeeting(dto, lang);
-            Models.Event meetingEvent = dto.GetEntity();
-            meetingEvent.CreatedBy = addBy;
-            meetingEvent.CreatedDate = DateTime.Now;
-            int meetingId = GetNewValueByMeetingSec();
-            int sumDigits = 0;
-            int temp = meetingId;
-            while (temp > 0)
-            {
-                sumDigits += temp % 10;
-                temp /= 10;
-            }
-            sumDigits %= 100;
-            meetingEvent.MeetingId = sumDigits < 10 ? meetingId.ToString() + "0" + sumDigits.ToString() : meetingId.ToString() + sumDigits.ToString();
-            try
-            {
-                await _DbContext.Events.AddAsync(meetingEvent);
-                await _DbContext.SaveChangesAsync();
-                return result.SuccessMe(meetingEvent.Id, "Meeting created", true, APIResult.RESPONSE_CODE.CREATED, meetingEvent.MeetingId);
-            }
-            catch
-            {
-                return result.FailMe(-1, "Error adding meeting");
-            }
-        }
-
         public async Task<APIResult> AddMeeting(MeetingPostDto dto, int addBy, string lang)
         {
             APIResult result = new APIResult();
@@ -345,30 +315,6 @@ namespace VideoProjectCore6.Services.Meeting
                 receivers.Add(new Receiver(email));
             }
             var a = await _ISendNotificationRepository.FillAndSendNotification(notifications_, receivers, null, meetingId, true, "ar", true, false);
-            return true;
-        }
-
-        public async Task<bool> ChangeMeetingStatusBackToPendingByAppId(int applicationId)
-        {
-            var originalMeetingList = await _DbContext.Meetings.Where(a => a.EventId == applicationId).ToListAsync();
-            foreach (var originalMeeting in originalMeetingList)
-            {
-                if (originalMeeting == null || originalMeeting.Status == (int)Constants.MEETING_STATUS.FINISHED || originalMeeting.Status == (int)Constants.MEETING_STATUS.PENDING)
-                {
-                    continue;
-                }
-
-                originalMeeting.LastUpdatedBy = _iUserRepository.GetUserID();
-                originalMeeting.LastUpdatedDate = DateTime.Now;
-                originalMeeting.Status = (int)Constants.MEETING_STATUS.PENDING;
-                _DbContext.Meetings.Update(originalMeeting);
-                await _DbContext.SaveChangesAsync();
-
-                // TODO later from lilac.
-                var deleteLogging = await _DbContext.MeetingLoggings.Where(a => a.MeetingId == originalMeeting.Id).ToListAsync();
-                _DbContext.MeetingLoggings.RemoveRange(deleteLogging);
-                await _DbContext.SaveChangesAsync();
-            }
             return true;
         }
 
@@ -877,84 +823,7 @@ namespace VideoProjectCore6.Services.Meeting
             }
             return true;
         }
-        public async Task GetMeetingLogger()
-        {
-            try
-            {
-                var allMeet = await _DbContext.Meetings.Where(x => x.Status == (int)Constants.MEETING_STATUS.FINISHED && x.MeetingLog == null).ToListAsync();
 
-                if (allMeet == null || allMeet.Count == 0)
-                {
-                    return;
-                }
-
-                HttpClientHandler clientHandler = new HttpClientHandler()
-                {
-                    ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
-                };
-
-                string confUrlPrefix = _IConfiguration["Meeting:host"];
-                if (confUrlPrefix == null || confUrlPrefix.Length == 0)
-                {
-                    throw _exception;
-                }
-
-                string confUrlPrefixLog = _IConfiguration["CONF_URL_PREFIX_LOG"];
-                if (confUrlPrefixLog == null || confUrlPrefixLog.Length == 0)
-                {
-                    throw _exception;
-                }
-
-                string confUrlAPIGetLog = _IConfiguration["CONF_URL_API_GET_LOG"];
-                if (confUrlAPIGetLog == null || confUrlAPIGetLog.Length == 0)
-                {
-                    throw _exception;
-                }
-
-                HttpClient client = new HttpClient(clientHandler);
-                client.DefaultRequestHeaders.Host = confUrlPrefixLog;
-
-                int failed = 0;
-                int success = 0;
-                foreach (var meet in allMeet)
-                {
-                    var response = await client.GetAsync(String.Format(confUrlAPIGetLog, meet));
-
-                    // ensure the request was a success
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        meet.MeetingLog = "failed in getting log";
-                        failed++;
-                    }
-                    else
-                    {
-                        meet.MeetingLog = await response.Content.ReadAsStringAsync();
-                        success++;
-                    }
-                    _DbContext.Meetings.Update(meet);
-                    await _DbContext.SaveChangesAsync();
-                }
-
-                _iLogger.LogInformation(" GetMeetingLogger success is : " + success.ToString() + " failed records count is : " + failed.ToString());
-            }
-
-            catch (Exception ex)
-            {
-                _iLogger.LogInformation("error in GetMeetingLogger : " + ex.Message.ToString());
-                return;
-            }
-
-            /* TODO load the string logger to JSON Object to trace users.
-             var stream2 = await response.Content.ReadAsStringAsync();
-             var content = JsonConvert.DeserializeObject<ConferenceLogger>(stream2);
-            // serialize JSON directly to a file
-            using (StreamWriter file = File.CreateText(@"c:\movie.json"))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                serializer.Serialize(file, content);
-            }
-            */
-        }
         private APIResult ValidateMeeting(MeetingPostDto dto, string lang)
         {
             APIResult result = new APIResult();
@@ -970,23 +839,6 @@ namespace VideoProjectCore6.Services.Meeting
                 result.Message.Add(Translation.getMessage(lang, "wrongParameter"));
                 return result;
             }
-            return result.SuccessMe(1);
-        }
-        private APIResult ValidateMeeting(EventPostDto dto, string lang)
-        {
-            APIResult result = new APIResult();
-            if (dto.EndDate < dto.StartDate)
-            {
-                result.Message.Add(Translation.getMessage(lang, "ErrorEventDate"));
-                return result;
-            }
-
-            //byte? status = dto.Status;
-            //if (!Enum.IsDefined(typeof(Constants.MEETING_STATUS), status))
-            //{
-            //    result.Message.Add(Translation.getMessage(lang, "wrongParameter"));
-            //    return result;
-            //}
             return result.SuccessMe(1);
         }
 

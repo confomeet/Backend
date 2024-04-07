@@ -113,15 +113,6 @@ namespace VideoProjectCore6.Controllers.Meeting
             return Ok(obj);
         }
 
-
-        [HttpPost("GetMeetingLogger")]
-        public async Task<IActionResult> GetMeetingLogger()
-        {
-            await _IMeetingRepository.GetMeetingLogger();
-            return Ok(true);
-        }
-
-
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("Join")]
         public async Task<IActionResult> moderatorJWT(string meetingId, [FromHeader] string lang)
