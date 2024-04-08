@@ -30,7 +30,7 @@ namespace VideoProjectCore6.Services.Statistics
 
         private readonly IGeneralRepository _IGeneralRepository = iGeneralRepository;
 
-        public async Task<List<ValueIdDesc>> EventsByApp(DateTimeRange range, string lang)
+        public async Task<List<ValueIdDesc>> ByApp(DateTimeRange range)
         {
             var eventSum = await _DbContext.Events
                 .Where(e => e.MeetingId != null && e.AppId != null && e.CreatedDate > range.StartDateTime.Date && e.CreatedDate < range.EndDateTime.AddDays(1).Date)
@@ -48,8 +48,11 @@ namespace VideoProjectCore6.Services.Statistics
             return eventSum;
         }
 
-        public async Task<List<ValueIdDesc>> ActiveRooms(DateTimeRange range)
+        public async Task<List<ValueIdDesc>> ByMeetingStatus(DateTimeRange range)
         {
+            if (range.EndDateTime < range.StartDateTime)
+                return [];
+
             var now = DateTime.UtcNow;
 
             // We likely can hold 10^7 records of RelevangConfEvent in memory
@@ -121,54 +124,46 @@ namespace VideoProjectCore6.Services.Statistics
             return result;
         }
 
-        public async Task<ListCount> UsersByStatus(DateTimeRange range, string lang)
+        public async Task<ListCount> ByOnlineUsers(DateTimeRange range)
         {
-            // var events = await _DbContext.Events.Include(x => x.Participants).Where(e => e.CreatedDate > range.StartDateTime.Date && e.CreatedDate < range.EndDateTime.AddDays(1).Date).ToListAsync();
+            if (range.EndDateTime < range.StartDateTime)
+            {
+                return new ListCount
+                {
+                    Count = 0,
+                    Items = new List<object>()
+                };
+            }
 
-            // List<EventActiveUsers> listActiveUser = new List<EventActiveUsers>();
+            var events = await _DbContext.Events.Include(x => x.Participants).Where(e => e.StartDate <= range.EndDateTime && e.EndDate >= range.EndDateTime).ToListAsync();
 
-            
-            // foreach(var ev in events)
-            // {
+            List<EventActiveUsers> listActiveUser = [];
 
-            //     var singleRoomActiveUsers = await _IConfEventRepository.handleGetRoom(range, ev.Id.ToString(), ev.MeetingId, lang);
+            foreach(var ev in events)
+            {
 
-            //     EventActiveUsers eventActiveUsers = new EventActiveUsers
-            //     {
-            //         MeetingId = ev.MeetingId,
-            //         Topic = ev.Topic,
-            //         AllParticipants = ev.Participants.Count,
-            //         OnlineParticipants = (singleRoomActiveUsers == null 
-            //         || singleRoomActiveUsers.Id == -1)  ? 0 : singleRoomActiveUsers.Result.Count
-            //     };
+                var singleRoomActiveUsers = await _IConfEventRepository.handleGetRoom(range, ev.Id.ToString(), ev.MeetingId);
 
-
-            //     if(eventActiveUsers.OnlineParticipants > 0)
-            //     {
-            //         listActiveUser.Add(eventActiveUsers);
-            //     }
-            // }
-
-            List<EventActiveUsers> items =
-            [
-                new() {MeetingId = "10", Topic = "topic10", AllParticipants = 15, OnlineParticipants = 2},
-                new() {MeetingId = "20", Topic = "topic20", AllParticipants = 5, OnlineParticipants = 4},
-                new() {MeetingId = "30", Topic = "topic30", AllParticipants = 10, OnlineParticipants = 10},
-
-                new() {MeetingId = "40", Topic = "topic40", AllParticipants = 7, OnlineParticipants = 6},
-                new() {MeetingId = "50", Topic = "topic50", AllParticipants = 3, OnlineParticipants = 1},
-                new() {MeetingId = "60", Topic = "topic60", AllParticipants = 5, OnlineParticipants = 3},
+                EventActiveUsers eventActiveUsers = new()
+                {
+                    MeetingId = ev.MeetingId,
+                    Topic = ev.Topic,
+                    AllParticipants = ev.Participants.Count,
+                    OnlineParticipants = (singleRoomActiveUsers == null
+                    || singleRoomActiveUsers.Id == -1)  ? 0 : singleRoomActiveUsers.Result.Count
+                };
 
 
-                new() {MeetingId = "70", Topic = "topic70", AllParticipants = 5, OnlineParticipants = 1},
-                new() {MeetingId = "80", Topic = "topic80", AllParticipants = 5, OnlineParticipants = 3},
-                new() {MeetingId = "90", Topic = "topic90", AllParticipants = 11, OnlineParticipants = 7},
-            ];
+                if(eventActiveUsers.OnlineParticipants > 0)
+                {
+                    listActiveUser.Add(eventActiveUsers);
+                }
+            }
 
             return new ListCount
             {
-                Count = items.Count,
-                Items = items
+                Count = listActiveUser.Count,
+                Items = listActiveUser
             };
 
         }
@@ -217,7 +212,7 @@ namespace VideoProjectCore6.Services.Statistics
             return res;
         }
 
-        public class RelevantConfEvent
+        private class RelevantConfEvent
         {
             public DateTime MeetingStartTime;
             public string MeetingId = string.Empty;

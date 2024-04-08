@@ -15,7 +15,7 @@ namespace VideoProjectCore6.Repositories.IConfEventRepository
         Task<APIResult> addConfEvent(ConfEventPostDto confEventPostDto,string lang);
         Task<APIResult> addProsodyEvent(ProsodyEventPostDto prosodyEventPostDto, IHubContext<EventHub> HubContext);
 
-        Task<APIResult> handleGetRoom(DateTimeRange range, string pId, string meetingID, string lang);
+        Task<APIResult> handleGetRoom(DateTimeRange range, string pId, string meetingID);
 
         Task<APIResult> handleListRoom(string lang);
 

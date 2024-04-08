@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.Repositories.IConfEventRepository;
 using VideoProjectCore6.Repositories.IStatisticsRepository;
@@ -12,29 +13,30 @@ namespace VideoProjectCore6.Controllers.Statistics
     public class StatisticsController : ControllerBase
     {
         private readonly IStatisticsRepository _IStatisticsRepository;
-        private readonly IUserRepository _IUserRepository;
-        public StatisticsController(IStatisticsRepository iStatisticsRepository, IUserRepository iUserRepository)
+        public StatisticsController(IStatisticsRepository iStatisticsRepository)
         {
             _IStatisticsRepository = iStatisticsRepository;
-            _IUserRepository = iUserRepository;
         }
-       
+
         [HttpPost("EvensByApp")]
-        public async Task<IActionResult> EvensByApp([FromBody] DateTimeRange range, [FromHeader] string lang)
+        [Authorize]
+        public async Task<IActionResult> ByApp([FromBody] DateTimeRange range)
         {
-            return Ok(await _IStatisticsRepository.EventsByApp(range,  lang));
+            return Ok(await _IStatisticsRepository.ByApp(range));
         }
 
         [HttpPost("UsersByStatus")]
-        public async Task<IActionResult> ActiveUsers([FromBody] DateTimeRange range, [FromHeader] string lang = "ar")
+        [Authorize]
+        public async Task<IActionResult> ByOnlineUsers([FromBody] DateTimeRange range)
         {
-            return Ok(await _IStatisticsRepository.UsersByStatus(range, lang));
+            return Ok(await _IStatisticsRepository.ByOnlineUsers(range));
         }
 
         [HttpPost("EventsByStatus")]
-        public async Task<IActionResult> ActiveRooms([FromBody] DateTimeRange range, [FromHeader] string lang)
+        [Authorize]
+        public async Task<IActionResult> ByMeetingStatus([FromBody] DateTimeRange range)
         {
-            return Ok(await _IStatisticsRepository.ActiveRooms(range));
+            return Ok(await _IStatisticsRepository.ByMeetingStatus(range));
         }
 
     }

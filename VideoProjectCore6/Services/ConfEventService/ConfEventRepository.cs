@@ -456,7 +456,7 @@ namespace VideoProjectCore6.Services.ConfEventService
         /// <param name="lang"></param>
         /// 
         /// <returns>Active users depending on the id and meeting id of the room</returns>
-        public async Task<APIResult> handleGetRoom(DateTimeRange range, string pId, string meetingID, string lang)
+        public async Task<APIResult> handleGetRoom(DateTimeRange range, string pId, string meetingID)
         {
             APIResult res = new APIResult();
 

@@ -59,7 +59,7 @@ namespace VideoProjectCore6.Controllers.ConfEvent
         [HttpGet("room/{meetingId}/{id}")]
         public async Task<ActionResult> GetParticipantsByRoom([FromBody] DateTimeRange range, [FromRoute] string meetingId, [FromRoute] string id, [FromHeader] string lang = "ar")
         {
-            return Ok(await _IConfEventRepository.handleGetRoom(range, id, meetingId, lang));
+            return Ok(await _IConfEventRepository.handleGetRoom(range, id, meetingId));
         }
 
         [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
