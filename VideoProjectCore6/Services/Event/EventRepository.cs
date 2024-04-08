@@ -2362,21 +2362,13 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             var FilePath = "";
 
 
-            List<ConfEventCompactGet> eventLogs = await _DbContext.ConfEvents.OrderByDescending(o => o.Id).Where(x => x.MeetingId == id
+            List<ConfEventCompactGet> eventLogs = await _DbContext.ConfEvents.OrderByDescending(o => o.Id).Where(x => x.MeetingId == id.ToString()
 
             && x.ConfId.Equals(meetingId)).Select(s => new ConfEventCompactGet
             {
                 EventTime = s.EventTime,
 
-                Status = s.EventType == 1 ? lang == "ar" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED][0]
-                   : Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED][1]
-                   : s.EventType == 2 ? lang == "ar" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED][0]
-                   : Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED][1]
-                   : s.EventType == 4 ? lang == "ar" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN][0]
-                   : Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN][1]
-                   : s.EventType == 5 ? lang == "ar" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE][0]
-                   : Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE][1]
-                   : null,
+                Status = EventTypeToStatusText(s, lang),
 
                 UserName = s.UserId
 
@@ -2485,34 +2477,27 @@ public class EventRepository(IMeetingRepository iMeetingRepository
     }
 
 
+    private static string EventTypeToStatusText(ConfEvent ev, string lang)
+        {
+            int langIndex = lang == "ar" ? 1 : 0;
+            if (!MeetingStatusValue.TryGetValue(ev.EventType, out string[]? value))
+                return "";
+            return value[langIndex];
+        }
+
     private static List<ConfEventCompactGet> EventLog(int? id, string meetingId, List<ConfUser> allUsers, List<ConfEvent> allRooms, string lang, string timeZoneId)
     {
-
-        List<ConfEventCompactGet> eventLogs = allRooms.OrderByDescending(o => o.Id).Where(x => x.MeetingId == id
-
-
-        
-        && x.ConfId.Equals(meetingId)).Select(s => new ConfEventCompactGet
-        {
-            EventTime = timeZoneId != null ? TimeConverter.ConvertFromUtc(s.EventTime, timeZoneId) : s.EventTime,
-
-            Status = s.EventType == 1 ? lang == "ar" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED][0]
-                : Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED][1]
-                : s.EventType == 2 ? lang == "ar" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED][0]
-                : Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED][1]
-                : s.EventType == 4 ? lang == "ar" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN][0]
-                : Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN][1]
-                : s.EventType == 5 ? lang == "ar" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE][0]
-                : Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE][1]
-                : s.EventType == 6 ? lang == "ar" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE_LOBBY][0]
-                : Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE_LOBBY][1]
-                : null,
-
-            UserName = s.UserId,
-            KickedBy = s.EventInfo.Split("<")[0] != "" ? s.EventInfo.Split("<")[0] : null,
-          //  EndedBy = s.
-
-    }).ToList();
+        List<ConfEventCompactGet> eventLogs = allRooms
+            .OrderByDescending(o => o.Id)
+            .Where(x => x.MeetingId == id.ToString() && x.ConfId.Equals(meetingId))
+            .Select(s => new ConfEventCompactGet
+            {
+                EventTime = timeZoneId != null ? TimeConverter.ConvertFromUtc(s.EventTime, timeZoneId) : s.EventTime,
+                Status = EventTypeToStatusText(s, lang),
+                UserName = s.UserId,
+                KickedBy = s.EventInfo.Split("<")[0] != "" ? s.EventInfo.Split("<")[0] : null,
+            })
+        .ToList();
 
 
         foreach (var eventLog in eventLogs)

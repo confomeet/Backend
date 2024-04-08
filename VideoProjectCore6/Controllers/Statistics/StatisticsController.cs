@@ -32,11 +32,9 @@ namespace VideoProjectCore6.Controllers.Statistics
         }
 
         [HttpPost("EventsByStatus")]
-        public async Task<IActionResult> ActiveRooms([FromBody] DateTimeRange range, [FromHeader] short? eventType,[FromHeader] string lang)
+        public async Task<IActionResult> ActiveRooms([FromBody] DateTimeRange range, [FromHeader] string lang)
         {
-            var param = eventType != 0 ? eventType : null;
-
-            return Ok(await _IStatisticsRepository.ActiveRooms(range, param, lang));
+            return Ok(await _IStatisticsRepository.ActiveRooms(range));
         }
 
     }

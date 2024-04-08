@@ -47,9 +47,13 @@ namespace VideoProjectCore6.Services
             DateTime now = DateTime.Now;
 
 
-            var result = allRooms.OrderByDescending(c => c.Id).Where(c => c.EventType != 5 && c.EventType != 6
-                && c.MeetingId.ToString().Equals(id.ToString())
-                && c.ConfId.Equals(meetingId)).FirstOrDefault();
+            var result = allRooms.OrderByDescending(c => c.Id).Where(
+                c =>
+                    c.EventType != Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE
+                    && c.EventType != Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE_LOBBY
+                    && c.MeetingId.ToString().Equals(id.ToString())
+                    && c.ConfId.Equals(meetingId)
+            ).FirstOrDefault();
 
 
             if (result == null
@@ -69,7 +73,7 @@ namespace VideoProjectCore6.Services
 
                 if (result != null)
                 {
-                    if (result.EventType == 1 || result.EventType == 4)
+                    if (result.EventType == Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED || result.EventType == Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN)
                     {
                         return new EventStatus()
                         {
@@ -80,10 +84,10 @@ namespace VideoProjectCore6.Services
                         };
                     }
 
-                    else if (result.EventType == 2)
+                    else if (result.EventType == Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED)
                     {
 
-                        var eventStart = allRooms.Where(x=> x.EventType == 1 && x.MeetingId == id && x.ConfId.Equals(meetingId)).FirstOrDefault();
+                        var eventStart = allRooms.Where(x=> x.EventType == Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED && x.MeetingId == id.ToString() && x.ConfId.Equals(meetingId)).FirstOrDefault();
                         TimeSpan ts = new TimeSpan();
 
                         if (eventStart != null)
@@ -120,7 +124,7 @@ namespace VideoProjectCore6.Services
 
             var entryPoint = (from ep in allRooms.OrderByDescending(x => x.Id)
                               join e in allUsers on ep.UserId equals e.Id.ToString()
-                              where e.Email == email && ep.MeetingId == id && ep.ConfId.Equals(meetingId)
+                              where e.Email == email && ep.MeetingId == id.ToString() && ep.ConfId.Equals(meetingId)
 
                               select new
                               {
@@ -129,12 +133,12 @@ namespace VideoProjectCore6.Services
 
             if(entryPoint != null)
             {
-                if(entryPoint.EventType == 4)
+                if(entryPoint.EventType == Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN)
                 {
                     return true;
                 }
 
-                else if(entryPoint.EventType == 5 && entryPoint.EventType == 6)
+                else if(entryPoint.EventType == Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE && entryPoint.EventType == Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE_LOBBY)
                 {
                     return false;
                 }

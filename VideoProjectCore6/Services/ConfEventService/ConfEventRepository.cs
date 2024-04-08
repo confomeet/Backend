@@ -203,7 +203,7 @@ namespace VideoProjectCore6.Services.ConfEventService
 
                 ConfEvent res = new ConfEvent();
 
-                res.EventType = (int) Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED;
+                res.EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED;
                 res.ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex);
                 res.MeetingId = prosodyEventPostDto.meetingId;
                 res.EventTime = dateTime;
@@ -246,7 +246,7 @@ namespace VideoProjectCore6.Services.ConfEventService
 
                 ConfEvent res = new ConfEvent();
 
-                res.EventType = (int) Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE;
+                res.EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE;
                 res.ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex);
                 res.MeetingId = prosodyEventPostDto.meetingId;
                 res.EventTime = dateTime;
@@ -289,7 +289,7 @@ namespace VideoProjectCore6.Services.ConfEventService
 
                 ConfEvent res = new ConfEvent();
 
-                res.EventType = (int) Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE_LOBBY;
+                res.EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE_LOBBY;
                 res.ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex);
                 res.MeetingId = prosodyEventPostDto.meetingId;
                 res.EventTime = dateTime;
@@ -333,7 +333,7 @@ namespace VideoProjectCore6.Services.ConfEventService
                 if (confIdIndex < 0) return null;
 
                 ConfEvent res = new ConfEvent();
-                res.EventType = (int) Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN;
+                res.EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN;
                 res.ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex);
                 res.MeetingId = prosodyEventPostDto.meetingId;
 
@@ -427,7 +427,7 @@ namespace VideoProjectCore6.Services.ConfEventService
 
                 ConfEvent res = new ConfEvent();
 
-                res.EventType = (int) Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED;
+                res.EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED;
                 res.ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex);
                 res.EventInfo = prosodyEventPostDto.message;
                 res.MeetingId = prosodyEventPostDto.meetingId;
@@ -469,7 +469,7 @@ namespace VideoProjectCore6.Services.ConfEventService
                 return res.FailMe(-1, "The requested room is not existed");
             }
 
-            if(lastState != null && lastState.EventType == 2)
+            if(lastState != null && lastState.EventType == EVENT_TYPE.EVENT_TYPE_CONF_FINISHED)
             {
                 return res.FailMe(-1, "The requested room is finished");
             }
@@ -477,12 +477,12 @@ namespace VideoProjectCore6.Services.ConfEventService
 
             
 
-            var roomsJoinedUsers = confEvents.Where(c => c.EventType == 4 
+            var roomsJoinedUsers = confEvents.Where(c => c.EventType == EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN
 
               && c.MeetingId.ToString().Equals(pId)
 
               && c.ConfId.Equals(meetingID)
-              && confEvents.Where(p => p.EventType == 5 && p.MeetingId == c.MeetingId && p.ConfId.Equals(c.ConfId) && c.UserId.Equals(p.UserId) && c.EventTime < p.EventTime).FirstOrDefault() != null
+              && confEvents.Where(p => p.EventType == EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE && p.MeetingId == c.MeetingId && p.ConfId.Equals(c.ConfId) && c.UserId.Equals(p.UserId) && c.EventTime < p.EventTime).FirstOrDefault() != null
             ).ToList();
 
 
@@ -543,7 +543,7 @@ namespace VideoProjectCore6.Services.ConfEventService
                 var lastState = openRooms.OrderByDescending(x => x.Id).Where(x => x.ConfId.Equals(ev.ConfId) 
                                 && x.MeetingId == ev.MeetingId).FirstOrDefault();
 
-                if (lastState != null && lastState.EventType != 2)
+                if (lastState != null && lastState.EventType != Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED)
                 {
                     activeRooms.Add(ev);
                 }
@@ -557,7 +557,7 @@ namespace VideoProjectCore6.Services.ConfEventService
                 foreach (Models.Event ev in events)
                 {
 
-                    if (activeRooms.Select(r => r.ConfId).Contains(ev.MeetingId) && activeRooms.Select(r => r.MeetingId).Contains(ev.Id))
+                    if (activeRooms.Select(r => r.ConfId).Contains(ev.MeetingId) && activeRooms.Select(r => r.MeetingId).Contains(ev.Id.ToString()))
                     {
 
                         Models.Event singleEvent = new Models.Event()
@@ -610,10 +610,10 @@ namespace VideoProjectCore6.Services.ConfEventService
 
             foreach(ConfEvent ev in openRooms)
             {
-                if(names.Contains(ev.ConfId) && (ev.EventType == 4))
+                if(names.Contains(ev.ConfId) && (ev.EventType == EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN))
                 {
                     var lastEventInConf = openRooms.OrderByDescending(x=>x.Id).FirstOrDefault(
-                            x => (x.EventType == 2 || x.EventType == 5) && x.ConfId.Equals(ev.ConfId)
+                            x => (x.EventType == EVENT_TYPE.EVENT_TYPE_CONF_FINISHED || x.EventType == EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE) && x.ConfId.Equals(ev.ConfId)
                         );
                     if (lastEventInConf != null)
                         activeRooms.Add(ev);
@@ -719,7 +719,7 @@ namespace VideoProjectCore6.Services.ConfEventService
 
                 (confEvent.ConfId.Equals(x.MeetingId))
                 &&
-                (confEvent.MeetingId == x.Id)
+                (confEvent.MeetingId == x.Id.ToString())
                 &&
 
                 x.Participants.Select(e => e.UserId).Contains(userId)

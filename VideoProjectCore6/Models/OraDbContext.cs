@@ -660,7 +660,7 @@ namespace VideoProjectCore6.Models
 
 
                 entity.Property(e => e.MeetingId)
-                    .HasMaxLength(1000)
+                    .HasMaxLength(30)
                     .HasColumnName("meeting_id");
 
                 //entity.HasOne(d => d.User)

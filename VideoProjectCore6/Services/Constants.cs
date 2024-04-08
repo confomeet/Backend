@@ -190,7 +190,7 @@ namespace VideoProjectCore6.Services
         };
 
 
-        public enum EVENT_TYPE
+        public enum EVENT_TYPE : int
         {
             EVENT_TYPE_CONF_CREATED = 0,
             EVENT_TYPE_CONF_STARTED = 1,

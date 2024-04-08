@@ -1,4 +1,6 @@
-﻿namespace VideoProjectCore6.DTOs.ConfEventDto
+﻿using VideoProjectCore6.Services;
+
+namespace VideoProjectCore6.DTOs.ConfEventDto
 {
     public class ConfEventPostDto
     {
@@ -6,7 +8,7 @@
         public int Id { get; set; }
         public DateTime EventTime { get; set; }
 
-        public int EventType { get; set; }
+        public Constants.EVENT_TYPE EventType { get; set; }
 
         public string ConfId { get; set; } = string.Empty;
 
@@ -14,7 +16,7 @@
 
         public string EventInfo { get; set; } = string.Empty;
 
-        public int MeetingId { get; set; } = 10000;
+        public string MeetingId { get; set; } = "10000";
 
     }
 }

@@ -1,5 +1,5 @@
-﻿
-#nullable disable
+﻿using VideoProjectCore6.Services;
+
 namespace VideoProjectCore6.Models
 {
     public partial class ConfEvent
@@ -7,14 +7,14 @@ namespace VideoProjectCore6.Models
         public int Id { get; set; }
         public DateTime EventTime { get; set; }
 
-        public int? EventType { get; set; }
+        public Constants.EVENT_TYPE EventType { get; set; }
 
-        public string ConfId { get; set; }
+        public string ConfId { get; set; } = string.Empty;
 
         public string UserId { get; set; } = "string";
 
-        public string EventInfo { get; set; }
-        public int MeetingId { get; set; } = 10000;
+        public string EventInfo { get; set; } = string.Empty;
+        public string MeetingId { get; set; } = "10000";
 
     }
 }
