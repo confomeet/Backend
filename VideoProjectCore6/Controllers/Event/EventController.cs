@@ -127,32 +127,6 @@ namespace VideoProjectCore6.Controllers.Event
             return StatusCode(StatusCodes.Status500InternalServerError, "error occurred");
         }
 
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("GetNumOfMeetingsDone")]
-        public async Task<ActionResult> GetNumOfMeetingsDone([FromQuery] DateTime startDate, DateTime endDate)
-        {
-            var result = await _IEventRepository.GetNumOfMeetingsDone(startDate, endDate);
-            if (result != null)
-            {
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
-            return StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("GetNumOfFutureMeetings")]
-        public async Task<ActionResult> GetNumOfFutureMeetings([FromQuery] DateTime startDate, DateTime endDate)
-        {
-            var result = await _IEventRepository.GetNumOfFutureMeetings(startDate, endDate);
-            if (result != null)
-            {
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
-            return StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
-
-
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("{eventId}/UpdateParticipants")]
         public async Task<ActionResult> UpdateEventParticipants([FromRoute] int eventId, [FromBody] ParticipantsAsObj dto, [FromHeader] bool sendToAll, [FromHeader] string lang = "ar")

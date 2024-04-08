@@ -173,16 +173,6 @@ namespace VideoProjectCore6.Services.Statistics
 
         }
 
-        public async Task<EventStatOfMeetings> IncomingEvents(DateTime startDate, DateTime endDate)
-        {
-            return await _IEventRepository.GetNumOfFutureMeetings(startDate, endDate);
-        }
-
-        public async Task<EventStatOfMeetings> FinishedEvents(DateTime startDate, DateTime endDate)
-        {
-            return await _IEventRepository.GetNumOfMeetingsDone(startDate, endDate);
-        }
-
         // sortedEvents is sorted by event time ascending
         static int CalculateAllMeetingsTime(List<RelevantConfEvent> sortedEvents)
         {
