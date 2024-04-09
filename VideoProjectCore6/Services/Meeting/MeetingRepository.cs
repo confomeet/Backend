@@ -480,9 +480,6 @@ namespace VideoProjectCore6.Services.Meeting
                 throw _exception;
             }
 
-            //var Date1 = new DateTime(now.Year, now.Month, now.Day);
-            //var Date2 = new DateTime(meeting.StartDate.Year, meeting.StartDate.Month, meeting.StartDate.Day);
-
             var remainedDays = event_.StartDate.Subtract(now);
 
             var oneDay = TimeSpan.FromHours(24);
@@ -530,7 +527,6 @@ namespace VideoProjectCore6.Services.Meeting
             UserStruct userInfo = new UserStruct()
             {
                 id = userId != null ? userId.ToString() : autoUserId,
-                //avatar = "data:image/png;base64,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",
                 avatar = "",
                 name = userData != null ? userData.Name : "user",
                 email = "not available",
@@ -555,65 +551,6 @@ namespace VideoProjectCore6.Services.Meeting
                         throw _exception;
                     }
                 }
-
-                //var dictionary = new Dictionary<string, string>
-                //    {
-                //        { "secret", _IConfiguration["GoogleReCaptchaSecretKey:SecretKey"] },
-                //        { "response", userData.ReCaptchaToken }
-                //    };
-
-                //var postContent = new FormUrlEncodedContent(dictionary);
-
-
-
-                //HttpResponseMessage recaptchaResponse = null;
-                //string stringContent = "";
-
-                //using (var http = new HttpClient())
-                //{
-                //    recaptchaResponse = await http.PostAsync("https://www.google.com/recaptcha/api/siteverify", postContent);
-                //    stringContent = await recaptchaResponse.Content.ReadAsStringAsync();
-                //}
-
-                //if (!recaptchaResponse.IsSuccessStatusCode)
-                //{
-                //    _exception.AttributeMessages.Add("Unable to verify recaptcha token");
-
-                //    return _exception;
-                //}
-
-                //if (string.IsNullOrEmpty(stringContent))
-                //{
-                //    _exception.AttributeMessages.Add("Invalid reCAPTCHA verification response");
-
-                //    return _exception;
-
-                //}
-
-                //var googleReCaptchaResponse = JsonConvert.DeserializeObject<ReCaptchaGetDto>(stringContent);
-
-                //if (!googleReCaptchaResponse.Success)
-                //{
-                //    var errors = string.Join(",", googleReCaptchaResponse.ErrorCodes);
-                //    _exception.AttributeMessages.Add(errors);
-
-                //    return _exception;
-
-                //}
-
-                //if (!googleReCaptchaResponse.Action.Equals("signup", StringComparison.OrdinalIgnoreCase))
-                //{
-                //    _exception.AttributeMessages.Add("Invalid action");
-                //    return _exception;
-
-                //}
-
-                //if (googleReCaptchaResponse.Score < 0.5)
-                //{
-                //    _exception.AttributeMessages.Add("This is a potential bot. Signup request rejected");
-                //    return _exception;
-                //}
-
             }
             else
             {
@@ -640,12 +577,6 @@ namespace VideoProjectCore6.Services.Meeting
                 {
                     isModerator = true;
                 }
-                byte[] bytes = new byte[16];
-                BitConverter.GetBytes(user.Id).CopyTo(bytes, 0);
-                //EncryptGUID encryptGUID = new EncryptGUID(bytes);
-                //byte[] guid = new byte[16];
-                //var encruptedGuid = new Guid(encryptGUID.encryptUID(guid));
-                //userInfo.id = encruptedGuid.ToString();
             }
 
             try
