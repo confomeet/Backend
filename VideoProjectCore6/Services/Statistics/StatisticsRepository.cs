@@ -38,12 +38,12 @@ namespace VideoProjectCore6.Services.Statistics
                 .Select(g => new ValueIdDesc { Id = g.Key ?? 0, Value = g.Count() }).ToListAsync();
             if (eventSum.Count > 0)
             {
-                var appName = await _DbContext.ClientInfos.Where(c => eventSum.Select(e => e.Id).ToList().Contains(c.Id)).ToDictionaryAsync(c => c.Id, c => c.ClientName);
+                // var appName = await _DbContext.ClientInfos.Where(c => eventSum.Select(e => e.Id).ToList().Contains(c.Id)).ToDictionaryAsync(c => c.Id, c => c.ClientName);
 
-                foreach (var app in eventSum)
-                {
-                    app.Description = appName.TryGetValue((ushort)app.Id, out string? v) ? v : string.Empty;
-                }
+                // foreach (var app in eventSum)
+                // {
+                //     app.Description = appName.TryGetValue((ushort)app.Id, out string? v) ? v : string.Empty;
+                // }
             }
             return eventSum;
         }

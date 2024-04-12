@@ -15,7 +15,6 @@ using VideoProjectCore6.DTOs.ChannelDto;
 using VideoProjectCore6.Models;
 using VideoProjectCore6.Repositories;
 using VideoProjectCore6.Repositories.IChannelRepository;
-using VideoProjectCore6.Repositories.IClientRepository;
 using VideoProjectCore6.Repositories.IConfEventRepository;
 using VideoProjectCore6.Repositories.IContactRepository;
 using VideoProjectCore6.Repositories.ICountryRepository;
@@ -32,7 +31,6 @@ using VideoProjectCore6.Repositories.ITabRepository;
 using VideoProjectCore6.Repositories.IUserRepository;
 using VideoProjectCore6.Services;
 using VideoProjectCore6.Services.Channels;
-using VideoProjectCore6.Services.ClientService;
 using VideoProjectCore6.Services.ConfEventService;
 using VideoProjectCore6.Services.ContactService;
 using VideoProjectCore6.Services.CountryService;
@@ -97,8 +95,7 @@ builder.Services.AddMvc(option => option.EnableEndpointRouting = false)
     .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-var environmentVar = builder.Configuration.GetConnectionString("Meeting:sub");
-var currentHostName = environmentVar != null ? environmentVar : "http://localhost:6500";
+var currentHostName = builder.Configuration["CONFOMEET_BASE_URL"] ?? "http://localhost:6500";
 
 
 //builder.Services.AddDbContext<OraDbContext>(options => options.UseOracle(connectionString));
@@ -191,14 +188,14 @@ builder.Services.Configure<ChannelSMSSetting>(builder.Configuration.GetSection("
 var ConfomeetJwtAuthKey = Encoding.ASCII.GetBytes(builder.Configuration["CONFOMEET_AUTH_JWT_KEY"]!);
 
 int passFailureMaxCount = 3;
-bool successFailureAttempts = int.TryParse(builder.Configuration["PassworFailureAttempts"], out int passworFailureAttempts);
+bool successFailureAttempts = int.TryParse(builder.Configuration["CONFOMEET_LOGIN_ATTEMPS_BEFORE_LOCKOUT"], out int passworFailureAttempts);
 if (successFailureAttempts && passworFailureAttempts > 1)
 {
     passFailureMaxCount = passworFailureAttempts;
 }
 
 int lockedTimeInMinutes = 2;
-bool successRead = int.TryParse(builder.Configuration["PassworFailureAttempts"], out int lockedTempTimeInMinutes);
+bool successRead = int.TryParse(builder.Configuration["CONFOMEET_LOCKOUT_TIME_MINUTES"], out int lockedTempTimeInMinutes);
 if (successRead && lockedTempTimeInMinutes > 1)
 {
     lockedTimeInMinutes = lockedTempTimeInMinutes;

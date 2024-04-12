@@ -89,21 +89,21 @@ namespace VideoProjectCore6.Services.UserService
         }
 
         private TimeSpan GetOTPLifetime(OtpLog otp) {
-            if (_configuration["OtpPeriodInMinutes"] == null)
+            if (_configuration["CONFOMEET_OTP_PERIOD_IN_MINUTES"] == null)
             {
-                _logger.LogWarning("OtpPeriodInMinutes is not configured, use {}", Constants.OTP_PERIOD_If_MISSED_IN_APP_SETTING);
+                _logger.LogWarning("CONFOMEET_OTP_PERIOD_IN_MINUTES is not configured, use {}", Constants.OTP_PERIOD_If_MISSED_IN_APP_SETTING);
                 return TimeSpan.FromMinutes(Constants.OTP_PERIOD_If_MISSED_IN_APP_SETTING);
             }
 
-            if (int.TryParse(_configuration["OtpPeriodInMinutes"], out int otpPeriodInMinutes)) {
+            if (int.TryParse(_configuration["CONFOMEET_OTP_PERIOD_IN_MINUTES"], out int otpPeriodInMinutes)) {
                 if (otpPeriodInMinutes < 1) {
-                    _logger.LogWarning("OtpPeriodInMinutes < 1 is invalid, use {}", Constants.OTP_PERIOD_If_MISSED_IN_APP_SETTING);
+                    _logger.LogWarning("CONFOMEET_OTP_PERIOD_IN_MINUTES < 1 is invalid, use {}", Constants.OTP_PERIOD_If_MISSED_IN_APP_SETTING);
                     return TimeSpan.FromMinutes(Constants.OTP_PERIOD_If_MISSED_IN_APP_SETTING);
                 }
                 return TimeSpan.FromMinutes(otpPeriodInMinutes);
             }
 
-            _logger.LogError("{} is incorrect value for OtpPeriodInMinutes setting use {}", _configuration["OtpPeriodInMinutes"], Constants.OTP_PERIOD_If_MISSED_IN_APP_SETTING);
+            _logger.LogError("{} is incorrect value for CONFOMEET_OTP_PERIOD_IN_MINUTES setting use {}", _configuration["CONFOMEET_OTP_PERIOD_IN_MINUTES"], Constants.OTP_PERIOD_If_MISSED_IN_APP_SETTING);
             return TimeSpan.FromMinutes(Constants.OTP_PERIOD_If_MISSED_IN_APP_SETTING);
         }
     }

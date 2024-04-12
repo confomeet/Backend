@@ -337,7 +337,7 @@ namespace VideoProjectCore6.Services.ContactService
         //        }
 
         //        return result.SuccessMe(addBy, "Ok", true, APIResult.RESPONSE_CODE.OK,
-        //            string.Format("{0}/{1}?jwt={2}", _IConfiguration["Meeting:host"], meetingId, token));
+        //            string.Format("{0}/{1}?jwt={2}", _IConfiguration["PUBLIC_URL"], meetingId, token));
         //    }
 
         //    catch
@@ -360,7 +360,7 @@ namespace VideoProjectCore6.Services.ContactService
 
             bool isModerator = false;
 
-            string confUrlPrefix = _IConfiguration["Meeting:host"];
+            string confUrlPrefix = _IConfiguration["PUBLIC_URL"];
             if (confUrlPrefix == null || confUrlPrefix.Length == 0)
             {
                 _exception.AttributeMessages.Add("Missing configuration for lilac CONF_URL_PREFIX ");
@@ -1109,7 +1109,7 @@ namespace VideoProjectCore6.Services.ContactService
 
 
                 return result.SuccessMe(v, "Ok", true, APIResult.RESPONSE_CODE.OK,
-                    string.Format("{0}/{1}?jwt={2}", _IConfiguration["Meeting:host"], meetingId, token));
+                    string.Format("{0}/{1}?jwt={2}", _IConfiguration["PUBLIC_URL"], meetingId, token));
 
             }
             catch

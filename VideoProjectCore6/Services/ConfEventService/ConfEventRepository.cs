@@ -456,7 +456,7 @@ namespace VideoProjectCore6.Services.ConfEventService
         {
             APIResult result = new APIResult();
 
-            var host = _IConfiguation["CurrentHostName"];
+            var host = _IConfiguation["CONFOMEET_BASE_URL"];
 
             var allRooms = await _DbContext.ConfEvents.ToListAsync();
 

@@ -305,7 +305,7 @@ namespace VideoProjectCore6.Services.Meeting
                 CreatedDate = DateTime.Now,
                 Lang = lang,
                 NotificationBody = name + "is inviting you to join a video call happening now",
-                NotificationLink = Url.Combine(_IConfiguration["CurrentHostName"], "join", meetingId),
+                NotificationLink = Url.Combine(_IConfiguration["CONFOMEET_BASE_URL"], "join", meetingId),
                 NotificationChannelId = 1,
                 NotificationTitle = "invitation",
                 Template = "invitation.html"
@@ -405,9 +405,9 @@ namespace VideoProjectCore6.Services.Meeting
             };
             var payload = new Dictionary<string, object>
             {
-                { "iss", _IConfiguration["Meeting:iss"] },
-                { "aud", _IConfiguration["Meeting:aud"] },
-                { "sub", _IConfiguration["Meeting:sub"] },
+                { "iss", _IConfiguration["JWT_APP_ID"] },
+                { "aud", _IConfiguration["*"] },
+                { "sub", _IConfiguration["XMPP_DOMAIN"] },
                 { "room", event_.MeetingId},
                 { "autoRec", eventMeeting.RecordingReq!=null?eventMeeting.RecordingReq:false},
                 { "singleAccess", eventMeeting.SingleAccess !=null ? eventMeeting.SingleAccess : false},
@@ -433,10 +433,10 @@ namespace VideoProjectCore6.Services.Meeting
             IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
             IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
 
-            var token = encoder.Encode(payload, _IConfiguration["Meeting:secret"]);
+            var token = encoder.Encode(payload, _IConfiguration["JWT_APP_SECRET"]);
             // Uncomment for meeting log
             await LogMeeting(participant.IsModerator, event_.MeetingId, participant.UserId, eventMeeting.Id);
-            return result.SuccessMe(participantId, "Ok", true, APIResult.RESPONSE_CODE.OK, string.Format("{0}/{1}?jwt={2}", _IConfiguration["Meeting:host"], event_.MeetingId, token));
+            return result.SuccessMe(participantId, "Ok", true, APIResult.RESPONSE_CODE.OK, string.Format("{0}/{1}?jwt={2}", _IConfiguration["PUBLIC_URL"], event_.MeetingId, token));
         }
 
         public async Task<object> MeetingJWT(string meetingId, int? userId, JoinData userData, string lang)//From web
@@ -506,7 +506,7 @@ namespace VideoProjectCore6.Services.Meeting
             bool isModerator = false;
             // context.user.id and contex.group should be fresh-generated UUID values(Do not put actual user ids here).
             string autoUserId = Guid.NewGuid().ToString();
-            string confUrlPrefix = _IConfiguration["Meeting:host"];
+            string confUrlPrefix = _IConfiguration["PUBLIC_URL"];
             if (confUrlPrefix == null || confUrlPrefix.Length == 0)
             {
                 _exception.AttributeMessages.Add("Missing configuration for lilac CONF_URL_PREFIX ");
@@ -617,9 +617,9 @@ namespace VideoProjectCore6.Services.Meeting
 
             var payload = new Dictionary<string, object>
             {
-                { "iss", _IConfiguration["Meeting:iss"] },
-                { "aud", _IConfiguration["Meeting:aud"] },
-                { "sub", _IConfiguration["Meeting:sub"] },
+                { "iss", _IConfiguration["JWT_APP_ID"] },
+                { "aud", _IConfiguration["*"] },
+                { "sub", _IConfiguration["XMPP_DOMAIN"] },
                 { "room", meetingId },
                 { "autoRec", meeting.RecordingReq!=null ? meeting.RecordingReq:false },
                 { "singleAccess", meeting.SingleAccess !=null ? meeting.SingleAccess : false },
@@ -634,7 +634,7 @@ namespace VideoProjectCore6.Services.Meeting
             IJsonSerializer serializer = new JsonNetSerializer();
             IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
             IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
-            var token = encoder.Encode(payload, _IConfiguration["Meeting:secret"]);
+            var token = encoder.Encode(payload, _IConfiguration["JWT_APP_SECRET"]);
 
             // Console.WriteLine(token);
 

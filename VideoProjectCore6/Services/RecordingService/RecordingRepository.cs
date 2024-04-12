@@ -33,7 +33,7 @@ namespace VideoProjectCore6.Services.RecordingService
 
             DateTime now = DateTime.Now;
 
-            var videoPublicLink = _IConfiguation["Meeting:host"] + recordingPostDto.FilePath.Replace("/config/recordings", "/recordings");
+            var videoPublicLink = _IConfiguation["PUBLIC_URL"] + recordingPostDto.FilePath.Replace("/config/recordings", "/recordings");
             RecordingLog newRecordingLog = new RecordingLog()
             {
                 //VideoType = recordingPostDto.Type,
@@ -74,7 +74,7 @@ namespace VideoProjectCore6.Services.RecordingService
             }
 
             var guid = Guid.NewGuid();
-            string VideoPublicLink = _IConfiguation["CurrentHostName"] + $"/api/v1/Recording/DownloadS3Record/{guid}";
+            string VideoPublicLink = _IConfiguation["CONFOMEET_BASE_URL"] + $"/api/v1/Recording/DownloadS3Record/{guid}";
             var recordingLog = new RecordingLog
             {
                 FileSize = recordingDto.FileSize.ToString(),

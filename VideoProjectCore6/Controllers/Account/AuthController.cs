@@ -29,7 +29,7 @@ namespace VideoProjectCore6.Controllers.Account
         private readonly ILogger<OIDCAuthController> _logger = logger;
         private readonly IUserRepository _userRepository = userRepository;
         private readonly IConfiguration _configuration = configuration;
-        private readonly string _backendBaseUrl = configuration["CurrentHostName"]!;
+        private readonly string _backendBaseUrl = configuration["CONFOMEET_BASE_URL"]!;
         public const string ControllerRoute = "/api/v1/web/Auth";
         private const string OIDCLogInAction = "OIDCLogIn";
         public const string OIDCLoggedOutAction = "SuccessLoggedOut";
@@ -73,7 +73,7 @@ namespace VideoProjectCore6.Controllers.Account
             var logInResultDto = await _userRepository.LogInExternal(sub!, "oidc", email!, name!);
             FillSessionWithUserInfo(logInResultDto);
 
-            var redirectUri = !string.IsNullOrEmpty(ConfomeetRedirectUri) ? ConfomeetRedirectUri : _configuration["CurrentHostName"]!;
+            var redirectUri = !string.IsNullOrEmpty(ConfomeetRedirectUri) ? ConfomeetRedirectUri : _configuration["CONFOMEET_BASE_URL"]!;
             return Redirect(redirectUri);
         }
 
@@ -113,7 +113,7 @@ namespace VideoProjectCore6.Controllers.Account
         [HttpGet(OIDCLoggedOutAction)]
         public IActionResult SuccessLoggedOut([FromQuery] string ConfomeetRedirectUri)
         {
-            var redirectUri = !string.IsNullOrEmpty(ConfomeetRedirectUri) ? ConfomeetRedirectUri : _configuration["CurrentHostName"]!;
+            var redirectUri = !string.IsNullOrEmpty(ConfomeetRedirectUri) ? ConfomeetRedirectUri : _configuration["CONFOMEET_BASE_URL"]!;
             return Redirect(redirectUri);
         }
 

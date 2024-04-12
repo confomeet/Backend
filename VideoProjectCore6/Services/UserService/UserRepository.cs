@@ -750,7 +750,7 @@ namespace VideoProjectCore6.Services.UserService
             }
 
 
-            if (_IConfiguration["CurrentHostName"] == null || _IConfiguration["CurrentHostName"].Length < 5)
+            if (_IConfiguration["CONFOMEET_BASE_URL"] == null || _IConfiguration["CONFOMEET_BASE_URL"].Length < 5)
             {
                 res.Code = APIResult.RESPONSE_CODE.NotImplemented;
                 res.Message.Add(" Missed Current Host Name configuration.. ask the admin to fix.");
@@ -939,7 +939,7 @@ namespace VideoProjectCore6.Services.UserService
         public async Task<bool> SendActivation(User user)
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            string url = Url.Combine(_IConfiguration["CurrentHostName"], "ActiveAccount") + "?token=" + token + "&email=" + user.Email;
+            string url = Url.Combine(_IConfiguration["CONFOMEET_BASE_URL"], "ActiveAccount") + "?token=" + token + "&email=" + user.Email;
             int activationActionId = await _DbContext.Actions.Where(x => x.Shortcut == "ACTIVATION").Select(x => x.Id).FirstOrDefaultAsync();
 
             var toSendNoti = await _INotificationSettingRepository.GetNotificationsForAction(activationActionId);
@@ -961,7 +961,7 @@ namespace VideoProjectCore6.Services.UserService
 
         public async Task<bool> SendInvitation(User user, string password)
         {
-            string url = Url.Combine(_IConfiguration["CurrentHostName"], "ForgetPassword");
+            string url = Url.Combine(_IConfiguration["CONFOMEET_BASE_URL"], "ForgetPassword");
             int activationActionId = await _DbContext.Actions.Where(x => x.Shortcut == "SEND_REGISTER_INVITATION").Select(x => x.Id).FirstOrDefaultAsync();
 
             var toSendNoti = await _INotificationSettingRepository.GetNotificationsForAction(activationActionId);
@@ -1344,13 +1344,13 @@ namespace VideoProjectCore6.Services.UserService
 
             string token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-            if (_IConfiguration["CurrentHostName"] == null || _IConfiguration["CurrentHostName"].Length < 5)
+            if (_IConfiguration["CONFOMEET_BASE_URL"] == null || _IConfiguration["CONFOMEET_BASE_URL"].Length < 5)
             {
                 _exception.AttributeMessages.Add(" Missed Current Host Name configuration.. ask the admin to fix.");
                 throw _exception;
             }
 
-            string url = Url.Combine(_IConfiguration["CurrentHostName"], "ResetPassword") + "?token=" + token + "&email=" + email;
+            string url = Url.Combine(_IConfiguration["CONFOMEET_BASE_URL"], "ResetPassword") + "?token=" + token + "&email=" + email;
             //string body = " please follow the link to change your password :\n" + "<a href =\'" + url + "' > reset password link </a> ";
             var channel = await _DbContext.SysLookupValues.Where(x => x.Shortcut == NOTIFICATION_MAIL_CHANNEL).Select(x => x.Id).FirstOrDefaultAsync();
             NotificationLogPostDto notificationPost = new()
@@ -1498,7 +1498,7 @@ namespace VideoProjectCore6.Services.UserService
             var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_ConfomeetAuthJwtKey));
             var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha512);
             var jwt = new JwtSecurityToken(
-                issuer: _IConfiguration["CurrentHostName"],
+                issuer: _IConfiguration["CONFOMEET_BASE_URL"],
                 audience: "*",
                 claims: GenerateAuthJwtClaims(user),
                 expires: expDate,
@@ -2250,10 +2250,9 @@ namespace VideoProjectCore6.Services.UserService
 
         private string BuildCreateConfUrl(User user, string pathToTokenLogin) {
             var createConfAuthToken = MakeAuthJwt(user, true);
-            var redirectUrl = _IConfiguration["Meeting:host"] + "/meet/panel/events";
+            var redirectUrl = _IConfiguration["PUBLIC_URL"] + "/meet/panel/events";
 
-            // var baseUrl = _IConfiguration["Meeting:host"] + pathToTokenLogin;
-            var baseUrl = "http://localhost:5000" + pathToTokenLogin;
+            var baseUrl = _IConfiguration["PUBLIC_URL"] + pathToTokenLogin;
             var urlParams = System.Web.HttpUtility.ParseQueryString(string.Empty);
             urlParams["token"] = createConfAuthToken;
             urlParams["redirectUrl"] = redirectUrl;

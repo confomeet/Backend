@@ -85,7 +85,7 @@ namespace VideoProjectCore6.Hubs
 
             var receiverToken = _generalRepository.generateMeetingToken(receiver, meetingId, true);
 
-            var receiverLink = string.Format("{0}/{1}?jwt={2}", _IConfiguration["Meeting:host"], meetingId, receiverToken);
+            var receiverLink = string.Format("{0}/{1}?jwt={2}", _IConfiguration["PUBLIC_URL"], meetingId, receiverToken);
 
 
             NotificationDirectCallGetDto notificationDirectCallGetDto = new NotificationDirectCallGetDto
@@ -137,7 +137,7 @@ namespace VideoProjectCore6.Hubs
 
             var receiverToken = _generalRepository.generateMeetingToken(receiver, meetingId, true);
 
-            var receiverLink = string.Format("{0}/{1}?jwt={2}", _IConfiguration["Meeting:host"], meetingId, receiverToken);
+            var receiverLink = string.Format("{0}/{1}?jwt={2}", _IConfiguration["PUBLIC_URL"], meetingId, receiverToken);
 
 
             NotificationDirectCallGetDto notificationDirectCallGetDto = new NotificationDirectCallGetDto

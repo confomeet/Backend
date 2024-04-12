@@ -409,7 +409,7 @@ namespace VideoProjectCore6.Services.NotificationService
             var ChargePlaceHolder = "@" + Constants.CHARGE;
             //--------------Send public link to moderator-------------------
             string publicLink = string.Empty;
-            var host = _configuration?["CurrentHostName"] ?? "";
+            var host = _configuration?["CONFOMEET_BASE_URL"] ?? "";
             var evtMeetingId = await _DbContext.Events.Where(x => x.Id == notifications[0].EventId).Select(x => x.MeetingId).FirstOrDefaultAsync();
             if (evtMeetingId != null && addPublicLink)
             {
@@ -466,7 +466,7 @@ namespace VideoProjectCore6.Services.NotificationService
 
             List<MeetingUserLink> links = new List<MeetingUserLink>();
             MeetingRepository m = new MeetingRepository(_DbContext, _exception, _loggerM, _IFilesUploaderRepository, _configuration, _iUserRepository);
-            string host = _configuration?["CurrentHostName"] ?? "", meetingLink;
+            string host = _configuration?["CONFOMEET_BASE_URL"] ?? "", meetingLink;
             List<string> meetingLinks = new List<string>();
             if (Parameters != null)
             {

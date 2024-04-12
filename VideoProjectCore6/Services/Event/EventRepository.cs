@@ -1002,7 +1002,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             }
         }
 
-        var host = _IConfiguration["CurrentHostName"];
+        var host = _IConfiguration["CONFOMEET_BASE_URL"];
 
         var allRooms = await _DbContext.ConfEvents.ToListAsync();
 
@@ -1242,7 +1242,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
     {
         bool serverSearch = obj != null && obj.HasDateSearch();
         bool localSearch = obj != null && obj.HasStringSearch();
-        var host = _IConfiguration["CurrentHostName"];
+        var host = _IConfiguration["CONFOMEET_BASE_URL"];
         List<int> idsList = [];
 
         var allRooms = await _DbContext.ConfEvents.Where(cv => obj == null || obj.EndDate == null || obj.StartDate == null || (cv.EventTime >= obj.StartDate.Value.Date && cv.EventTime < obj.EndDate.Value.AddDays(1).Date)).ToListAsync();
@@ -1536,7 +1536,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         var allUsers = await _DbContext.ConfUsers.ToListAsync();
         var videoRecords = await _DbContext.RecordingLogs.ToListAsync();
 
-        var host = _IConfiguration["CurrentHostName"];
+        var host = _IConfiguration["CONFOMEET_BASE_URL"];
         var e = await _DbContext.Events.AsNoTracking()
             .Include(x => x.Participants)
             .Include(x => x.Meeting)
@@ -1651,7 +1651,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
     public async Task<APIResult> EventParticipantLinks(int id, int userId)
     {
         APIResult result = new();
-        var host = _IConfiguration["CurrentHostName"];
+        var host = _IConfiguration["CONFOMEET_BASE_URL"];
         try
         {
             var links = await _DbContext.Participants.Where(x => x.EventId == id).Select(x => new MeetingUserLink
