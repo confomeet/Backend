@@ -87,8 +87,6 @@ namespace VideoProjectCore6.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasDefaultSchema(_IConfiguration["Schema"])
-                .UseCollation("USING_NLS_COMP");
             base.OnModelCreating(modelBuilder);
             
             modelBuilder.Entity<Action>(entity =>
