@@ -319,7 +319,6 @@ app.UseCors("AllowAll");
 
 app.UseClientRateLimiting();
 
-app.UseHttpsRedirection();
 app.UseMiddleware(typeof(ErrorHandlingMiddleware));
 app.UseCors();
 app.UseAuthentication();//yhab
