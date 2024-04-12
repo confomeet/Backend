@@ -645,7 +645,8 @@ namespace VideoProjectCore6.Services.UserService
             bool successEnable = bool.TryParse(_IConfiguration["EnableRegistration"], out bool enableRegistration);
 
 
-            bool disableActivate = bool.TryParse(_IConfiguration["DisableActivate"], out bool disableActiveAccount);
+            if (!bool.TryParse(_IConfiguration["CONFOMEET_ACTIVATE_ON_REGISTER"], out bool activateOnRegister))
+                activateOnRegister = false;
 
 
             if (successEnable && !enableRegistration)
@@ -865,7 +866,7 @@ namespace VideoProjectCore6.Services.UserService
             }
             if (sendNotification && !AddByAdmin)
             {
-                if (disableActivate && disableActiveAccount)
+                if (!activateOnRegister)
                 {
                     res.Code = APIResult.RESPONSE_CODE.NoResponse;
                     res.Message.Add("Your account requires activation from the admin now");
