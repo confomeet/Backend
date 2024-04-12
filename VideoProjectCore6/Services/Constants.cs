@@ -76,7 +76,6 @@ namespace VideoProjectCore6.Services
         public const string ADMIN = "1";
         public const string USER = "2";
         public const string VISITOR = "22";
-        public const string EXUSER = "23";
         public const string POLICE_STATION = "3";
         public const string CABIN = "4";
 

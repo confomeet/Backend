@@ -129,13 +129,6 @@ namespace VideoProjectCore6.Controllers.Account
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
         }
 
-        [HttpGet("Check")]
-        public async Task<IActionResult> CheckUserIfExist([FromQuery] int userId, [FromQuery] int userType)
-        {
-            var result = await _IUserRepository.GetLocalUserId(userId, userType);
-            return result.Id > 0 ? Ok(true) : Ok(false);
-        }
-
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("EditPassword")]
         public async Task<IActionResult> EditPassword(EditUserPasswordDTO editUserPasswordDTO, [FromHeader] string lang)

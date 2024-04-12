@@ -11,14 +11,9 @@ namespace VideoProjectCore6.Repositories.IUserRepository
 {
     public interface IUserRepository
     {
-        Task<bool> IsExist(string EmiratId);
-        Task<UserDto> GetOne(int Id);
         public int GetUserID();
         public string GetUserName();
         public bool IsAdmin();
-        public bool IsInspector();
-        public bool IsEmployee();
-        public string GetUserEid();
         public string GetUserEmail();
         public Task<APIResult> FindUserById(int id, string lang);
         public Task<APIResult> RefreshToken();
@@ -36,13 +31,10 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         public Task<APIResult> SendResetPasswordEmail(MultiLangMessage multiLangMessage, string email, string lang);
         public Task<APIResult> CreateUser(UserPostDto UserPostDto, string ImageUrl, bool updateRoles, string lang, bool FromUg);
         public Task<APIResult> DeleteUser(int id);
-        public Task<List<UserDto>> GetUsers();
         public Task<UserPermissionsDTO> GetUserPermissions(int userId);
         public Task<IdentityResult> EditUserRolesAsync(int userId, List<int> userRoles, string lang);
         Task<List<int>> GetUserClaimPermissions(int userId, string claimType);
         public void SignOut();
-        public Task<Dictionary<int, string>> GetEmployees();
-        public Task<CreateUserOldResultDto> CreateUserForOldAppParties(OldUserPostDto UserPostDto);
         public Task<APIResult> GetUserToken(int userId,int userType);
         public Task<APIResult> GetLocalUserId(int userId,int userType);
         public  Task<ListCount> GetUsers(string lang, int pageIndex = 1, int pageSize = 25);
@@ -61,8 +53,6 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         public Task Update(UserDto userDto);
         public Task<ListCount> SearchFilterUsers(string? text = null, string? name = null, string? email = null,
                                                        int pageIndex = 1, int pageSize = 25, string lang = "ar");
-        //Task<APIResult> AuthenticateUserExternal(int v);
-        // public Task<APIResult> GetLocalUserId(int userId);
         Task<APIResult> VerifyOTP(OtpLogInDto otpLogInDto, string lang);
         Task<APIResult> LogIn(LogInDto logInDto, string lang);
         Task<APIResult> LogInWithToken(string token);

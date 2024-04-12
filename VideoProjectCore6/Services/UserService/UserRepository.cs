@@ -92,11 +92,7 @@ namespace VideoProjectCore6.Services.UserService
             }
             return userID;
         }
-        public string GetUserEid()
-        {
-            string EmirateId = _httpContext.HttpContext.User.Claims.Where(x => x.Type == "EmirateId").Select(x => x.Value).FirstOrDefault();// FindFirst("EmirateId").Value ;
-            return EmirateId;
-        }
+
         public string GetUserEmail()
         {
             string Email = _httpContext.HttpContext.User.FindFirst(ClaimTypes.Email)?.Value;
@@ -110,16 +106,6 @@ namespace VideoProjectCore6.Services.UserService
         public bool IsAdmin()
         {
             return _httpContext.HttpContext.User.IsInRole(AdminPolicy);
-        }
-
-        public bool IsInspector()
-        {
-            return false;//_httpContext.HttpContext.User.IsInRole(Constants.InspectorPolicy);
-        }
-
-        public bool IsEmployee()
-        {
-            return _httpContext.HttpContext.User.IsInRole(EmployeePolicy);
         }
 
         //public bool IsPNSEmployee()
@@ -1476,24 +1462,6 @@ namespace VideoProjectCore6.Services.UserService
                     refreshToken = GenerateToken(claims, _jwt.Key, true);
                 }
 
-                if (IsEmployee())
-                {
-                    try
-                    {
-                        //TODO
-                        //  await RefreshEmpLogin();
-                    }
-                    catch (Exception ex)
-                    {
-                        var msg = " error is : " + ex.Message;
-                        if (ex.InnerException != null && ex.InnerException.Message.Length > 0)
-                        {
-                            msg += "  " + ex.InnerException.Message;
-                        }
-                        _logger.LogInformation("Error in Refresh employee Login  " + msg);
-                    }
-                }
-
                 return result.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, refreshToken);
             }
             catch
@@ -1502,101 +1470,6 @@ namespace VideoProjectCore6.Services.UserService
             }
         }
 
-        // private async Task<LogInResultDto> SignIn(LogInDto logInDto, string lang)
-        // {
-        //     // using TransactionScope scope = new(TransactionScopeAsyncFlowOption.Enabled);
-        //     var user = await _userManager.FindByEmailAsync(logInDto.Email);
-
-        //     var userRoles = user != null ? await _IRoleRepository.GetRolesIdByUserId(user.Id) : null;
-
-        //     var onlyAdminLogin = bool.Parse(_IConfiguration["EnableOnlyAdminLogin"]);
-
-
-        //     LogInResultDto result = new();
-
-        //     if(onlyAdminLogin && (userRoles != null && !userRoles.Contains(Int32.Parse(Constants.ADMIN)) 
-        //         && !userRoles.Contains(Int32.Parse(Constants.EXUSER))))
-        //     {
-        //         result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
-        //         result.StatusCode.Message.Add(Translation.getMessage(lang, "InActiveEmail"));
-        //         return result;
-        //     }
-
-
-        //     if (user == null)
-        //     {
-        //         result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
-        //         result.StatusCode.Message.Add(Translation.getMessage(lang, "UserEmailError"));
-        //         return result;
-        //     }
-        //     var resSignin = await _signInManager.PasswordSignInAsync(user, logInDto.PassWord, false, lockoutOnFailure: true);
-        //     if (resSignin.IsNotAllowed)
-        //     {
-        //         if (user.ProfileStatus != null && user.ProfileStatus == Convert.ToInt32(PROFILE_STATUS.SUSPENDED))// User Is created without his knowing 
-        //         {
-        //             if (!await SendActivation(user))
-        //             {
-        //                 result.StatusCode.Code = APIResult.RESPONSE_CODE.NoResponse;
-        //                 result.StatusCode.Message.Add(Translation.getMessage(lang, "InActiveEmail"));
-        //             }
-        //             else
-        //             {
-        //                 result.StatusCode.Code = APIResult.RESPONSE_CODE.OK;
-        //                 result.StatusCode.Message.Add("Check your mail please");
-        //             }
-        //             return result;
-        //         }
-        //         result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
-        //         result.StatusCode.Message.Add(Translation.getMessage(lang, "UserAccountInactive"));
-        //         return result;
-        //     }
-        //     if (resSignin.IsLockedOut)
-        //     {
-        //         result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
-        //         result.StatusCode.Message.Add(Translation.getMessage(lang, "UserAccountLocked"));
-        //         return result;
-        //     }
-        //     if (!resSignin.Succeeded)
-        //     {
-        //         //await _userManager.SetLockoutEnabledAsync(user, true);
-        //         result.StatusCode.Code = APIResult.RESPONSE_CODE.BadRequest;
-        //         result.StatusCode.Message.Add(Translation.getMessage(lang, "wrongPassword"));
-        //         return result;
-        //     }
-
-        //     DateTime lastLog = DateTime.Now;
-        //     var info = await _DbContext.UserLogins.Where(x => x.UserId == user.Id).ToListAsync();
-        //     if (info.Count > 0)
-        //     {
-        //         lastLog = (DateTime)info.Last().LoginDate;
-        //     }
-
-        //     await LogUserSignInEvent(user, logInDto.UA);
-        //     return await PrepareUserLoggedInResponse(user);
-        // }
-
-
-        //private async Task<int> GetGenderIdAsync(string gender)
-        //{
-        //    int res = 1;
-        //    var lookupValue = await _DbContext.SysLookupValue.Where(x => x.Shortcut == "MALE").FirstOrDefaultAsync();
-        //    if (lookupValue != null)
-        //    {
-        //        res = lookupValue.Id;
-        //    }
-
-        //    if (gender == null) return res;
-
-        //    if (gender.Contains('F') || gender.Contains('f') || gender.Contains('ث'))
-        //    {
-        //        var lookupValueF = await _DbContext.SysLookupValue.Where(x => x.Shortcut == "FEMALE").FirstOrDefaultAsync();
-        //        if (lookupValueF != null)
-        //        {
-        //            return lookupValueF.Id;
-        //        }
-        //    }
-        //    return res;
-        //}
         private string GenerateToken(Claim[] claims, string key, bool longLifeTime = false)
         {
             int tokenPeriodInMinutes = 200;
@@ -1653,32 +1526,7 @@ namespace VideoProjectCore6.Services.UserService
             }
             return claims.ToArray();
         }
-        public async Task<bool> IsExist(string EmiratId)
-        {
-            return await _DbContext.Users.AnyAsync(m => m.EmiratesId == EmiratId);
-        }
-        public async Task<List<UserDto>> GetUsers()
-        {
-            List<UserDto> Users = await _DbContext.Users.Select(x => new UserDto
-            {
-                Address = x.Address,
-                BirthdayDate = x.BirthdayDate,
-                Email = x.Email,
-                EmailLang = x.EmailLang,
-                EmiratesId = x.EmiratesId,
-                FullName = x.FullName,
-                Gender = x.Gender,
-                Id = x.Id,
-                Image = x.Image,
-                PhoneNumber = x.PhoneNumber,
-                SmsLang = x.SmsLang,
-                TelNo = x.TelNo,
-                ProfileStatus = (int)x.ProfileStatus,
-                UserName = x.UserName
-            }).ToListAsync();
 
-            return Users;
-        }
         public async Task<bool> DisabledAccount(int id)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
@@ -1834,286 +1682,6 @@ namespace VideoProjectCore6.Services.UserService
                 _signInManager.SignOutAsync();
             }
         }
-        public async Task<UserDto> GetOne(int Id)
-        {
-            var query = _DbContext.Users.Where(x => x.Id == Id)
-                                         .Select(x => new UserDto
-                                         {
-                                             Address = x.Address,
-                                             BirthdayDate = x.BirthdayDate,
-                                             Email = x.Email,
-                                             EmailLang = x.EmailLang,
-                                             EmiratesId = x.EmiratesId,
-                                             FullName = x.FullName,
-                                             Id = x.Id,
-                                             SmsLang = x.SmsLang,
-                                             TelNo = x.TelNo,
-                                             PhoneNumber = x.PhoneNumber,
-                                             ProfileStatus = (int)x.ProfileStatus,
-                                             UserName = x.UserName,
-                                             AreaId = (int)x.AreaId,
-                                             NatId = (int)x.NatId,
-                                             Sign = x.Sign
-                                         });
-
-            return await query.FirstOrDefaultAsync();
-        }
-        public async Task<Dictionary<int, string>> GetEmployees()
-        {
-            Dictionary<int, string> dic = new Dictionary<int, string>();
-            var allEmployeeUsers = await _userManager.GetUsersInRoleAsync(EmployeePolicy);
-            dic = allEmployeeUsers.ToDictionary(x => x.Id, x => x.UserName);
-            return dic;
-        }
-
-        //public async Task<List<OnLineEmployee>> GetOnlineEmployees(DateTime date)
-        //{
-        //    List<OnLineEmployee> result = new List<OnLineEmployee>();
-
-        //    var logger = await (
-        //        from employeeLog in _DbContext.EmpLogger
-        //        join useInfo in _DbContext.User on employeeLog.UserId equals useInfo.Id
-        //        where employeeLog.LoggingDate.Date == date.Date
-        //        select new { UserID = useInfo.Id, UserName = useInfo.FullName, fLogIn = employeeLog.FirstLogin, logIn = employeeLog.LoggingDate, LogRec = employeeLog.PreviousLoginList }).ToListAsync();
-
-        //    foreach (var rec in logger)
-        //    {
-        //        OnLineEmployee onLineEmployee = new OnLineEmployee
-        //        {
-        //            UserId = rec.UserID,
-        //            UserName = rec.UserName,
-        //            LastStartWork = rec.logIn,
-        //            StartWork = (DateTime)rec.fLogIn,
-        //            Minutes = (int)((DateTime)rec.logIn - (DateTime)rec.fLogIn).TotalMinutes,
-        //            LogToday = rec.LogRec
-        //        };
-
-        //        if (rec.LogRec != null)
-        //        {
-        //            UserLog myDeserializedObj = new UserLog();
-        //            myDeserializedObj = Newtonsoft.Json.JsonConvert.DeserializeObject<UserLog>(rec.LogRec);
-        //            foreach (var log in myDeserializedObj.UserLogs)
-        //            {
-        //                var min = (int)(log.End - log.Start).TotalMinutes;
-        //                if (min > 0)
-        //                {
-        //                    onLineEmployee.Minutes += min;
-        //                }
-        //            }
-        //        }
-
-        //        result.Add(onLineEmployee);
-        //    }
-
-
-        //    return result;
-        //}
-
-        //public async Task<bool> RefreshEmpLogin()
-        //{
-        //    var userId = GetUserID();
-        //    var logDay = await _DbContext.EmpLogger.Where(x => x.UserId == userId && x.LoggingDate.Date == DateTime.Now.Date).FirstOrDefaultAsync();
-        //    if (logDay == null)
-        //    {
-
-        //        first login today for the employee.
-
-        //       await _DbContext.EmpLogger.AddAsync(new EmpLogger { UserId = userId, LoggingDate = DateTime.Now, FirstLogin = DateTime.Now });
-        //       await _DbContext.SaveChangesAsync();
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        if (logDay.FirstLogin == null || logDay.LoggingDate == null)
-        //        {
-
-        //            logDay.FirstLogin ??= DateTime.Now;
-        //            logDay.LoggingDate = DateTime.Now;
-        //            _DbContext.EmpLogger.Update(logDay);
-        //            await _DbContext.SaveChangesAsync();
-        //        }
-        //        else
-        //        {
-        //            if ((int)(DateTime.Now - logDay.LoggingDate).TotalMinutes > 21)
-        //            {
-        //                UserLog myDeserializedObj = new UserLog();
-        //                if (logDay.PreviousLoginList != null)
-        //                {
-        //                    myDeserializedObj = Newtonsoft.Json.JsonConvert.DeserializeObject<UserLog>(logDay.PreviousLoginList);
-        //                }
-
-        //                LogEntry entry = new LogEntry
-        //                {
-        //                    Start = (DateTime)logDay.FirstLogin,
-        //                    End = (DateTime)logDay.LoggingDate
-        //                };
-        //                myDeserializedObj.UserLogs.Add(entry);
-
-        //                logDay.PreviousLoginList = JsonConvert.SerializeObject(myDeserializedObj, Formatting.Indented);
-        //                logDay.FirstLogin = DateTime.Now;
-        //                logDay.LoggingDate = DateTime.Now;
-
-        //                _DbContext.EmpLogger.Update(logDay);
-        //                await _DbContext.SaveChangesAsync();
-        //            }
-        //            else
-        //            {
-        //                logDay.LoggingDate = DateTime.Now;
-        //                _DbContext.EmpLogger.Update(logDay);
-        //                await _DbContext.SaveChangesAsync();
-        //            }
-        //        }
-        //    }
-        //    return true;
-        //}
-
-        public async Task<CreateUserOldResultDto> CreateUserForOldAppParties(OldUserPostDto UserPostDto)
-        {
-
-            CreateUserOldResultDto res = new CreateUserOldResultDto();
-            var emailIdOldUsers = UserPostDto.Email;
-            var emaritIdOldUsers = UserPostDto.EmiratesId;
-
-            if (UserPostDto.EmiratesId != null && UserPostDto.EmiratesId != "0" && UserPostDto.EmiratesId != "" && UserPostDto.EmiratesId.Trim() != null)
-            {
-                UserPostDto.EmiratesId = UserPostDto.EmiratesId.Trim();
-                UserPostDto.EmiratesId = UserPostDto.EmiratesId.Trim().Replace(@"_", "");
-                UserPostDto.EmiratesId = UserPostDto.EmiratesId.Trim().Replace(@"-", "");
-                UserPostDto.EmiratesId = UserPostDto.EmiratesId.Trim().Replace(@"/", "");
-
-                if (!UserPostDto.EmiratesId.StartsWith("784") || UserPostDto.EmiratesId.Length != 15)
-                {
-                    UserPostDto.EmiratesId = "Invalid_Old_" + UserPostDto.EmiratesId;
-                }
-            }
-            else
-            {
-
-                var existUserName = await _DbContext.Users.Where(x => x.FullName.Trim() == UserPostDto.FullName.Trim()).FirstOrDefaultAsync();
-                if (existUserName != null)
-                {
-                    res.UserId = existUserName.Id;
-                    res.User = UserPostDto;
-                    res.Message = "Existed before same full Name";
-                    return res;
-                }
-
-                UserPostDto.EmiratesId = "Invalid_Old_" + _iGeneralRepository.GetNewValueBySec();
-            }
-
-            var existUser = await _DbContext.Users.Where(x => x.EmiratesId.Trim() == UserPostDto.EmiratesId.Trim()).FirstOrDefaultAsync();
-            if (existUser != null)
-            {
-                res.UserId = existUser.Id;
-                res.User = UserPostDto;
-                res.Message = "Existed before same Emarit id";
-                return res;
-            }
-
-            if (UserPostDto.Email == null || UserPostDto.Email == "0" || UserPostDto.Email == "")
-            {
-                string Email = INVALID_EMAIL_PREFIX + _iGeneralRepository.GetNewValueBySec() + INVALID_EMAIL_SUFFIX;
-                UserPostDto.Email = Email;
-            }
-            else
-            {
-                if (await _DbContext.Users.AnyAsync(x => x.Email.Trim() == UserPostDto.Email.Trim()))
-                {
-                    string Email = INVALID_EMAIL_PREFIX + _iGeneralRepository.GetNewValueBySec() + INVALID_EMAIL_SUFFIX;
-                    UserPostDto.Email = Email;
-                }
-            }
-
-            int index = UserPostDto.Email.IndexOf("@");
-            UserPostDto.UserName = UserPostDto.Email.Substring(0, index);
-
-
-            existUser = await _DbContext.Users.Where(x => x.UserName.Trim() == UserPostDto.UserName.Trim()).FirstOrDefaultAsync();
-            if (existUser != null)
-            {
-                res.UserId = existUser.Id;
-                res.User = UserPostDto;
-                res.Message = "Existed before same userName id";
-                return res;
-            }
-
-            if (UserPostDto.PhoneNumber != null)
-            {
-                UserPostDto.PhoneNumber = GetPhoneNumberWithCode(UserPostDto.PhoneNumber);
-                if (UserPostDto.PhoneNumber.Length > 25)
-                {
-                    throw new System.InvalidOperationException("invalid phone number");
-                }
-            }
-
-            try
-            {
-
-                User newUser = new User()
-                {
-                    TwoFactorEnabled = false,
-                    PhoneNumberConfirmed = false,
-                    PhoneNumber = UserPostDto.PhoneNumber,
-                    PasswordHash = UserPostDto.PasswordHash,
-                    EmailConfirmed = false,
-                    NormalizedEmail = UserPostDto.Email.ToUpper(),
-                    Email = UserPostDto.Email,
-                    NormalizedUserName = UserPostDto.UserName.ToLower(),
-                    UserName = UserPostDto.UserName,
-                    LockoutEnabled = false,
-                    AccessFailedCount = 0,
-                    FullName = UserPostDto.FullName,
-                    BirthdayDate = UserPostDto.BirthdayDate,
-                    Gender = UserPostDto.Gender,
-                    TelNo = UserPostDto.TelNo,
-                    Address = UserPostDto.Address,
-                    EmiratesId = UserPostDto.EmiratesId,
-                    CreatedDate = DateTime.Now,
-                    ProfileStatus = Convert.ToInt32(PROFILE_STATUS.ENABLED),
-                };
-
-
-                var result = await _userManager.CreateAsync(newUser, UserPostDto.PasswordHash);
-
-                if (!result.Succeeded)
-                {
-                    var errors = result.Errors.Select(x => x.Description).ToList();
-                    string errorResult = "";
-                    foreach (var x in errors)
-                    {
-                        errorResult = errorResult + " , " + x;
-                    }
-                    res.UserId = existUser.Id;
-                    res.User = UserPostDto;
-                    res.Message = errorResult;
-                    return res;
-                }
-
-
-                var resRole = await EditUserRolesAsync(newUser.Id, UserPostDto.UserRoles, "en");
-                if (!resRole.Succeeded)
-                {
-                    res.UserId = newUser.Id;
-                    res.User = UserPostDto;
-                    res.Message = "Success in adding but failed in adding role";
-                    return res;
-                }
-
-                res.UserId = newUser.Id;
-                res.User = UserPostDto;
-                res.Message = "Success";
-                return res;
-
-            }
-
-            catch (Exception ex)
-            {
-                res.UserId = 0;
-                res.User = UserPostDto;
-                res.Message = "Failed," + ex.Message;
-                return res;
-            }
-        }
 
         // TODO
         private int GetNewValueBySec()
@@ -2172,25 +1740,6 @@ namespace VideoProjectCore6.Services.UserService
                 return result.FailMe(-1, "No matching user");
             }
         }
-
-        //public async Task<APIResult> GetLocalUserId(int userId)
-        //{
-        //    APIResult result = new APIResult();
-
-        //    int localUserId = await _DbContext.Users.Where(x => x.Id == userId).Select(x => x.Id).FirstOrDefaultAsync();
-
-        //    if (localUserId > 0)
-
-        //    {
-        //        return result.SuccessMe(localUserId);
-        //    }
-
-        //    else
-
-        //    {
-        //        return result.FailMe(-1, "No matching user");
-        //    }
-        //}
 
         public async Task<ListCount> GetUsers(string lang, int pageIndex = 1, int pageSize = 25)
         {
@@ -2892,12 +2441,6 @@ namespace VideoProjectCore6.Services.UserService
             else
                 msg = "Internal Server Error";
             result.FailMe(-1, msg, false, code);
-            return result;
-        }
-
-        private static APIResult PrepareTwoFactorRequiredResponse() {
-            APIResult result = new();
-            ;
             return result;
         }
 
