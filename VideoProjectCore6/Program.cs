@@ -12,7 +12,6 @@ using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 using VideoProjectCore6;
 using VideoProjectCore6.DTOs.ChannelDto;
-using VideoProjectCore6.DTOs.JWTDto;
 using VideoProjectCore6.Models;
 using VideoProjectCore6.Repositories;
 using VideoProjectCore6.Repositories.IChannelRepository;
@@ -186,12 +185,10 @@ builder.Services.AddSwaggerGen(c =>
 
 
 //---------------------token ----------------------------
-builder.Services.Configure<JWTDto>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<ChannelMailFirstSetting>(builder.Configuration.GetSection("ChannelMailFirstSetting"));
 builder.Services.Configure<ChannelSMSSetting>(builder.Configuration.GetSection("ChannelSMSSetting"));
 
-//var Key = Encoding.ASCII.GetBytes("this-is-my-secret-key");
-var Key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]!);
+var ConfomeetJwtAuthKey = Encoding.ASCII.GetBytes(builder.Configuration["CONFOMEET_AUTH_JWT_KEY"]!);
 
 int passFailureMaxCount = 3;
 bool successFailureAttempts = int.TryParse(builder.Configuration["PassworFailureAttempts"], out int passworFailureAttempts);
@@ -221,7 +218,7 @@ authenticationBuilder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwt =
     jwt.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Key),
+        IssuerSigningKey = new SymmetricSecurityKey(ConfomeetJwtAuthKey),
         ValidateIssuer = false,
         ValidateAudience = false,
         // active token expiration.

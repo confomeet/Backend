@@ -14,7 +14,6 @@ using VideoProjectCore6.DTOs.AccountDto;
 using VideoProjectCore6.DTOs.ChannelDto;
 using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.DTOs.FileDto;
-using VideoProjectCore6.DTOs.JWTDto;
 using VideoProjectCore6.DTOs.NotificationDto;
 using VideoProjectCore6.DTOs.RoleDto;
 using VideoProjectCore6.DTOs.UserDTO;
@@ -47,10 +46,11 @@ namespace VideoProjectCore6.Services.UserService
         private readonly ILogger<UserRepository> _logger;
         private readonly INotificationSettingRepository _INotificationSettingRepository;
         private readonly IFileRepository _IFileRepository;
+        private readonly string _ConfomeetAuthJwtKey;
 
         ValidatorException _exception;
-        private readonly JWTDto _jwt;
-        public UserRepository(IRoleRepository iRoleRepository, IOptions<JWTDto> jwt, SignInManager<User> signInManager,
+        public UserRepository(IRoleRepository iRoleRepository,
+                             SignInManager<User> signInManager,
                              OraDbContext OraDbContext, IHttpContextAccessor httpContext,
                              IGeneralRepository iGeneralRepository,
                              UserManager<User> userManager,
@@ -77,10 +77,13 @@ namespace VideoProjectCore6.Services.UserService
             _logger = logger;
             _mailSetting = mailSetting;
             _smsSetting = smsSetting;
-            _jwt = jwt.Value;
             _exception = new ValidatorException();
             _INotificationSettingRepository = iNotificationSettingRepository;
             _IFileRepository = fileRepository;
+            if (string.IsNullOrEmpty(iConfiguration["CONFOMEET_AUTH_JWT_KEY"])) {
+                throw new Exception("CONFOMEET_AUTH_JWT_KEY is not configured.");
+            }
+            _ConfomeetAuthJwtKey = iConfiguration["CONFOMEET_AUTH_JWT_KEY"];
         }
 
         public int GetUserID()
@@ -1458,8 +1461,7 @@ namespace VideoProjectCore6.Services.UserService
                 var user = await _DbContext.Users.Where(x => x.Id == GetUserID()).FirstOrDefaultAsync();
                 if (user != null)
                 {
-                    Claim[] claims = GenerateClaims(user);
-                    refreshToken = GenerateToken(claims, _jwt.Key, true);
+                    refreshToken = MakeAuthJwt(user, true);
                 }
 
                 return result.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, refreshToken);
@@ -1470,22 +1472,22 @@ namespace VideoProjectCore6.Services.UserService
             }
         }
 
-        private string GenerateToken(Claim[] claims, string key, bool longLifeTime = false)
+        private string MakeAuthJwt(User user, bool longLifeTime = false)
         {
             int tokenPeriodInMinutes = 200;
 
             int tokenPeriodOutDays = 30;
 
-            if (_IConfiguration["jwt:TokenInMinutes"] == null)
+            if (_IConfiguration["CONFOMEET_AUTH_JWT_LIFETIME_MINUTES"] == null)
             {
-                _logger.LogInformation("Warning!!! jwt:TokenInMinutes is missing");
+                _logger.LogWarning("CONFOMEET_AUTH_JWT_LIFETIME_MINUTES is missing");
             }
             else
             {
-                bool success = int.TryParse(_IConfiguration["jwt:TokenInMinutes"], out int settingPeriod);
+                bool success = int.TryParse(_IConfiguration["CONFOMEET_AUTH_JWT_LIFETIME_MINUTES"], out int settingPeriod);
                 if (!success || settingPeriod < 1)
                 {
-                    _logger.LogInformation("jwt:TokenInMinutes is invalid number or < 1 minute");
+                    _logger.LogWarning("CONFOMEET_AUTH_JWT_LIFETIME_MINUTES is invalid number or < 1 minute");
                 }
                 else
                 {
@@ -1493,30 +1495,27 @@ namespace VideoProjectCore6.Services.UserService
                 }
             }
             var expDate = longLifeTime ? DateTime.Now.AddDays(tokenPeriodOutDays) : DateTime.Now.AddMinutes(tokenPeriodInMinutes);
-            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_ConfomeetAuthJwtKey));
             var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha512);
-            var jwt = new JwtSecurityToken(signingCredentials: signingCredentials,
-                claims: claims, expires: expDate);
+            var jwt = new JwtSecurityToken(
+                issuer: _IConfiguration["CurrentHostName"],
+                audience: "*",
+                claims: GenerateAuthJwtClaims(user),
+                expires: expDate,
+                signingCredentials: signingCredentials
+            );
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
-        private Claim[] GenerateClaims(User user)
+        private Claim[] GenerateAuthJwtClaims(User user)
         {
             var claims = new List<Claim>
             {
-
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Name, user.UserName),
-             //   new Claim("EmirateId", user.EmiratesId),
-                new Claim("iss","MOJ_NOTARY"),
-            //    new Claim(ClaimTypes.Expiration, new DateTimeOffset().ToUniversalTime().ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
             };
 
-            //if (!string.IsNullOrWhiteSpace(user.UuId))
-            //{
-            //    claims.Add(new Claim("uuid", user.UuId));
-            //}
             foreach (var role in _roleManager.Roles.ToList())
             {
                 if (_userManager.IsInRoleAsync(user, role.Name).Result)
@@ -2203,7 +2202,7 @@ namespace VideoProjectCore6.Services.UserService
                     ValidateAudience = false,
                     ValidateIssuer = false,
                     ValidateLifetime = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_ConfomeetAuthJwtKey)),
                 }, out _);
             } catch (SecurityTokenException e) {
                 _logger.LogInformation("Failed LogInWithToken attempt, token={}, error={}", token, e.Message);
@@ -2249,8 +2248,8 @@ namespace VideoProjectCore6.Services.UserService
             return await PrepareUserLoggedInResponse(user);
         }
 
-        private string BuildCreateConfUrl(int userId, string pathToTokenLogin) {
-            var createConfAuthToken = GenerateToken([new Claim("user_id", userId.ToString())], _jwt.Key, true);
+        private string BuildCreateConfUrl(User user, string pathToTokenLogin) {
+            var createConfAuthToken = MakeAuthJwt(user, true);
             var redirectUrl = _IConfiguration["Meeting:host"] + "/meet/panel/events";
 
             // var baseUrl = _IConfiguration["Meeting:host"] + pathToTokenLogin;
@@ -2293,7 +2292,7 @@ namespace VideoProjectCore6.Services.UserService
                         FileSize = w.FileSize
                     }),
                     UserGroups = currentUser.UserGroups.Select(o => o.Group.GroupName).ToList().Count > 0 ? currentUser.UserGroups.Select(o => new ValueId { Id = o.GroupId, Value = o.Group.GroupName }).ToList() : defaultGroup,
-                    CreateConfLink = BuildCreateConfUrl(currentUserId, pathToTokenLogin),
+                    CreateConfLink = BuildCreateConfUrl(currentUser, pathToTokenLogin),
                 };
 
                 return res.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, userProfileGetDto);
@@ -2384,8 +2383,7 @@ namespace VideoProjectCore6.Services.UserService
             var lastUserLogIn = await _DbContext.UserLogins.Where(x => x.UserId == user.Id).OrderByDescending(x => x.LoginDate).Take(1).LastOrDefaultAsync();
             DateTime? lastLogInDate = (lastUserLogIn != null) ? lastUserLogIn.LoginDate : DateTime.Now;
 
-            Claim[] claims = GenerateClaims(user);
-            string jwt = GenerateToken(claims, _jwt.Key);
+            string jwt = MakeAuthJwt(user);
 
             try
             {

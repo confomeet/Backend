@@ -13,7 +13,6 @@ using VideoProjectCore6.DTOs.AccountDto;
 using VideoProjectCore6.DTOs.ChannelDto;
 using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.DTOs.EventDto;
-using VideoProjectCore6.DTOs.JWTDto;
 using VideoProjectCore6.DTOs.NotificationDto;
 using VideoProjectCore6.Models;
 using VideoProjectCore6.Repositories;
