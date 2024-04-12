@@ -339,3 +339,6 @@ modules/
 React Web Project/debug.log
 
 out/
+
+# Ignore local dev configuration, since it contains various credentials.
+*/appsettings.Development.json
