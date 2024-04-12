@@ -645,11 +645,6 @@ namespace VideoProjectCore6.Models
                 .HasPrecision(10)
                 .HasColumnName("event_type");
 
-                entity.Property(e => e.ConfId)
-                .HasMaxLength(100)
-                .HasColumnName("conf_id");
-
-
                 entity.Property(e => e.UserId)
                     .HasMaxLength(100)
                     .HasColumnName("user_id");

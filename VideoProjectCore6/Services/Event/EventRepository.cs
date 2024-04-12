@@ -2232,9 +2232,8 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             var FilePath = "";
 
 
-            List<ConfEventCompactGet> eventLogs = await _DbContext.ConfEvents.OrderByDescending(o => o.Id).Where(x => x.MeetingId == id.ToString()
-
-            && x.ConfId.Equals(meetingId)).Select(s => new ConfEventCompactGet
+            List<ConfEventCompactGet> eventLogs = await _DbContext.ConfEvents.OrderByDescending(o => o.Id).Where(x => x.MeetingId == id.ToString())
+            .Select(s => new ConfEventCompactGet
             {
                 EventTime = s.EventTime,
 
@@ -2359,7 +2358,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
     {
         List<ConfEventCompactGet> eventLogs = allRooms
             .OrderByDescending(o => o.Id)
-            .Where(x => x.MeetingId == id.ToString() && x.ConfId.Equals(meetingId))
+            .Where(x => x.MeetingId == id.ToString())
             .Select(s => new ConfEventCompactGet
             {
                 EventTime = timeZoneId != null ? TimeConverter.ConvertFromUtc(s.EventTime, timeZoneId) : s.EventTime,

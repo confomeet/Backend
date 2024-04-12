@@ -21,7 +21,7 @@ namespace VideoProjectCore6.Controllers.ConfEvent
         }
 
         [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
-        [HttpGet("roomList")]
+        [HttpGet("ActiveRoomsList")]
         public async Task<ActionResult> GetRoom([FromHeader] string lang = "ar")
         {
             return Ok(await _IConfEventRepository.HandleListRoom(lang));
@@ -32,13 +32,6 @@ namespace VideoProjectCore6.Controllers.ConfEvent
         public async Task<ActionResult> GetParticipantsByRoom([FromBody] DateTimeRange range, [FromRoute] string meetingId, [FromRoute] string id, [FromHeader] string lang = "ar")
         {
             return Ok(await _IConfEventRepository.HandleGetRoom(range, id, meetingId));
-        }
-
-        [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
-        [HttpGet("roomUsersList")]
-        public async Task<ActionResult> GetParticipantsByRooms([FromBody] List<string> roomNames, [FromHeader] string lang = "ar")
-        {
-            return Ok(await _IConfEventRepository.HandleRoomsUsersList(roomNames, lang));
         }
     }
 }

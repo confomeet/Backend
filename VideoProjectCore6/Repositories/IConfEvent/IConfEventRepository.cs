@@ -14,7 +14,5 @@ namespace VideoProjectCore6.Repositories.IConfEventRepository
         Task<APIResult> HandleGetRoom(DateTimeRange range, string pId, string meetingID);
 
         Task<APIResult> HandleListRoom(string lang);
-
-        Task<APIResult> HandleRoomsUsersList(List<string> names, string lang);
     }
 }

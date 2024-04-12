@@ -1,7 +1,7 @@
 ﻿using Flurl;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+using System.Diagnostics;
 using System.Xml;
 using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.DTOs.ConfEventDto;
@@ -11,13 +11,12 @@ using VideoProjectCore6.Hubs;
 using VideoProjectCore6.Models;
 using VideoProjectCore6.Repositories;
 using VideoProjectCore6.Repositories.IConfEventRepository;
-using VideoProjectCore6.Repositories.IUserRepository;
 using VideoProjectCore6.Utility;
 using static VideoProjectCore6.Services.Constants;
 
 namespace VideoProjectCore6.Services.ConfEventService
 {
-    public class ConfEventRepository(IGeneralRepository GeneralRepository, OraDbContext dbContext, IConfiguration configuration) : IConfEventRepository
+    public class ConfEventRepository(IGeneralRepository GeneralRepository, OraDbContext dbContext, IConfiguration configuration, ILogger<ConfEventRepository> logger) : IConfEventRepository
     {
 
         private readonly OraDbContext _DbContext = dbContext;
@@ -25,6 +24,7 @@ namespace VideoProjectCore6.Services.ConfEventService
         private readonly IConfiguration _IConfiguation = configuration;
 
         private readonly IGeneralRepository _IGeneralRepository = GeneralRepository;
+        private readonly ILogger<ConfEventRepository> _ILogger = logger;
 
         public async Task<APIResult> AddProsodyEvent(ProsodyEventPostDto prosodyEventPostDto, IHubContext<EventHub> HubContext)
         {
@@ -113,7 +113,6 @@ namespace VideoProjectCore6.Services.ConfEventService
                 ConfEvent res = new()
                 {
                     EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED,
-                    ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex),
                     MeetingId = prosodyEventPostDto.meetingId,
                     EventTime = dateTime
                 };
@@ -157,7 +156,6 @@ namespace VideoProjectCore6.Services.ConfEventService
                 ConfEvent res = new()
                 {
                     EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE,
-                    ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex),
                     MeetingId = prosodyEventPostDto.meetingId,
                     EventTime = dateTime
                 };
@@ -201,7 +199,6 @@ namespace VideoProjectCore6.Services.ConfEventService
                 ConfEvent res = new()
                 {
                     EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE_LOBBY,
-                    ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex),
                     MeetingId = prosodyEventPostDto.meetingId,
                     EventTime = dateTime
                 };
@@ -247,7 +244,6 @@ namespace VideoProjectCore6.Services.ConfEventService
                 ConfEvent res = new()
                 {
                     EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN,
-                    ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex),
                     MeetingId = prosodyEventPostDto.meetingId,
 
                     EventTime = dateTime
@@ -344,7 +340,6 @@ namespace VideoProjectCore6.Services.ConfEventService
                 ConfEvent res = new()
                 {
                     EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED,
-                    ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex),
                     EventInfo = prosodyEventPostDto.message,
                     MeetingId = prosodyEventPostDto.meetingId,
                     EventTime = dateTime
@@ -379,7 +374,7 @@ namespace VideoProjectCore6.Services.ConfEventService
 
             List<ConfEvent> confEvents = await _DbContext.ConfEvents.Where(e => (e.EventTime > range.StartDateTime.Date && e.EventTime < range.EndDateTime.AddDays(1).Date)).ToListAsync();
 
-            var lastState = confEvents.OrderByDescending(x=>x.Id).Where(x => x.ConfId.Equals(meetingID) && x.MeetingId.ToString().Equals(pId)).FirstOrDefault();
+            var lastState = confEvents.OrderByDescending(x=>x.Id).Where(x => x.MeetingId.ToString().Equals(pId)).FirstOrDefault();
 
             if(lastState == null)
             {
@@ -398,8 +393,7 @@ namespace VideoProjectCore6.Services.ConfEventService
 
               && c.MeetingId.ToString().Equals(pId)
 
-              && c.ConfId.Equals(meetingID)
-              && confEvents.Where(p => p.EventType == EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE && p.MeetingId == c.MeetingId && p.ConfId.Equals(c.ConfId) && c.UserId.Equals(p.UserId) && c.EventTime < p.EventTime).FirstOrDefault() != null
+              && confEvents.Where(p => p.EventType == EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE && p.MeetingId == c.MeetingId && c.UserId.Equals(p.UserId) && c.EventTime < p.EventTime).FirstOrDefault() != null
             ).ToList();
 
 
@@ -441,133 +435,42 @@ namespace VideoProjectCore6.Services.ConfEventService
         /// <returns>Return list of active rooms</returns>
         public async Task<APIResult> HandleListRoom(string lang)
         {
-            var openRooms = await _DbContext.ConfEvents.ToListAsync();
-
             var events = await _DbContext.Events.ToListAsync();
 
-
-            APIResult res = new APIResult();
-
-            List<ConfEvent> activeRooms = new List<ConfEvent>();
-
-            foreach (ConfEvent ev in openRooms)
-            {
-
-                //ConfEvent finishedConference = openRooms.OrderByDescending(x => x.Id).FirstOrDefault(x => x.EventType == 2
-                //    && x.ConfId.Equals(ev.ConfId)
-                //    && x.MeetingId.Equals(ev.MeetingId));
-
-                var lastState = openRooms.OrderByDescending(x => x.Id).Where(x => x.ConfId.Equals(ev.ConfId) 
-                                && x.MeetingId == ev.MeetingId).FirstOrDefault();
-
-                if (lastState != null && lastState.EventType != Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED)
-                {
-                    activeRooms.Add(ev);
-                }
-
-            }
+            APIResult res = new();
 
             try
             {
-                List<Models.Event> activeEvents = new List<Models.Event>();
-
-                foreach (Models.Event ev in events)
-                {
-
-                    if (activeRooms.Select(r => r.ConfId).Contains(ev.MeetingId) && activeRooms.Select(r => r.MeetingId).Contains(ev.Id.ToString()))
+                var activeRooms = await
+                    _DbContext.ConfEvents.AsNoTracking()
+                    .GroupBy(confEv => confEv.MeetingId)
+                    .Select(g => new
                     {
+                        MeetingId = g.Key,
+                        g.OrderByDescending(e => e.EventTime).First().EventType
+                    })
+                    .Where(x => x.EventType != EVENT_TYPE.EVENT_TYPE_CONF_FINISHED)
+                    .Select(y => y.MeetingId)
+                    .ToListAsync();
 
-                        Models.Event singleEvent = new Models.Event()
-                        {
-                            Id = ev.Id,
-       
-                            CreatedBy = ev.CreatedBy,
-                            OrderNo = ev.OrderNo,
-                            Topic = ev.Topic,
-                            SubTopic = ev.SubTopic,
-                            Organizer = ev.Organizer,
-                            Description = ev.Description,
-                            MeetingId = ev.MeetingId,
-                            StartDate = ev.StartDate,
-                            EndDate = ev.EndDate,
-                            TimeZone = ev.TimeZone,
-                            Type = ev.Type,
-                        };
-
-                        activeEvents.Add(singleEvent);
-                    }
-
-                }
-
-                return res.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, activeEvents);
-            }
-
-            catch
-            {
-
-                return res.FailMe(-1, "Failed to get active rooms");
-            }
-
-        }
-
-
-     
-        /// <param name="names"></param>
-        /// <param name="lang"></param>
-        /// <returns>Return active users of all rooms</returns>
-        public async Task<APIResult> HandleRoomsUsersList(List<string> names, string lang)
-        {
-            APIResult res = new APIResult();
-
-            var openRooms = await _DbContext.ConfEvents.ToListAsync();
-
-            var confUsers = await _DbContext.ConfUsers.ToListAsync();
-
-            List<ConfEvent> activeRooms = new List<ConfEvent>();
-
-            foreach(ConfEvent ev in openRooms)
-            {
-                if(names.Contains(ev.ConfId) && (ev.EventType == EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN))
-                {
-                    var lastEventInConf = openRooms.OrderByDescending(x=>x.Id).FirstOrDefault(
-                            x => (x.EventType == EVENT_TYPE.EVENT_TYPE_CONF_FINISHED || x.EventType == EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE) && x.ConfId.Equals(ev.ConfId)
-                        );
-                    if (lastEventInConf != null)
-                        activeRooms.Add(ev);
-                }
-            }
-
-            try
-            {
-
-                List<User> activeEvents = new List<User>();
-
-                foreach (ConfUser confUser in confUsers)
-                {
-
-                    if (activeRooms.Select(r => r.UserId).Contains(confUser.Id.ToString()))
+                var activeEvents = await
+                    _DbContext.Events.AsNoTracking()
+                    .Where(ev => activeRooms.Contains(ev.MeetingId))
+                    .Select(x => new ActiveRoom
                     {
+                        MeetingId = x.MeetingId,
+                        Topic = x.Topic
+                    })
+                    .ToListAsync();
 
-                        User newUser = new User()
-                        {
-                            FullName = confUser.Name,
-                            Email = confUser.Email
-                        };
-
-                        if (!activeEvents.Select(a => a.Email).Contains(newUser.Email))
-                        {
-                            activeEvents.Add(newUser);
-                        }
-                    }
-                }
-
-                return res.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, activeEvents);
+                res.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, activeEvents);
             }
-
-            catch
+            catch (Exception e)
             {
-                return res.FailMe(-1, "Failed to get active rooms");
+                _ILogger.LogError("Quering active rooms failed due to db error: {}", e.Message);
+                res.FailMe(-1, "Failed to get active rooms", false, APIResult.RESPONSE_CODE.ERROR);
             }
+            return res;
         }
 
         public async Task<APIResult> GetUserEventsStatus(int userId, ConfEvent confEvent)
@@ -633,9 +536,6 @@ namespace VideoProjectCore6.Services.ConfEventService
             {
 
                 var changedEvents = events.Where(x =>
-
-                (confEvent.ConfId.Equals(x.MeetingId))
-                &&
                 (confEvent.MeetingId == x.Id.ToString())
                 &&
 

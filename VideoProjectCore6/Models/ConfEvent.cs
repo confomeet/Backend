@@ -1,20 +1,24 @@
-﻿using VideoProjectCore6.Services;
+﻿using System.ComponentModel.DataAnnotations;
+using VideoProjectCore6.Services;
 
 namespace VideoProjectCore6.Models
 {
     public partial class ConfEvent
     {
         public int Id { get; set; }
+
+        [Required]
         public DateTime EventTime { get; set; }
 
+        [Required]
         public Constants.EVENT_TYPE EventType { get; set; }
-
-        public string ConfId { get; set; } = string.Empty;
 
         public string UserId { get; set; } = "string";
 
         public string EventInfo { get; set; } = string.Empty;
-        public string MeetingId { get; set; } = "10000";
+
+        [Required]
+        public string MeetingId { get; set; } = null!;
 
     }
 }
