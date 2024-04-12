@@ -24,18 +24,8 @@ namespace VideoProjectCore6.Repositories.IEventRepository
         Task<EventFullView?> EventDetails(int id,int userId, string timeZoneId);
 
         Task<APIResult> EventParticipantLinks(int id, int userId);
-
-
-
         Task<APIResult> UpdateEventParticipants(ParticipantsAsObj dtos, int eventId, int addBy, string lang, bool sendNotification, bool sendToAll);
-
-        Task<APIResult> AddEventType(List<Dictionary<string, string>> value);
-
-        //DeleteEventType
-
-        Task<APIResult> DeleteEventType(int id, string lang);
         Task<APIResult> AddRecurrenceEvents(EventWParticipant dto, DateTimeOfRule rDates, int addBy,bool sendNotification, string lang);
-        Task<APIResult> EditEventType(List<Dictionary<string, string>> value, int id, string lang);
         Task<APIResult> ShiftRecurrenceEvents(int eventId, DateTimeRange dto, int updatedBy,bool updateThis=true, string lang="ar" );
         Task<APIResult> Reschedule(int id, MeetingEventDto dto, int updatedBy, string lang);
         Task<APIResult> ReNotifyParticipants(int eventId,int userId, string lang);

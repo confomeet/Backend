@@ -1529,33 +1529,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
 
     }
 
-    public async Task<APIResult> AddEventType(List<Dictionary<string, string>> eventType)
-    {
-        APIResult result = new APIResult();
-        try
-        {
-            await _IGeneralRepository.AddNewLookUpType(eventType, "event_type");
-            return result.SuccessMe(1, "Ok", true, APIResult.RESPONSE_CODE.CREATED);
-        }
-        catch
-        {
-            return result.FailMe(-1, "Failed");
-        }
-    }
-
-    public async Task<APIResult> DeleteEventType(int id, string lang)
-    {
-
-        return await _IGeneralRepository.DeleteLookUpType(id, "event_type");
-
-    }
-
-    public async Task<APIResult> EditEventType(List<Dictionary<string, string>> value, int id, string lang)
-    {
-
-        return await _IGeneralRepository.EditLookUpType(value, id, "event_type");
-    }
-
     public async Task<EventFullView?> EventDetails(int id, int userId, string timeZoneId)
     {
         var relatedUsers = await _DbContext.Users.Where(u => u.EntityId == userId).Select(u => u.Id).ToListAsync();

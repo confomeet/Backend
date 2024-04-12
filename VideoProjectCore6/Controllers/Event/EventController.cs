@@ -167,54 +167,12 @@ namespace VideoProjectCore6.Controllers.Event
             return result.Id > 0 ? Ok(result) : BadRequest(result);
         }
 
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("AddType")]
-        public async Task<ActionResult> AddEventType([FromBody] List<Dictionary<string, string>> value)
-        {
-            var result = await _IEventRepository.AddEventType(value);
-            if (result != null)
-            {
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
-
-            return StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpDelete("DeleteEventType")]
-        public async Task<ActionResult> DeleteEventType([FromQuery] int id, [FromHeader] string lang)
-        {
-            var result = await _IEventRepository.DeleteEventType(id, lang);
-            if (result != null)
-            {
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
-
-            return StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
-
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("AddRecurrence")]
         public async Task<ActionResult> AddREvent([FromBody] RecurrenceEvent events, [FromHeader] string lang = "ar")
         {
             var result = await _IEventRepository.AddRecurrenceEvents(events.Event, events.RDates, _IUserRepository.GetUserID(), true, lang);
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status404NotFound, result);
-        }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPut("EditEventType")]
-        public async Task<ActionResult> EditEventType([FromBody] List<Dictionary<string, string>> value, [FromQuery] int id, [FromHeader] string lang)
-        {
-            var result = await _IEventRepository.EditEventType(value, id, lang);
-
-            if (result != null)
-
-            {
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
-
-            return StatusCode(StatusCodes.Status404NotFound, "error occurred");
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
