@@ -106,10 +106,6 @@ namespace VideoProjectCore6.Services.ConfEventService
         {
             try
             {
-
-                int confIdIndex = prosodyEventPostDto.to.IndexOf("@"+ _IConfiguation["ProsodyDomain"]);
-                if (confIdIndex < 0) return null;
-
                 ConfEvent res = new()
                 {
                     EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED,
@@ -149,10 +145,6 @@ namespace VideoProjectCore6.Services.ConfEventService
 
             try
             {
-
-                int confIdIndex = prosodyEventPostDto.to.IndexOf("@" + _IConfiguation["ProsodyDomain"]);
-                if (confIdIndex < 0) return null;
-
                 ConfEvent res = new()
                 {
                     EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE,
@@ -192,10 +184,6 @@ namespace VideoProjectCore6.Services.ConfEventService
 
             try
             {
-
-                int confIdIndex = prosodyEventPostDto.to.IndexOf("@" + _IConfiguation["ProsodyDomain"]);
-                if (confIdIndex < 0) return null;
-
                 ConfEvent res = new()
                 {
                     EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE_LOBBY,
@@ -236,11 +224,6 @@ namespace VideoProjectCore6.Services.ConfEventService
 
             try
             {
-
-                int confIdIndex = prosodyEventPostDto.to.IndexOf("@" + _IConfiguation["ProsodyDomain"]);
-
-                if (confIdIndex < 0) return null;
-
                 ConfEvent res = new()
                 {
                     EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN,
@@ -333,10 +316,6 @@ namespace VideoProjectCore6.Services.ConfEventService
         {
             try
             {
-
-                int confIdIndex = prosodyEventPostDto.to.IndexOf("@" + _IConfiguation["ProsodyDomain"]);
-                if (confIdIndex < 0) return null;
-
                 ConfEvent res = new()
                 {
                     EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED,
