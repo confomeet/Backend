@@ -389,7 +389,7 @@ namespace VideoProjectCore6.Services.Meeting
                 name = user.FullName,
                 email = string.IsNullOrWhiteSpace(participant.Email) ? user.Email : participant.Email,
                 groupId = event_.Id.ToString(),
-                partyId = partyId != null ? partyId.ToString() : string.Empty,
+                participantGuid = partyId != null ? partyId.ToString() : string.Empty,
             };
 
             IdentityOptions identityOptions = new IdentityOptions();
@@ -531,6 +531,7 @@ namespace VideoProjectCore6.Services.Meeting
                 name = userData != null ? userData.Name : "user",
                 email = "not available",
                 groupId = event_.Id.ToString(),
+                participantGuid = userId?.ToString() ?? "hardcoded_user",
             };
 
             if (userId == null)
@@ -834,6 +835,6 @@ public struct UserStruct
     public string email { get; set; }   // email restrict to be in small letter name accord to conference meeting.
 
     public string groupId { get; set; }
-    public string partyId { get; set; }
+    public string participantGuid { get; set; }
 
 }

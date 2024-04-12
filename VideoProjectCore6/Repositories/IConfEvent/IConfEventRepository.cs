@@ -9,16 +9,12 @@ namespace VideoProjectCore6.Repositories.IConfEventRepository
 {
     public interface IConfEventRepository
     {
-        
-        Task<APIResult> getConfEvents(string lang);
-        Task<APIResult> getConfEventById(int id, string lang);
-        Task<APIResult> addConfEvent(ConfEventPostDto confEventPostDto,string lang);
-        Task<APIResult> addProsodyEvent(ProsodyEventPostDto prosodyEventPostDto, IHubContext<EventHub> HubContext);
+        Task<APIResult> AddProsodyEvent(ProsodyEventPostDto prosodyEventPostDto, IHubContext<EventHub> HubContext);
 
-        Task<APIResult> handleGetRoom(DateTimeRange range, string pId, string meetingID);
+        Task<APIResult> HandleGetRoom(DateTimeRange range, string pId, string meetingID);
 
-        Task<APIResult> handleListRoom(string lang);
+        Task<APIResult> HandleListRoom(string lang);
 
-        Task<APIResult> handleRoomsUsersList(List<string> names, string lang);
+        Task<APIResult> HandleRoomsUsersList(List<string> names, string lang);
     }
 }

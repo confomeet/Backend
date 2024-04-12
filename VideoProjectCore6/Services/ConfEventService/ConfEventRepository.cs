@@ -1,6 +1,7 @@
 ﻿using Flurl;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System.Xml;
 using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.DTOs.ConfEventDto;
@@ -10,128 +11,37 @@ using VideoProjectCore6.Hubs;
 using VideoProjectCore6.Models;
 using VideoProjectCore6.Repositories;
 using VideoProjectCore6.Repositories.IConfEventRepository;
-using VideoProjectCore6.Repositories.IContactRepository;
-using VideoProjectCore6.Repositories.IEventRepository;
 using VideoProjectCore6.Repositories.IUserRepository;
-using VideoProjectCore6.Services.ContactService;
-using VideoProjectCore6.Services.Event;
 using VideoProjectCore6.Utility;
 using static VideoProjectCore6.Services.Constants;
 
-/// <Author>
-/// Mikal
-/// </Author>
 namespace VideoProjectCore6.Services.ConfEventService
 {
-    public class ConfEventRepository : IConfEventRepository
+    public class ConfEventRepository(IGeneralRepository GeneralRepository, OraDbContext dbContext, IConfiguration configuration) : IConfEventRepository
     {
 
-        private readonly OraDbContext _DbContext;
+        private readonly OraDbContext _DbContext = dbContext;
 
-        private readonly IConfiguration _IConfiguation;
+        private readonly IConfiguration _IConfiguation = configuration;
 
-        private readonly IUserRepository _IUserRepository;
+        private readonly IGeneralRepository _IGeneralRepository = GeneralRepository;
 
-        private readonly IGeneralRepository _IGeneralRepository;
-
-  
-
-        public ConfEventRepository(IGeneralRepository GeneralRepository, OraDbContext dbContext, IConfiguration configuration, IUserRepository userRepository)
+        public async Task<APIResult> AddProsodyEvent(ProsodyEventPostDto prosodyEventPostDto, IHubContext<EventHub> HubContext)
         {
-            _DbContext = dbContext;
-            _IConfiguation = configuration;
-            _IUserRepository = userRepository;
-            _IGeneralRepository = GeneralRepository;
-    
-        }
-
-        public async Task<APIResult> addConfEvent(ConfEventPostDto confEventPostDto, string lang)
-        {
-            APIResult result = new APIResult();
-
-            ConfEvent newConf = new ConfEvent()
-            {
-                EventTime = confEventPostDto.EventTime,
-                EventType = confEventPostDto.EventType,
-                ConfId = confEventPostDto.ConfId,
-                UserId = confEventPostDto.UserId,
-                EventInfo = confEventPostDto.EventInfo,
-                MeetingId = confEventPostDto.MeetingId
-            };
-
-            try
-            {
-                await _DbContext.ConfEvents.AddAsync(newConf);
-                await _DbContext.SaveChangesAsync();
-                return result.SuccessMe(newConf.Id, Translation.getMessage(lang, "sucsessAdd"), true, APIResult.RESPONSE_CODE.CREATED);
-            }
-
-            catch
-            {
-                return result.FailMe(-1, Translation.getMessage(lang, "failedAdd"));
-            }
-        }
-
-        public async Task<APIResult> getConfEventById(int id, string lang)
-        {
-
-            APIResult result = new APIResult();
-
-            try
-            {
-                var confEvent = await _DbContext.ConfEvents.Where(c => c.Id == id).FirstOrDefaultAsync();
-
-                if (confEvent == null)
-                {
-                    return result.FailMe(-1, Translation.getMessage(lang, "NoMatchingRecord"));
-                }
-
-                return result.SuccessMe(1, "Ok", true, APIResult.RESPONSE_CODE.OK, confEvent);
-            }
-
-            catch
-            {
-                return result.FailMe(-1, Translation.getMessage(lang, "NoMatchingRecord"));
-            }
-
-        }
-
-        public async Task<APIResult> getConfEvents(string lang)
-        {
-            APIResult result = new APIResult();
-
-            var confEvent = await _DbContext.ConfEvents.ToListAsync();
-            
-            var events = confEvent.Select(conf => new
-            {
-                Id = conf.Id,
-                EventTime = conf.EventTime,
-                EventType = conf.EventType,
-                ConfId = conf.ConfId,
-                UserId = conf.UserId,
-                EventInfo = conf.EventInfo
-            });
-
-            return result.SuccessMe(1, "Ok", true, APIResult.RESPONSE_CODE.OK, events);
-        }
-
-        public async Task<APIResult> addProsodyEvent(ProsodyEventPostDto prosodyEventPostDto, IHubContext<EventHub> HubContext)
-        {
-            APIResult result = new APIResult();
+            APIResult result = new();
 
             DateTime dateTime = DateTime.UtcNow;
-            int currentUserId = _IUserRepository.GetUserID();
 
             try
             {
 
-                ConfEvent? confEvent = await toConferenceEvent(prosodyEventPostDto, dateTime);
+                ConfEvent? confEvent = await ToConferenceEvent(prosodyEventPostDto, dateTime);
 
                 if (confEvent == null)
                 {
                     return result.FailMe(-1,  "NoMatchingRecord");
                 }
-                if(UserHandler.ConnectedIds.Count() > 0)
+                if(UserHandler.ConnectedIds.Count > 0)
                 {
                     foreach(var connectedId in UserHandler.ConnectedIds)
                     {
@@ -141,7 +51,6 @@ namespace VideoProjectCore6.Services.ConfEventService
                         {
                             await HubContext.Clients.User(connectedId).SendAsync("NotifyEventStatus", userEvents);
                         }
-                        
                     }
                 }
 
@@ -159,32 +68,32 @@ namespace VideoProjectCore6.Services.ConfEventService
 
         }
 
-        private async Task<ConfEvent?> toConferenceEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
+        private async Task<ConfEvent?> ToConferenceEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
         {
 
             ConfEvent? confEvent = null;
 
             if (prosodyEventPostDto.type.Equals(Constants.PROSODY_EVENT_ROOM_CREATED))
             {
-                confEvent = processRoomCreatedEvent(prosodyEventPostDto, dateTime);
+                confEvent = ProcessRoomCreatedEvent(prosodyEventPostDto, dateTime);
             }
 
             else if (prosodyEventPostDto.type.Equals(Constants.PROSODY_EVENT_OCCUPANT_JOINED))
             {
-                confEvent = await processOccupantJoinedEvent(prosodyEventPostDto, dateTime);
+                confEvent = await ProcessOccupantJoinedEvent(prosodyEventPostDto, dateTime);
             }
 
             else if (prosodyEventPostDto.type.Equals(Constants.PROSODY_EVENT_OCCUPANT_LEAVING))
             {
-                confEvent = await processOccupantLeavingEvent(prosodyEventPostDto, dateTime);
+                confEvent = await ProcessOccupantLeavingEvent(prosodyEventPostDto, dateTime);
             }
 
             else if (prosodyEventPostDto.type.Equals(Constants.PROSODY_EVENT_ROOM_DESTROYED) || prosodyEventPostDto.type.Equals(Constants.PROSODY_EVENT_ROOM_FINISHED))
             {
-                confEvent = await processRoomDestroyed(prosodyEventPostDto, dateTime);
+                confEvent = await ProcessRoomDestroyed(prosodyEventPostDto, dateTime);
             }
 
-            else if (prosodyEventPostDto.type.Equals(Constants.PROSODY_EVENT_USER_LEAVING_LOBBY))
+            else if (prosodyEventPostDto.type.Equals(PROSODY_EVENT_USER_LEAVING_LOBBY))
             {
                 confEvent = await processOccupantLeavingLobbyEvent(prosodyEventPostDto, dateTime);
             }
@@ -193,7 +102,7 @@ namespace VideoProjectCore6.Services.ConfEventService
 
         }
 
-        private async Task<ConfEvent?> processRoomDestroyed(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
+        private async Task<ConfEvent?> ProcessRoomDestroyed(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
         {
             try
             {
@@ -201,12 +110,13 @@ namespace VideoProjectCore6.Services.ConfEventService
                 int confIdIndex = prosodyEventPostDto.to.IndexOf("@"+ _IConfiguation["ProsodyDomain"]);
                 if (confIdIndex < 0) return null;
 
-                ConfEvent res = new ConfEvent();
-
-                res.EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED;
-                res.ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex);
-                res.MeetingId = prosodyEventPostDto.meetingId;
-                res.EventTime = dateTime;
+                ConfEvent res = new()
+                {
+                    EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED,
+                    ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex),
+                    MeetingId = prosodyEventPostDto.meetingId,
+                    EventTime = dateTime
+                };
 
 
                 List<ConfUser> users = await _DbContext.ConfUsers.Where(c =>
@@ -214,7 +124,7 @@ namespace VideoProjectCore6.Services.ConfEventService
 
                 string userId = prosodyEventPostDto.from;
 
-                if (users != null && users.Count() > 0)
+                if (users != null && users.Count > 0)
                 {
                     userId = users.First().ConfId;
                 }
@@ -235,7 +145,7 @@ namespace VideoProjectCore6.Services.ConfEventService
             return null;
         }
 
-        private async Task<ConfEvent?> processOccupantLeavingEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
+        private async Task<ConfEvent?> ProcessOccupantLeavingEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
         {
 
             try
@@ -244,12 +154,13 @@ namespace VideoProjectCore6.Services.ConfEventService
                 int confIdIndex = prosodyEventPostDto.to.IndexOf("@" + _IConfiguation["ProsodyDomain"]);
                 if (confIdIndex < 0) return null;
 
-                ConfEvent res = new ConfEvent();
-
-                res.EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE;
-                res.ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex);
-                res.MeetingId = prosodyEventPostDto.meetingId;
-                res.EventTime = dateTime;
+                ConfEvent res = new()
+                {
+                    EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE,
+                    ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex),
+                    MeetingId = prosodyEventPostDto.meetingId,
+                    EventTime = dateTime
+                };
 
                 List<ConfUser> users = await _DbContext.ConfUsers.Where(c => 
                 c.ProsodyId.Equals(prosodyEventPostDto.from)).OrderByDescending(item => item.ConfTime).ToListAsync();
@@ -287,12 +198,13 @@ namespace VideoProjectCore6.Services.ConfEventService
                 int confIdIndex = prosodyEventPostDto.to.IndexOf("@" + _IConfiguation["ProsodyDomain"]);
                 if (confIdIndex < 0) return null;
 
-                ConfEvent res = new ConfEvent();
-
-                res.EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE_LOBBY;
-                res.ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex);
-                res.MeetingId = prosodyEventPostDto.meetingId;
-                res.EventTime = dateTime;
+                ConfEvent res = new()
+                {
+                    EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE_LOBBY,
+                    ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex),
+                    MeetingId = prosodyEventPostDto.meetingId,
+                    EventTime = dateTime
+                };
 
                 List<ConfUser> users = await _DbContext.ConfUsers.Where(c =>
                 c.ProsodyId.Equals(prosodyEventPostDto.from)).OrderByDescending(item => item.ConfTime).ToListAsync();
@@ -322,7 +234,7 @@ namespace VideoProjectCore6.Services.ConfEventService
         }
 
 
-        private async Task<ConfEvent?> processOccupantJoinedEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
+        private async Task<ConfEvent?> ProcessOccupantJoinedEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
         {
 
             try
@@ -332,14 +244,16 @@ namespace VideoProjectCore6.Services.ConfEventService
 
                 if (confIdIndex < 0) return null;
 
-                ConfEvent res = new ConfEvent();
-                res.EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN;
-                res.ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex);
-                res.MeetingId = prosodyEventPostDto.meetingId;
+                ConfEvent res = new()
+                {
+                    EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN,
+                    ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex),
+                    MeetingId = prosodyEventPostDto.meetingId,
 
-                res.EventTime = dateTime;
+                    EventTime = dateTime
+                };
 
-                XmlDocument xDoc = new XmlDocument();
+                XmlDocument xDoc = new();
 
                 xDoc.LoadXml(prosodyEventPostDto.message);
 
@@ -349,9 +263,11 @@ namespace VideoProjectCore6.Services.ConfEventService
                     return null;
 
 
-                ConfUser confUser = new ConfUser();
-                confUser.ProsodyId = prosodyEventPostDto.from;
-                confUser.ConfTime = DateTime.Now;
+                ConfUser confUser = new()
+                {
+                    ProsodyId = prosodyEventPostDto.from,
+                    ConfTime = DateTime.Now
+                };
 
                 var eventClaims = nodeList.Item(0);
                 if (eventClaims == null)
@@ -417,7 +333,7 @@ namespace VideoProjectCore6.Services.ConfEventService
         }
 
 
-        private ConfEvent? processRoomCreatedEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
+        private ConfEvent? ProcessRoomCreatedEvent(ProsodyEventPostDto prosodyEventPostDto, DateTime dateTime)
         {
             try
             {
@@ -425,13 +341,14 @@ namespace VideoProjectCore6.Services.ConfEventService
                 int confIdIndex = prosodyEventPostDto.to.IndexOf("@" + _IConfiguation["ProsodyDomain"]);
                 if (confIdIndex < 0) return null;
 
-                ConfEvent res = new ConfEvent();
-
-                res.EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED;
-                res.ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex);
-                res.EventInfo = prosodyEventPostDto.message;
-                res.MeetingId = prosodyEventPostDto.meetingId;
-                res.EventTime = dateTime;
+                ConfEvent res = new()
+                {
+                    EventType = Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED,
+                    ConfId = prosodyEventPostDto.to.Substring(0, confIdIndex),
+                    EventInfo = prosodyEventPostDto.message,
+                    MeetingId = prosodyEventPostDto.meetingId,
+                    EventTime = dateTime
+                };
 
                 return res;
             }
@@ -456,9 +373,9 @@ namespace VideoProjectCore6.Services.ConfEventService
         /// <param name="lang"></param>
         /// 
         /// <returns>Active users depending on the id and meeting id of the room</returns>
-        public async Task<APIResult> handleGetRoom(DateTimeRange range, string pId, string meetingID)
+        public async Task<APIResult> HandleGetRoom(DateTimeRange range, string pId, string meetingID)
         {
-            APIResult res = new APIResult();
+            APIResult res = new();
 
             List<ConfEvent> confEvents = await _DbContext.ConfEvents.Where(e => (e.EventTime > range.StartDateTime.Date && e.EventTime < range.EndDateTime.AddDays(1).Date)).ToListAsync();
 
@@ -494,7 +411,7 @@ namespace VideoProjectCore6.Services.ConfEventService
 
                 foreach (ConfUser confUser in confUsers)
                 {
-                    if (roomsJoinedUsers.Count() > 0 && roomsJoinedUsers.Select(x=>x.UserId).Contains(confUser.Id.ToString()))
+                    if (roomsJoinedUsers.Count > 0 && roomsJoinedUsers.Select(x=>x.UserId).Contains(confUser.Id.ToString()))
                     {
                         User newUser = new User()
                         {
@@ -522,7 +439,7 @@ namespace VideoProjectCore6.Services.ConfEventService
 
         /// <param name="lang"></param>
         /// <returns>Return list of active rooms</returns>
-        public async Task<APIResult> handleListRoom(string lang)
+        public async Task<APIResult> HandleListRoom(string lang)
         {
             var openRooms = await _DbContext.ConfEvents.ToListAsync();
 
@@ -598,7 +515,7 @@ namespace VideoProjectCore6.Services.ConfEventService
         /// <param name="names"></param>
         /// <param name="lang"></param>
         /// <returns>Return active users of all rooms</returns>
-        public async Task<APIResult> handleRoomsUsersList(List<string> names, string lang)
+        public async Task<APIResult> HandleRoomsUsersList(List<string> names, string lang)
         {
             APIResult res = new APIResult();
 
@@ -758,6 +675,5 @@ namespace VideoProjectCore6.Services.ConfEventService
                 return result.FailMe(-1, "Failed to load statuses");
             }
         }
-
     }
 }

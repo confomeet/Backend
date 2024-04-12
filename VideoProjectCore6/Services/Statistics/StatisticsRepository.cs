@@ -142,7 +142,7 @@ namespace VideoProjectCore6.Services.Statistics
             foreach(var ev in events)
             {
 
-                var singleRoomActiveUsers = await _IConfEventRepository.handleGetRoom(range, ev.Id.ToString(), ev.MeetingId);
+                var singleRoomActiveUsers = await _IConfEventRepository.HandleGetRoom(range, ev.Id.ToString(), ev.MeetingId);
 
                 EventActiveUsers eventActiveUsers = new()
                 {
