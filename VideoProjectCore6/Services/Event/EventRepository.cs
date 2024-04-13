@@ -1532,22 +1532,20 @@ public class EventRepository(IMeetingRepository iMeetingRepository
     public async Task<EventFullView?> EventDetails(int id, int userId, string timeZoneId)
     {
         var relatedUsers = await _DbContext.Users.Where(u => u.EntityId == userId).Select(u => u.Id).ToListAsync();
-        var allRooms = await _DbContext.ConfEvents.ToListAsync();
         var allUsers = await _DbContext.ConfUsers.ToListAsync();
-        var videoRecords = await _DbContext.RecordingLogs.ToListAsync();
 
         var host = _IConfiguration["CONFOMEET_BASE_URL"];
         var e = await _DbContext.Events.AsNoTracking()
-            .Include(x => x.Participants)
+            .Include(x => x.Participants).ThenInclude(y => y.User)
             .Include(x => x.Meeting)
-            .Include(x => x.InverseParentEventNavigation)
-            .AsNoTracking().Where(e => e.Id == id)
+            .Include(x => x.User)
+            .Where(e => e.Id == id)
             .Select(e => new EventFullView
             {
                 Id = e.Id,
                 CreatedBy = e.CreatedBy,
                 OrderNo = e.OrderNo,
-                CreatedByName = _DbContext.Users.Where(u => u.Id == e.CreatedBy).Select(x => x.FullName).First(),
+                CreatedByName = e.User.FullName,
                 Topic = e.Topic,
                 SubTopic = e.SubTopic,
                 Organizer = e.Organizer,
@@ -1563,74 +1561,36 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 Status = e.RecStatus,
                 AllDay = e.AllDay,
                 Type = e.Type,
-                MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, "en", allRooms),
-                EventLogs = _IUserRepository.IsAdmin() ? EventLog(e.Id, e.MeetingId, allUsers, allRooms, "en", timeZoneId) : new List<ConfEventCompactGet>(),
+                EventLogs = new List<ConfEventCompactGet>(),
                 ParentEventId = e.ParentEvent,
                 EGroup = e.EGroup,
                 Participants = e.Participants.Select(p => new ParticipantView
                 {
                     Id = p.Id,
                     UserId = p.UserId,
-                    FullName = _DbContext.Users.Where(u => u.Id == p.UserId).Select(x => x.FullName).First(),
+                    FullName = p.User.FullName,
                     Email = !p.Email.StartsWith(INVALID_EMAIL_PREFIX, StringComparison.OrdinalIgnoreCase) ? p.Email : string.Empty,
                     Mobile = p.Mobile,
                     IsModerator = p.IsModerator,
                     Description = p.Description,
-                    ParticipantStatus = _IGeneralRepository.CheckParticipantStatus(p.Email, e.Id, e.MeetingId, allRooms, allUsers),
                     Note = p.Note,
                     GroupIn = p.GroupIn,
                     MeetingLink = e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
                     UserType = p.UserType,
                     PartyId = p.PartyId,
                 }).ToList(),
-
-                SubEvents = e.InverseParentEventNavigation.Select(e => new EventFullView
-                {
-
-                    Id = e.Id,
-                    CreatedBy = e.CreatedBy,
-                    CreatedByName = _DbContext.Users.Where(u => u.Id == e.CreatedBy).Select(x => x.FullName).First(),
-                    OrderNo = e.OrderNo,
-                    Topic = e.Topic,
-                    SubTopic = e.SubTopic,
-                    Organizer = e.Organizer,
-                    Description = e.Description,
-                    StartDate = e.StartDate,
-                    EndDate = e.EndDate,
-                    TimeZone = e.TimeZone,
-                    Password = e.Meeting.Password,
-                    PasswordReq = e.Meeting != null && e.Meeting.PasswordReq,
-                    RecordingReq = e.Meeting != null && (e.Meeting.RecordingReq ?? false),
-                    SingleAccess = e.Meeting != null && (e.Meeting.SingleAccess ?? false),
-                    MeetingId = e.MeetingId,
-                    Status = e.RecStatus,
-                    AllDay = e.AllDay,
-                    Type = e.Type,
-                    MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, "en", allRooms),
-                    ParentEventId = e.ParentEvent,
-                    Participants = e.Participants.Select(p => new ParticipantView
-                    {
-                        Id = p.Id,
-                        UserId = p.UserId,
-                        FullName = _DbContext.Users.Where(u => u.Id == p.UserId).Select(x => x.FullName).First(),
-                        Email = p.Email,
-                        Mobile = p.Mobile,
-                        IsModerator = p.IsModerator,
-                        Description = p.Description,
-                        MeetingLink = e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
-                        ParticipantStatus = _IGeneralRepository.CheckParticipantStatus(p.Email, e.Id, e.MeetingId, allRooms, allUsers),
-                        Note = p.Note,
-                        GroupIn = p.GroupIn,
-                        UserType = p.UserType
-                    }).ToList()
-
-                }).ToList(),
-
             }).FirstOrDefaultAsync();
         if (e != null)
         {
+            // The number of events specific for a room is not very large since meeting is usually constrained by some timeframe.
+            var roomEvents = await
+                _DbContext.ConfEvents.AsNoTracking()
+                .Where(ce => ce.MeetingId == e.MeetingId)
+                .ToListAsync();
             e.VideoLogs = await FetchVideoLogs(e.MeetingId, _DbContext, timeZoneId);
-            e.SubEventCount = e.SubEvents.Count();
+            if (_IUserRepository.IsAdmin())
+                e.EventLogs = EventLog(e.MeetingId, allUsers, roomEvents, "en", timeZoneId);
+            e.MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, "en", roomEvents);
             var usersId1 = e.Participants.Select(p => p.UserId).Distinct().ToList();
             usersId1.Add(e.CreatedBy);
             var userName = _DbContext.Users.Where(u => usersId1.Distinct().Contains(u.Id)).Select(x => new { x.Id, x.FullName }).ToDictionary(x => x.Id, x => x.FullName);
@@ -1643,6 +1603,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 par.Remind = isModerator && par.UserId != userId ? true : false;
                 b = userName.TryGetValue(par.UserId, out userFullName);
                 par.FullName = b ? userFullName : string.Empty;
+                par.ParticipantStatus = _IGeneralRepository.CheckParticipantStatus(par.Email, e.Id, e.MeetingId, roomEvents, allUsers);
             }
         }
         return e;
@@ -2321,17 +2282,17 @@ public class EventRepository(IMeetingRepository iMeetingRepository
 
     private static string EventTypeToStatusText(ConfEvent ev, string lang)
         {
-            int langIndex = lang == "ar" ? 1 : 0;
+            int langIndex = lang == "ar" ? 0 : 1;
             if (!MeetingStatusValue.TryGetValue(ev.EventType, out string[]? value))
                 return "";
             return value[langIndex];
         }
 
-    private static List<ConfEventCompactGet> EventLog(int? id, string meetingId, List<ConfUser> allUsers, List<ConfEvent> allRooms, string lang, string timeZoneId)
+    private static List<ConfEventCompactGet> EventLog(string meetingId, List<ConfUser> allUsers, List<ConfEvent> allRooms, string lang, string timeZoneId)
     {
         List<ConfEventCompactGet> eventLogs = allRooms
             .OrderByDescending(o => o.Id)
-            .Where(x => x.MeetingId == id.ToString())
+            .Where(x => x.MeetingId == meetingId)
             .Select(s => new ConfEventCompactGet
             {
                 EventTime = timeZoneId != null ? TimeConverter.ConvertFromUtc(s.EventTime, timeZoneId) : s.EventTime,
