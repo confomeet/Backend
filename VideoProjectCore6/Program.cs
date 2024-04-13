@@ -238,12 +238,12 @@ authenticationBuilder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwt =
     };
 });
 
-if (!string.IsNullOrEmpty(builder.Configuration["oidc:authority"]))
+if (!string.IsNullOrEmpty(builder.Configuration["CONFOMEET_OIDC_AUTHORITY"]))
 {
     authenticationBuilder.AddOpenIdConnect("oidc", options =>
     {
-        options.Authority = builder.Configuration["oidc:authority"];
-        options.ClientId = builder.Configuration["oidc:client_id"];
+        options.Authority = builder.Configuration["CONFOMEET_OIDC_AUTHORITY"];
+        options.ClientId = builder.Configuration["CONFOMEET_OIDC_CLIENT_ID"];
         options.CallbackPath = VideoProjectCore6.Utility.Uri.CombineUri(OIDCAuthController.ControllerRoute, "/oidc-signin");
         options.MapInboundClaims = false;
         options.SaveTokens = true;

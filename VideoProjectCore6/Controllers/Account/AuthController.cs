@@ -79,12 +79,12 @@ namespace VideoProjectCore6.Controllers.Account
 
         [HttpGet("ExternalAuthProviders")]
         public IActionResult GetExternalAuthProviders() {
-            if (string.IsNullOrEmpty(_configuration["oidc:authority"]) || string.IsNullOrEmpty(_configuration["oidc:client_id"]))
+            if (string.IsNullOrEmpty(_configuration["CONFOMEET_OIDC_AUTHORITY"]) || string.IsNullOrEmpty(_configuration["CONFOMEET_OIDC_CLIENT_ID"]))
                 return Ok(new List<string>());
             List<ProviderDTO> providers =
             [
                 new ProviderDTO {
-                    Name = _configuration["oidc:name"] ?? _configuration["oidc:client_id"]!,
+                    Name = _configuration["CONFOMEET_OIDC_NAME"] ?? _configuration["CONFOMEET_OIDC_CLIENT_ID"]!,
                     Url = Utility.Uri.CombineUri(_backendBaseUrl, ControllerRoute, OIDCLogInAction)
                 }
             ];
