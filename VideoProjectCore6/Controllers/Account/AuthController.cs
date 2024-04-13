@@ -93,8 +93,11 @@ namespace VideoProjectCore6.Controllers.Account
 
         [HttpGet("LogOut")]
         public async Task<IActionResult> LogOut([FromQuery] string RedirectUri) {
-            if (HttpContext.User.Identity != null && HttpContext.User.Identity.IsAuthenticated) {
-                string id_token = (await HttpContext.GetTokenAsync("oidc", "id_token"))!;
+            if (HttpContext.User.Identity != null && HttpContext.User.Identity.IsAuthenticated && !string.IsNullOrEmpty(_configuration["CONFOMEET_OIDC_AUTHORITY"])) {
+                // We are authenticated and have oidc integration enabled.
+                string? id_token = await HttpContext.GetTokenAsync("oidc", "id_token");
+                if (string.IsNullOrEmpty(id_token)) // If no id_token provided, then we are authenticated locally
+                    return Redirect(RedirectUri);
 
                 AuthenticationProperties authProp = new()
                 {
