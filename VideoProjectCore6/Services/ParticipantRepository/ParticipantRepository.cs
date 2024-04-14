@@ -250,8 +250,6 @@ public class ParticipantRepository : IParticipantRepository
                         UserName = dto.Email != null ? dto.Email : dto.Mobile,
                         Email = dto.Email,
                         PhoneNumber = dto.Mobile,
-                        EmiratesId = dto.EmiratesId,
-                        UUID = dto.UUID,
                         PasswordHash = "P@ssw0rd_"
                     }, "ar", true);
                 if (u.Id > 0)
@@ -386,7 +384,6 @@ public class ParticipantRepository : IParticipantRepository
                 Mobile = dto.Mobile,
                 PartyId = dto.UserId,//------- UserId as it come from PP Request
                 GroupIn = dto.GroupIn,
-                Charge=dto.Charge,
             };
 
             ps.Add(newPart);
@@ -421,8 +418,6 @@ public class ParticipantRepository : IParticipantRepository
                     ParticipantId = p.Id,
                     //UserId = dtos.Where(d => d.LocalUserId == p.UserId).Select(c => c.UserId).FirstOrDefault(),
                     UserType = dtos.Where(d => d.LocalUserId == p.UserId).Select(c => c.UserType).FirstOrDefault(),
-                    EmiratesId = dtos.Where(d => d.LocalUserId == p.UserId).Select(c => c.EmiratesId).FirstOrDefault(),
-                    UuId = dtos.Where(d => d.LocalUserId == p.UserId).Select(c => c.UUID).FirstOrDefault(),
                     Tokens = null,
                     UserId = dtos.Where(d => d.LocalUserId == p.UserId).Select(c => c.UserId).FirstOrDefault(),
                     IsModerator = p.IsModerator,
@@ -465,35 +460,7 @@ public class ParticipantRepository : IParticipantRepository
                          }).ToListAsync();
         return res.Count() == 0;
     }
-    //private async Task<OuterParticipant> getUserByWorkAsParticipant(int eventId, string workType, int addBy, DateTimeRange range, bool checkAvailability, OuterUser entity, string lang)
-    //{
-    //    int cabinetWorkId = await _DbContext.Works.AsNoTracking().Where(x => x.Shorcut == workType).Select(w => w.Id).FirstOrDefaultAsync();
-    //    var cabinets = await _IWorkRepository.GetAvailableUserByWork(cabinetWorkId, range, checkAvailability, 0, entity, lang);
-    //    if (cabinets.Id > 0)
-    //    {
-    //        var random = new Random();
-    //        int index = random.Next(cabinets.Result.Count);
-    //        int cabinetId = cabinets.Result[index].Id;
-    //        var cabinetUser = _DbContext.Users.Where(x => x.Id == cabinetId).FirstOrDefault();
-    //        return new OuterParticipant()
-    //        {
-    //            EventId = eventId,
-    //            Email = cabinetUser.Email,
-    //            LocalUserId = cabinetUser.Id,
-    //            MeetingToken = "",
-    //            Note = cabinetUser.EntityId == null ? "" : await _DbContext.Users.Where(x => x.Id == cabinetUser.EntityId).Select(x => x.FullName).FirstOrDefaultAsync(),
-    //            Description = cabinetUser.FullName,
-    //            IsModerator = false,
-    //            UserId = cabinetUser.UserId,
-    //            UserType = cabinetUser.UserType,
-    //            Mobile = !string.IsNullOrWhiteSpace(cabinetUser.PhoneNumber) ? cabinetUser.PhoneNumber : !string.IsNullOrWhiteSpace(cabinetUser.TelNo) ? cabinetUser.TelNo : string.Empty
-    //        };
-    //    }
-    //    else
-    //    {
-    //        return null;
-    //    }
-    //}
+
     public async Task<List<MeetingUserLink>> NotifyParticipants(List<Receiver> participants, string mettingId, List<NotificationLogPostDto> notifications_,
         Dictionary<string, string> parameters, string template, bool send, bool isDirectInvitation ,string cisco=null)
     {
@@ -721,48 +688,6 @@ public class ParticipantRepository : IParticipantRepository
         {
             return result.FailMe(-1, Translation.getMessage(lang, "faildUpdate"));
         }
-    }
-    public async Task<APIResult> ParticipantsAsUser(List<OuterParticipant> participants, int addBy, string lang)
-    {
-        APIResult result = new();
-        foreach (var p in participants)
-        {
-            if (p.LocalUserId == null)
-            {
-                if (!string.IsNullOrWhiteSpace(p.Email))
-                {
-                    var u = await _IUserRepository.Search(p.Email);
-                    if (u != null)
-                    {
-                        p.LocalUserId = u.Id;
-                        p.FullName = u.FullName;
-                        p.Mobile = u.PhoneNumber;
-                    }
-                    else
-                    {
-                        result = await _IUserRepository.CreateUser(
-                        new UserPostDto
-                        {
-                            FullName = p.FullName,
-                            UserName = p.Email,
-                            Email = p.Email,
-                            PhoneNumber = p.Mobile,
-                            PasswordHash = "P@ssw0rd_"
-                        }, null, false, "ar", false);
-
-                        if (result.Id > 0)
-                        {
-                            p.LocalUserId = result.Id;
-                        }
-                        else
-                        {
-                            return result;
-                        }
-                    }
-                }
-            }
-        }
-        return result.SuccessMe(participants.Count(), "Done", true);
     }
 
     public async Task<APIResult> Liberate(int participantId, int updatedBy, string lang)
