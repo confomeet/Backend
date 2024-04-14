@@ -22,7 +22,6 @@ namespace VideoProjectCore6.Models
             Roles = new HashSet<Role>();
             Participants = new HashSet<Participant>();
             Contacts = new HashSet<Contact>();
-            FcmTokens = new HashSet<FcmToken>();
             Events = new HashSet<Event>();
             UserGroups = new HashSet<UserGroup>();
             UserPhotos = new HashSet<Files>();
@@ -80,7 +79,6 @@ namespace VideoProjectCore6.Models
         public virtual ICollection<Role> Roles { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
         public virtual ICollection<Contact> Contacts { get; set; }
-        public virtual ICollection<FcmToken> FcmTokens { get; set; }
         public virtual ICollection<Event> Events { get; set; }
         public virtual ICollection<Files> UserPhotos { get; set; }
         public virtual ICollection<SmtpConfig> SmtpConfigs { get; set; }

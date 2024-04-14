@@ -146,20 +146,6 @@ namespace VideoProjectCore6.Services
             return false;
         }
 
-        public async Task<DTOs.CommonDto.APIResult> GetContactToken(int userId)
-        {
-            DTOs.CommonDto.APIResult result = new APIResult();
-
-            if (userId < 0)
-            {
-                return result;
-            }
-
-            var tokens = await _DbContext.FcmTokens.Where(u => u.UserId == userId).Select(t => t.Token).ToListAsync();
-            return result.SuccessMe(userId, "", true, DTOs.CommonDto.APIResult.RESPONSE_CODE.OK, tokens);
-        }
-
-        
         // public async Task<DTOs.CommonDto.APIResult> GetLocalContactId(int userId)
         //    {
         //    APIResult result = new DTOs.CommonDto.APIResult();

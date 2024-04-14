@@ -110,9 +110,6 @@ namespace VideoProjectCore6.Services
         public const string NOTIFICATION_MAIL_CHANNEL = "channel_mail";  // TODO rename to first channel and add second accord to Figma design.
         public const string NOTIFICATION_SMS_CHANNEL = "channel_sms";
         public const string NOTIFICATION_INTERNAL_CHANNEL = "channel_internal";
-        public const string NOTIFICATION_FCM_CHANNEL = "channel_fcm";
-
-        public const string WEB_NOTIFICATION_FCM_CHANNEL = "web_channel_fcm";
 
 
         public const string TAB_NAME_SHORTCUT = "TabNameShortcut";

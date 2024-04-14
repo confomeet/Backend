@@ -25,7 +25,6 @@ namespace VideoProjectCore6.Models
         public virtual DbSet<Contact> Contacts { get; set; } = null!;
         public virtual DbSet<ClientInfo> ClientInfos { get; set; } = null!;
         public virtual DbSet<Country> Countries { get; set; } = null!;
-        public virtual DbSet<FcmToken> FcmTokens { get; set; } = null!;
         public virtual DbSet<FileConfiguration> FileConfigurations { get; set; } = null!;
         public virtual DbSet<Meeting> Meetings { get; set; } = null!;
         public virtual DbSet<MeetingLogging> MeetingLoggings { get; set; } = null!;
@@ -588,44 +587,6 @@ namespace VideoProjectCore6.Models
                     .HasPrecision(10)
                     .HasColumnName("ug_id");
             });
-           
-            modelBuilder.Entity<FcmToken>(entity =>
-            {
-                entity.ToTable("fcm_token");
-
-                entity.Property(e => e.Id)
-                    .HasPrecision(10)
-                    .HasColumnName("id");
-                entity.Property(e => e.CreatedDate)
-                      .HasColumnType("datetime")
-                      .HasColumnName("created_date");
-                entity.Property(e => e.DeviceInfo)
-                    .HasMaxLength(200)
-                    .IsUnicode(false)
-                    .HasColumnName("device_info");
-
-                entity.Property(e => e.IsActive)
-                    .HasPrecision(1)
-                    .HasColumnName("is_active");
-                entity.Property(e => e.LastUpdatedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("last_updated_date");
-                entity.Property(e => e.Token)
-                    .HasMaxLength(500)
-                    .IsUnicode(false)
-                    .HasColumnName("token");
-
-                entity.Property(e => e.UserId)
-                    .HasPrecision(10)
-                    .HasColumnName("user_id");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.FcmTokens)
-                    .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fcm_token_user_id_fk");
-            });
-
 
             modelBuilder.Entity<ConfEvent>(entity =>
             {
@@ -655,13 +616,6 @@ namespace VideoProjectCore6.Models
                 entity.Property(e => e.MeetingId)
                     .HasMaxLength(30)
                     .HasColumnName("meeting_id");
-
-                //entity.HasOne(d => d.User)
-                //    .WithMany(p => p.FcmTokens)
-                //    .HasForeignKey(d => d.UserId)
-                //    .OnDelete(DeleteBehavior.ClientSetNull)
-                //    .HasConstraintName("FCM_TOKEN_USER_ID_FK");
-
             });
 
             modelBuilder.Entity<ConfUser>(entity =>
@@ -696,13 +650,6 @@ namespace VideoProjectCore6.Models
                 entity.Property(e => e.ConfTime)
                     .HasColumnType("datetime")
                     .HasColumnName("conf_time");
-
-                //entity.HasOne(d => d.User)
-                //    .WithMany(p => p.FcmTokens)
-                //    .HasForeignKey(d => d.UserId)
-                //    .OnDelete(DeleteBehavior.ClientSetNull)
-                //    .HasConstraintName("FCM_TOKEN_USER_ID_FK");
-
             });
 
             modelBuilder.Entity<FileConfiguration>(entity =>

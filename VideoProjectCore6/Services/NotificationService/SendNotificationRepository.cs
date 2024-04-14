@@ -101,23 +101,17 @@ namespace VideoProjectCore6.Services.NotificationService
             int mailChannel = await _DbContext.SysLookupValues.Where(x => x.Shortcut == Constants.NOTIFICATION_MAIL_CHANNEL).Select(x => x.Id).FirstOrDefaultAsync();
             int smsChannel = await _DbContext.SysLookupValues.Where(x => x.Shortcut == Constants.NOTIFICATION_SMS_CHANNEL).Select(x => x.Id).FirstOrDefaultAsync();
             int internalChannel = await _DbContext.SysLookupValues.Where(x => x.Shortcut == Constants.NOTIFICATION_INTERNAL_CHANNEL).Select(x => x.Id).FirstOrDefaultAsync();
-            int fcmChannel = await _DbContext.SysLookupValues.Where(x => x.Shortcut == Constants.NOTIFICATION_FCM_CHANNEL).Select(x => x.Id).FirstOrDefaultAsync();
-            int webFcmChannel = await _DbContext.SysLookupValues.Where(x => x.Shortcut == Constants.WEB_NOTIFICATION_FCM_CHANNEL).Select(x => x.Id).FirstOrDefaultAsync();
 
 
             List<NotificationLogPostDto> notifyByEmail = new();
             List<NotificationLogPostDto> notifyBySMS = new();
             List<NotificationLogPostDto> notifyByInternal = new();
-            List<NotificationLogPostDto> notifyByFCM = new();
-            List<NotificationLogPostDto> notifyByWebFCM = new();
 
             notifications.RemoveAll(x => string.IsNullOrWhiteSpace(x.ToAddress) || x.ToAddress.Contains(Constants.INVALID_EMAIL_SUFFIX));
 
             notifyByEmail.AddRange(notifications.Where(x => x.NotificationChannelId == mailChannel));
             notifyBySMS.AddRange(notifications.Where(x => x.NotificationChannelId == smsChannel));
             notifyByInternal.AddRange(notifications.Where(x => x.NotificationChannelId == internalChannel));
-            notifyByFCM.AddRange(notifications.Where(x => x.NotificationChannelId == fcmChannel));
-            notifyByWebFCM.AddRange(notifications.Where(x => x.NotificationChannelId == webFcmChannel));
 
 
             ControlNotification Con = new();
@@ -125,8 +119,6 @@ namespace VideoProjectCore6.Services.NotificationService
             {
                 INotificationObserver objEmail = new MailNotification(notifyByEmail, _mailSetting, _DbContext);
                 Con.AddService(objEmail);
-
-                
             }
 
             //if (notifyBySMS.Count > 0)
@@ -140,22 +132,6 @@ namespace VideoProjectCore6.Services.NotificationService
                 INotificationObserver objInternal = new InternalNotification(notifyByInternal, _DbContext);
                 Con.AddService(objInternal);
             }
-
-            if (notifyByFCM.Count > 0)
-            {
-                INotificationObserver objFCM = new FCMNotification(notifyByFCM, _generalRepository);
-                Con.AddService(objFCM);
-            }
-
-            if (notifyByWebFCM.Count > 0)
-            {
-
-                WriteLog("Log0.txt", "inside Do Send");
-
-                INotificationObserver objFCM = new FCMNotification(notifyByWebFCM, _generalRepository);
-                Con.AddService(objFCM);
-            }
-
 
             var res = Con.ExecuteNotifier(sendImmediately, key ?? "");
 

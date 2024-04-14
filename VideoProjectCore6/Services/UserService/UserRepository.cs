@@ -1698,29 +1698,6 @@ namespace VideoProjectCore6.Services.UserService
             return sequenceNum;
         }
 
-        public async Task<APIResult> UpdateFCMToken(int id, FCMTokenDto dto)
-        {
-            APIResult res = new APIResult();
-            FcmToken fcmToken = await _DbContext.FcmTokens.FirstOrDefaultAsync(x => x.Id == id);
-            if (fcmToken == null)
-            {
-                return res.FailMe(-1, "No matching record");
-            }
-            try
-            {
-                fcmToken.DeviceInfo = dto.DeviceInfo;
-                fcmToken.Token = dto.Token;
-                fcmToken.LastUpdatedDate = DateTime.Now;
-                _DbContext.FcmTokens.Update(fcmToken);
-                await _DbContext.SaveChangesAsync();
-                return res.SuccessMe(fcmToken.Id, "Token updated successfully");
-            }
-            catch
-            {
-                return res.FailMe(-1, "Fail addeding token");
-            }
-        }
-
         public async Task<APIResult> GetLocalUserId(int userId, int userType)
         {
             APIResult result = new APIResult();
@@ -1937,16 +1914,6 @@ namespace VideoProjectCore6.Services.UserService
                         }).FirstOrDefaultAsync();
             int total = await _DbContext.Users.CountAsync();
             return query;
-        }
-        public async Task<APIResult> GetUserToken(int userId, int userType)
-        {
-            APIResult result = await GetLocalUserId(userId, userType);
-            if (result.Id < 0)
-            {
-                return result;
-            }
-            var tokens = await _DbContext.FcmTokens.Where(u => u.UserId == result.Id).Select(t => t.Token).ToListAsync();
-            return result.SuccessMe(result.Id, "", true, APIResult.RESPONSE_CODE.OK, tokens);
         }
 
         public async Task<APIResult> CheckEMailAddress(string email, string lang)

@@ -72,8 +72,6 @@ namespace VideoProjectCore6.Repositories
 
         string generateMeetingToken(User user, string meetingId, bool isAdmin);
 
-        Task<DTOs.CommonDto.APIResult> GetContactToken(int userId);
-
         Task<List<Dictionary<string, string>>> AddNewLookUpType(List<Dictionary<string, string>> eventTypePostDTO, string type);
 
         Task<DTOs.CommonDto.APIResult> DeleteLookUpType(int id, string type);

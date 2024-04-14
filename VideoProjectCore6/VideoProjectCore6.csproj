@@ -10,7 +10,6 @@
     <PackageReference Include="AspNetCoreRateLimit" Version="4.0.2" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.307.1" />
     <PackageReference Include="Cronos" Version="0.7.1" />
-    <PackageReference Include="FirebaseAdmin" Version="2.3.0" />
     <PackageReference Include="Flurl" Version="3.0.4" />
     <PackageReference Include="itext7" Version="7.2.3" />
     <PackageReference Include="JWT" Version="8.9.0" />
