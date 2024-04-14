@@ -58,26 +58,4 @@ namespace VideoProjectCore6.DTOs.NotificationDto
         }
 
     }
-
-
-    public class NotificationLogForApp
-    {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public string Body { get; set; }
-        public string Channel { get; set; }
-        public string SendReportId { get; set; }
-        public string IsSent { get; set; }
-        public byte SentCount { get; set; }
-        public string ReportValueId { get; set; }
-        public int? UserId { get; set; }
-        public string ToAddress { get; set; }
-        public string Lang { get; set; }
-        public DateTime? CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public int? ApplicationId { get; set; }
-    }
-
-
-
 }
