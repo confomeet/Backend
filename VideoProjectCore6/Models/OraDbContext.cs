@@ -40,8 +40,6 @@ namespace VideoProjectCore6.Models
         public virtual DbSet<QueueProcess> QueueProcesses { get; set; } = null!;
         //public virtual DbSet<Role> Roles { get; set; } = null!;
         //public virtual DbSet<RoleClaim> RoleClaims { get; set; } = null!;
-
-        public virtual DbSet<ShortenUrl> ShortenUrls { get; set; } = null!;
         public virtual DbSet<Speciality> Specialities { get; set; } = null!;
         public virtual DbSet<SysLookupType> SysLookupTypes { get; set; } = null!;
         public virtual DbSet<SysLookupValue> SysLookupValues { get; set; } = null!;
@@ -1371,20 +1369,6 @@ namespace VideoProjectCore6.Models
                     .HasForeignKey(d => d.RoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("role_claim_role_id_fk");
-            });
-
-            modelBuilder.Entity<ShortenUrl>(entity =>
-            {
-                entity.HasKey(e => e.GuidUrl)
-                    .HasName("shorten_url_pk");
-
-                entity.ToTable("shorten_url");
-
-                entity.Property(e => e.GuidUrl)
-                    .ValueGeneratedNever()
-                    .HasColumnName("guid_url");
-
-                entity.Property(e => e.Url).HasColumnName("url");
             });
 
             modelBuilder.Entity<Speciality>(entity =>
