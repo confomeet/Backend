@@ -38,17 +38,11 @@ namespace VideoProjectCore6.Models
         public virtual DbSet<PartyWork> PartyWorks { get; set; } = null!;
         public virtual DbSet<PartyWorkSpeciality> PartyWorkSpecialities { get; set; } = null!;
         public virtual DbSet<QueueProcess> QueueProcesses { get; set; } = null!;
-        //public virtual DbSet<Role> Roles { get; set; } = null!;
-        //public virtual DbSet<RoleClaim> RoleClaims { get; set; } = null!;
         public virtual DbSet<Speciality> Specialities { get; set; } = null!;
         public virtual DbSet<SysLookupType> SysLookupTypes { get; set; } = null!;
         public virtual DbSet<SysLookupValue> SysLookupValues { get; set; } = null!;
         public virtual DbSet<SysTranslation> SysTranslations { get; set; } = null!;
         public virtual DbSet<Tab> Tabs { get; set; } = null!;
-        // public virtual DbSet<User> Users { get; set; } = null!;
-        // public virtual DbSet<UserClaim> UserClaims { get; set; } = null!;
-        // public virtual DbSet<UserLogin> UserLogins { get; set; } = null!;
-        // public virtual DbSet<UserToken> UserTokens { get; set; } = null!;
 
         public virtual DbSet<Work> Works { get; set; } = null!;
 
