@@ -80,7 +80,7 @@ namespace VideoProjectCore6.Repositories.IMeetingRepository
         /// <returns>true if exist otherwise false</returns>
         Task<bool> IfExistMeeting(string meetingId);
 
-        Task<APIResult> MeetingJWT(int participantId,Guid guid,int? userId,List<Attendee> attendees , string lang);
+        Task<APIResult> MeetingJWT(int participantId,Guid guid,int? userId, string lang);
         Task<object> MeetingJWT(string meetingId, int? userId,JoinData user,  string lang);
         /// <summary>
         /// Get a list of meeting for a related order no.

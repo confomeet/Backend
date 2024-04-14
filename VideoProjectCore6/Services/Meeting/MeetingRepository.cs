@@ -358,7 +358,7 @@ namespace VideoProjectCore6.Services.Meeting
         {
             return await _DbContext.Meetings.AnyAsync(x => x.MeetingId == meetingId);
         }
-        public async Task<APIResult> MeetingJWT(int participantId, Guid guid, int? partyId, List<Attendee> attendees, string lang)
+        public async Task<APIResult> MeetingJWT(int participantId, Guid guid, int? partyId, string lang)
         {
             APIResult result = new();
             var participant = await _DbContext.Participants.Where(p => p.Id == participantId && p.Guid == guid).FirstOrDefaultAsync();
@@ -416,17 +416,6 @@ namespace VideoProjectCore6.Services.Meeting
                 { "context", contxt },
                 { "exp", doublec }
             };
-            //var attendeesList = new List<string>();
-            if (attendees != null && attendees.Any())
-            {
-                string name = string.Empty;
-                //foreach (var a in attendees)
-                //{
-                //    name = !string.IsNullOrEmpty(a.FullName) ? a.FullName : !string.IsNullOrEmpty(a.Email) ? a.Email : "UnKnown";
-                //}
-                payload.Add("attendees", attendees);
-            }
-
 
             IJwtAlgorithm algorithm = new HMACSHA256Algorithm();
             IJsonSerializer serializer = new JsonNetSerializer();

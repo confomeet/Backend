@@ -135,10 +135,9 @@ namespace VideoProjectCore6.Controllers.Meeting
         }
 
         [HttpPost("Verify/{ParticipantId}/{Guid}")]
-        public async Task<IActionResult> joinTo_([FromRoute] int ParticipantId,[FromQuery] int? partyId, [FromRoute] Guid Guid,[FromBody] AttendeesObj attendees, [FromHeader] string lang = "ar")
+        public async Task<IActionResult> joinTo_([FromRoute] int ParticipantId,[FromQuery] int? partyId, [FromRoute] Guid Guid, [FromHeader] string lang = "ar")
         {
-            var parameter = attendees != null && attendees.Attendees != null ? attendees.Attendees:null;
-            var result = await _IMeetingRepository.MeetingJWT(ParticipantId,Guid, partyId, parameter,  lang);
+            var result = await _IMeetingRepository.MeetingJWT(ParticipantId,Guid, partyId,  lang);
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
         }
 
