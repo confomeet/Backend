@@ -5,11 +5,7 @@ using VideoProjectCore6.DTOs.EventDto;
 using VideoProjectCore6.Repositories.IEventRepository;
 using VideoProjectCore6.Repositories.IUserRepository;
 using VideoProjectCore6.Services;
-using VideoProjectCore6.Attributes;
-using VideoProjectCore6.DTOs.ParticipantDto;
-using VideoProjectCore6.DTOs.CommonDto;
 
-#nullable disable
 namespace VideoProjectCore6.Controllers.Event
 {
     [ApiController]
@@ -25,13 +21,6 @@ namespace VideoProjectCore6.Controllers.Event
             _IUserRepository = iUserRepository;
         }
 
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("AddGroupLocal")]
-        public async Task<ActionResult> AddGroupEventLocal([FromBody] FullEventPostDto dto, [FromHeader] string lang = "ar")
-        {
-            return Ok(await _IEventRepository.AddConnectedEvents(dto, _IUserRepository.GetUserID(), lang, false));
-        }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("MeetingEvent")]
         public async Task<ActionResult> AddMeetingEvent([FromBody] EventWParticipant dto, [FromHeader] string lang = "ar")
@@ -39,18 +28,6 @@ namespace VideoProjectCore6.Controllers.Event
             return Ok(await _IEventRepository.AddMeetingEvent(dto, _IUserRepository.GetUserID(), true, lang));
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet()]
-        public async Task<ActionResult> GetLocal([FromHeader] string lang = "ar")
-        {
-            var result = await _IEventRepository.GetAllOfUser(_IUserRepository.GetUserID(), null, false, lang.ToLower());
-            if (result != null)
-            {
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
-
-            return StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("Search")]
         public async Task<ActionResult> SearchLocal([FromBody] EventSearchObject obj, [FromQuery] bool relatedUserEvents, [FromHeader] string lang = "ar")
@@ -62,14 +39,6 @@ namespace VideoProjectCore6.Controllers.Event
             }
 
             return StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("{eventId}/AddParticipants")]
-        public async Task<ActionResult> AddParticipants([FromRoute] int eventId, [FromBody] ParticipantsAsObj dto, [FromHeader] bool sendToAll = false, [FromHeader] string lang = "ar")
-        {
-            var result = await _IEventRepository.AddParticipantsToEventsScoped(dto, eventId, _IUserRepository.GetUserID(), lang, true, sendToAll);
-            return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -103,49 +72,6 @@ namespace VideoProjectCore6.Controllers.Event
             }
             return StatusCode(StatusCodes.Status404NotFound, "error occurred");
         }
-        
-        //[HttpPost("Public")]
-        //public async Task<ActionResult> GetAllPublic([FromBody] EventSearchObject obj, [FromQuery] int pageIndex, [FromQuery] int pageSize)
-        //{
-        //    var result = await _IEventRepository.GetPPEventByType(0, obj,"ar");
-        //    if (result != null)
-        //    {
-        //        return StatusCode(StatusCodes.Status200OK, result);
-        //    }
-        //    return StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        //}
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
-        [HttpPost("{id}/Unlink")]
-        public async Task<ActionResult> Unlink([FromRoute] int id)
-        {
-            var result = await _IEventRepository.UnlinkSubEvent(id, _IUserRepository.GetUserID());
-            if (result.Id > 0)
-            {
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
-            return StatusCode(StatusCodes.Status500InternalServerError, "error occurred");
-        }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("{eventId}/UpdateParticipants")]
-        public async Task<ActionResult> UpdateEventParticipants([FromRoute] int eventId, [FromBody] ParticipantsAsObj dto, [FromHeader] bool sendToAll, [FromHeader] string lang = "ar")
-        {
-            var result = await _IEventRepository.UpdateEventParticipants(dto, eventId, _IUserRepository.GetUserID(), lang, true, sendToAll);
-            return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
-        }
-
-        //[Key]
-        [HttpGet("{eventId}")]
-        public async Task<ActionResult> Event([FromRoute] string eventId, [FromHeader] string lang = "ar")
-        {
-            var result = await _IEventRepository.EventById(eventId);
-            if (result != null)
-            {
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
-            return StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("{id}/Details")]
@@ -160,26 +86,10 @@ namespace VideoProjectCore6.Controllers.Event
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("{id}/MeetingLinks")]
-        public async Task<ActionResult> EventLinks([FromRoute] int id, [FromHeader] string lang = "ar")
-        {
-            var result = await _IEventRepository.EventParticipantLinks(id, 4);
-            return result.Id > 0 ? Ok(result) : BadRequest(result);
-        }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("AddRecurrence")]
         public async Task<ActionResult> AddREvent([FromBody] RecurrenceEvent events, [FromHeader] string lang = "ar")
         {
             var result = await _IEventRepository.AddRecurrenceEvents(events.Event, events.RDates, _IUserRepository.GetUserID(), true, lang);
-            return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status404NotFound, result);
-        }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("ShiftRecurrence")]
-        public async Task<ActionResult> ShiftREvent([FromQuery] int eventId, [FromBody] DateTimeRange dto, [FromHeader] string lang = "ar")
-        {
-            var result = await _IEventRepository.ShiftRecurrenceEvents(eventId, dto, _IUserRepository.GetUserID(), false, lang);
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status404NotFound, result);
         }
 
@@ -191,15 +101,6 @@ namespace VideoProjectCore6.Controllers.Event
             return Ok(result);
         }
 
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPut("Reschedule/{id}")]
-        public async Task<ActionResult> Reschedule(MeetingEventDto dto, int id, [FromHeader] string lang)
-        {
-            var result = await _IEventRepository.Reschedule(id, dto, _IUserRepository.GetUserID(), lang);
-            return Ok(result);
-        }
-
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut("{id}/Cancel")]
         public async Task<ActionResult> Cancel([FromRoute] int id,  [FromHeader] string lang)
@@ -207,24 +108,5 @@ namespace VideoProjectCore6.Controllers.Event
             var result = await _IEventRepository.Cancel(id, _IUserRepository.GetUserID(), lang);
             return result.Id > 0 ? Ok(result) : BadRequest(result);
         }
-        [HttpPost("ActiveMeetings")]
-        public async Task<IActionResult> ActiveMeetings([FromBody] DateTimeRange range, [FromHeader] string lang)
-        {
-            return Ok(await _IEventRepository.ActiveMeetings(range, lang));
-        }
-
-        [HttpPost("FinishedMeetings")]
-        public async Task<IActionResult> FinishedMeetings([FromBody] DateTimeRange range, [FromQuery] string meetingId, [FromHeader] string lang)
-        {
-            return Ok(await _IEventRepository.FinishedMeetings(range, meetingId, lang));
-        }
-
-        [HttpGet("MeetingDetails")]
-        public async Task<IActionResult> MeetingDetails([FromQuery] int? id, [FromQuery] string meetingId, [FromHeader] string lang)
-        {
-            return Ok(await _IEventRepository.MeetingDetails(id, meetingId, lang));
-        }
-
-        
     }
 }

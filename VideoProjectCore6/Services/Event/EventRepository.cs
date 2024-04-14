@@ -1,9 +1,6 @@
 ﻿using Flurl;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 using System.Transactions;
-using VideoProjectCore6.DTOs;
-using VideoProjectCore6.DTOs.AccountDto;
 using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.DTOs.ConfEventDto;
 using VideoProjectCore6.DTOs.EventDto;
@@ -44,8 +41,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
     private readonly IConfiguration _IConfiguration = iConfiguration;
     private readonly IGroupRepository _IGroupRepository = iGroupRepository;
     private readonly IGeneralRepository _IGeneralRepository = iGeneralRepository;
-
-    private const string defaultTimeZone = "UTC+4";
 
     public async Task<APIResult> AddEvent(EventPostDto dto, int addBy, string lang)
     {
@@ -170,229 +165,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         }
         scope.Complete();
         return eventResult;
-    }
-
-    public async Task<APIResult> AddConnectedEvents(FullEventPostDto dto, int addBy, string lang, bool justCreatorLink,
-        bool checkUserTime = false, bool sendNotification = false, bool checkWorkTime = false, string? appId = null)
-    {
-        APIResult ParentEventAddParticipant = new(), result = new(), result1 = new(), validate = new(), addPEvent = new();
-        var receivedMsgs = new List<string>();
-        List<MeetingUserLink> l1 = [], l2 = [];
-        var toUseCabins=new List<EntityCabine>();
-        var parameters = new Dictionary<string, string>
-             {
-              { FROM_DATE,string.Empty},{ TO_DATE,string.Empty},{ FROM_TIME, string.Empty},{ TO_TIME, string.Empty},{ MEETING_ID,string.Empty},
-              { TOPIC,string.Empty},{ TIMEZONE,string.Empty}, { PASSCODE,string.Empty}
-,
-             };
-
-        //string ciscoMeetingLink = null;
-
-
-        string? eventMeetingID = null;
-
-        string? clearMeetingID = null;
-        string? senderEmail = await _DbContext.Users.Where(u => u.Id == addBy).Select(u => u.Email).FirstOrDefaultAsync();
-
-
-        validate = ValidateEvent(dto, lang);
-
-        if (!validate.Result)
-        {
-            return validate;
-        }
-
-        if (dto.SubEvents != null && dto.SubEvents.Count > 0)
-        {
-            foreach (EventPostDto event_ in dto.SubEvents)
-            {
-                validate = ValidateEvent(event_, lang);
-                if (!validate.Result)
-                    return validate;
-            }
-        }
-
-        int actionId = await _DbContext.Actions.Where(x => x.Shortcut == SEND_INVITATION_ACTION).Select(x => x.Id).FirstOrDefaultAsync();
-        //AppId Check
-        if (appId != null)
-        {
-            var clientId = await _DbContext.ClientInfos.Where(x => x.AppName == appId).Select(x => x.Id).FirstOrDefaultAsync();
-            if (clientId > 0)
-            {
-                dto.AppId = clientId;
-            }
-        }
-
-        var mdto = new MeetingPostDto();
-        if (dto.MeetingRequired)
-        {
-
-            mdto.StartDate = dto.StartDate;
-            mdto.EndDate = dto.EndDate;
-            mdto.Status = (sbyte)MEETING_STATUS.PENDING;
-            mdto.Topic = dto.Topic;
-            mdto.Description = dto.Description;
-            mdto.TimeZone = dto.TimeZone ?? defaultTimeZone;
-            mdto.RecordingReq = dto.RecordingReq;
-            mdto.AutoLobby = dto.AutoLobby;
-            mdto.SingleAccess = dto.SingleAccess;
-            mdto.PasswordReq = false;
-            //if (!dto.Cisco)
-            //{
-                mdto.Password = dto.Password;
-                parameters[PASSCODE] = dto.Password;
-            //}
-        }
-
-
-        using var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted }, TransactionScopeAsyncFlowOption.Enabled);
-        try
-        {
-            if (dto.MeetingRequired)
-            {
-                //MeetingPostDto mdto1 = new()
-                //{
-                //    StartDate = dto.StartDate,
-                //    EndDate = dto.EndDate,
-                //    Status = (sbyte)MEETING_STATUS.PENDING,
-                //    Topic = dto.Topic,
-                //    Description = dto.Description,
-                //    TimeZone = dto.TimeZone == null ? "UTC+4" : dto.TimeZone,
-                //    Password = dto.Password,
-                //    PasswordReq = false,
-                //    RecordingReq = dto.RecordingReq,
-                //    AutoLobby = dto.AutoLobby,
-                //    SingleAccess = dto.SingleAccess
-                //};
-                var newMeet = await _IMeetingRepository.AddMeeting(mdto, addBy, lang);
-                if (newMeet.Id < 0)
-                {
-                    return newMeet;
-                }
-                eventMeetingID = newMeet.Result;
-                dto.MeetingId = eventMeetingID;
-                clearMeetingID ??= newMeet.Result;
-                dto.MeetingId = eventMeetingID;
-            }
-
-            addPEvent = await AddEvent(dto, addBy, lang);
-            if (addPEvent.Id < 0)
-            {
-                return addPEvent;
-            }
-
-            if (!dto.Participants.Any(x => x.LocalUserId == addBy))//Add Creator as participant
-            {
-                dto.Participants.Add(new ParticipantWParent
-                {
-                    LocalUserId = addBy,
-                    IsModerator = true,
-                    EventId = addPEvent.Id,
-                    Email = senderEmail,
-                });
-            }
-
-            ParentEventAddParticipant = await _IParticipantRepository.AddParticipants(dto.Participants, addPEvent.Id, addBy, lang,toUseCabins, new DateTimeRange { StartDateTime = dto.StartDate, EndDateTime = dto.EndDate }, eventMeetingID!, checkUserTime, checkWorkTime,false);
-            if (ParentEventAddParticipant.Id < 0)
-            {
-                return ParentEventAddParticipant;
-            }
-            //----------------- get extra message------------------
-            if (ParentEventAddParticipant.Message.Count > 1)
-            {
-                receivedMsgs.AddRange(ParentEventAddParticipant.Message);
-                receivedMsgs.RemoveAt(receivedMsgs.Count - 1);
-            }
-            //-----------------------------------------------------
-
-            var toSendNoti = await _INotificationSettingRepository.GetNotificationsForAction(actionId, addPEvent.Id);
-
-            if (dto.SubEvents != null)
-            {
-                foreach (FullEventPostDto event_ in dto.SubEvents)
-                {
-                    event_.ParentEventId = addPEvent.Id;
-                    event_.MeetingId = eventMeetingID;
-                    result = await AddEvent(event_, addBy, lang);
-                    if (result.Id < 0)
-                    {
-                        return result;
-                    }
-                    result1 = await _IParticipantRepository.AddParticipants(event_.Participants, result.Id, addBy, lang, toUseCabins, new DateTimeRange { StartDateTime = event_.StartDate, EndDateTime = event_.EndDate }, eventMeetingID!, checkUserTime, checkWorkTime,false);
-                    if (result1.Id < 0)
-                    {
-                        return result1;
-                    }
-                    //----------------- get extra message------------------
-                    if (result1.Message.Count > 1)
-                    {
-                        receivedMsgs.AddRange(result1.Message);
-                        receivedMsgs.RemoveAt(receivedMsgs.Count - 1);
-                    }
-                    //-
-                    parameters[FROM_DATE] = event_.StartDate.ToString("dd-MM-yyyy");
-                    parameters[TO_DATE] = event_.EndDate.ToString("dd-MM-yyyy");
-                    parameters[FROM_TIME] = event_.StartDate.ToString("hh:mm tt");
-                    parameters[TO_TIME] = event_.EndDate.ToString("hh:mm tt");
-                    parameters[TOPIC] = event_.Topic;
-                    parameters[TIMEZONE] = event_.TimeZone;
-                    parameters[MEETING_ID] = clearMeetingID!;
-                    //parameters[MEETING_ID] = event_.MeetingId;
-                    var currentSubEvtNotifications = new List<NotificationLogPostDto>();
-                    foreach (var n in toSendNoti)
-                    {
-                        var newNoti = n.ShallowCopy();
-                        currentSubEvtNotifications.Add(newNoti);
-                    }
-                    foreach (var n in currentSubEvtNotifications)
-                    {
-                        n.EventId = result.Id;
-                    }
-
-                   var l = await _IParticipantRepository.NotifyParticipants(result1.Result, eventMeetingID, currentSubEvtNotifications, parameters, INVITATION_TEMPLATE, sendNotification, false/*, ciscoMeetingLink*/);
-                   l2.AddRange(l);
-                }
-            }
-            //-----------****--------Reset To main event Id---------
-            var MainEvtNotifications = new List<NotificationLogPostDto>();
-            foreach (var n in toSendNoti)
-            {
-                var newNoti = n.ShallowCopy();
-                MainEvtNotifications.Add(newNoti);
-            }
-            foreach (var n in MainEvtNotifications)
-            {
-                n.EventId = addPEvent.Id;
-            }
-            parameters[FROM_DATE] = dto.StartDate.ToString("dd-MM-yyyy");
-            parameters[TO_DATE] = dto.EndDate.ToString("dd-MM-yyyy");
-            parameters[FROM_TIME] = dto.StartDate.ToString("hh:mm tt");
-            parameters[TO_TIME] = dto.EndDate.ToString("hh:mm tt");
-            parameters[TOPIC] = dto.Topic;
-            parameters[TIMEZONE] = dto.TimeZone ?? defaultTimeZone;
-            parameters[MEETING_ID] = clearMeetingID!;
-            l1 = await _IParticipantRepository.NotifyParticipants(ParentEventAddParticipant.Result, eventMeetingID, MainEvtNotifications, parameters, INVITATION_TEMPLATE, sendNotification, false/*, ciscoMeetingLink*/);
-
-        }
-        catch (Exception ex)
-        {
-            return result.FailMe(-1, ex.Message, true);
-        }
-        scope.Complete();
-        MeetingUserLink? linkToResult = null;
-        if (justCreatorLink)
-        {
-            linkToResult = l1.Where(x => x.Id == addBy).FirstOrDefault();
-        }
-        else
-        {
-            l1.AddRange(l2);
-        }
-        if (receivedMsgs.Count != 0)
-            result.Message.AddRange(receivedMsgs);
-        result.SuccessMe(addPEvent.Id, Translation.getMessage(lang, "sucsessAdd"), false, APIResult.RESPONSE_CODE.CREATED, justCreatorLink ? linkToResult : l1);
-        result.Message.Reverse();
-        return result;
     }
     public async Task<APIResult> AddParticipantsToEvents(List<ParicipantDto> dtos, int eventId, int addBy, string lang, bool sendNotification, bool sendToAll)
     {
@@ -534,16 +306,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         
         return result.SuccessMe(eventId, Translation.getMessage(lang, "ParticipantAdded"), true, APIResult.RESPONSE_CODE.OK, result.Result);
     }
-    public async Task<APIResult> AddParticipantsToEventsScoped(List<ParicipantDto> dtos, int eventId, int addBy, string lang, bool sendNotification, bool sendToAll)
-    {
-        using var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted }, TransactionScopeAsyncFlowOption.Enabled);
-        var result = await AddParticipantsToEvents(dtos, eventId, addBy, lang, sendNotification, sendToAll);
-        if (result.Id > 0)
-        {
-            scope.Complete();
-        }
-        return result;
-    }
+
     public async Task<APIResult> AddParticipantsToEventsScoped(ParticipantsAsObj dto, int eventId, int addBy, string lang, bool sendNotification, bool sendToAll)
     {
         using var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted }, TransactionScopeAsyncFlowOption.Enabled);
@@ -555,7 +318,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         return result;
     }
     
-    public async Task<APIResult> UpdateEvent(int id, int updatedBy, MeetingEventDto dto, UpdateOption opt, string lang)
+    public async Task<APIResult> UpdateEvent(int id, int updatedBy, MeetingEventDto dto, UpdateOption? opt, string lang)
     {
         APIResult result = new APIResult();
         result = ValidateEvent(dto, lang);
@@ -844,41 +607,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         }
         return res;
     }
-    public async Task<List<EventGetDto>> GetEvent(int userId)
-    {
-        var res = await (from p in _DbContext.Participants
-                         join e in _DbContext.Events
-                         on p.EventId equals e.Id
-                         where p.UserId == userId && e.RecStatus != 0
-                         select new EventGetDto
-                         {
-                             Id = e.Id,
-                             UserId = p.UserId,
-                             Topic = e.Topic,
-                             SubTopic = e.SubTopic,
-                             Organizer = e.Organizer,
-                             Description = e.Description,
-                             StartDate = e.StartDate,
-                             EndDate = e.EndDate,
-                             AllDay = e.AllDay,
-                             MeetingId = e.MeetingId,
-                             Type = e.Type,
-                             Status = e.RecStatus
 
-                         }).ToListAsync();
-        return res;
-    }
-
-    public async Task<List<EventGetDto>> GetEventByMeetingId(string MeetingId)
-    {
-        List<EventGetDto> res = new();
-        var Events = await _DbContext.Events.Where(d => d.MeetingId == MeetingId).ToListAsync();
-        foreach (var Event in Events)
-        {
-            res.Add(EventGetDto.GetDTO(Event));
-        }
-        return res;
-    }
     private APIResult ValidateEvent(EventPostDto dto, string lang)
     {
         APIResult result = new();
@@ -900,8 +629,8 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             }
         }
         return result.SuccessMe(1);
-
     }
+
     private APIResult ValidateEvent(EventDto dto, string lang)
     {
         var postDto = new EventPostDto
@@ -913,76 +642,9 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             TimeZone = dto.TimeZone,
             Topic = dto.Topic,
         };
-        APIResult result = new();
         return ValidateEvent(postDto, lang);
-
-
-        //if (dto.MeetingId != null)
-        //{
-        //    var meet = _DbContext.Meetings.Where(x => x.MeetingId == dto.MeetingId).SingleOrDefault();
-        //    if (meet.StartDate != dto.StartDate)
-        //    {
-        //        return result.FailMe(-1, Translation.getMessage(lang, "wrongParameter") + " " + dto.StartDate);
-        //    }
-
-        //    if (meet.EndDate != dto.EndDate)
-        //    {
-        //        return result.FailMe(-1, Translation.getMessage(lang, "wrongParameter") + " " + dto.EndDate);
-        //    }
-        //}
     }
-    public async Task<List<EventFullView>> GetAllOfUserWithParent(int userId)
-    {
-        List<EventFullView> events = await _DbContext.Events
-            .Include(x => x.Participants)
-            .Include(x => x.ParentEventNavigation)
-            .Where(x => x.RecStatus != 0 && x.Participants.Any(p => p.UserId == userId))
-            .AsNoTracking()
-            .Select(e => new EventFullView
-            {
-                Id = e.Id,
-                OrderNo = e.OrderNo,
-                Topic = e.Topic,
-                SubTopic = e.SubTopic,
-                Organizer = e.Organizer,
-                Description = e.Description,
-                StartDate = e.StartDate,
-                EndDate = e.EndDate,
-                TimeZone = e.TimeZone,
-                Status = e.RecStatus,
-                AllDay = e.AllDay,
-                Type = e.Type,
-                Participants = e.Participants.Select(p => new ParticipantView
-                {
-                    Id = p.UserId,
-                    FullName = "",
 
-                }).ToList(),
-                ParentEvent = e.ParentEventNavigation != null ? new EventFullView
-                {
-                    Id = e.ParentEventNavigation.Id,
-                    Description = e.ParentEventNavigation.Description,
-                    Topic = e.ParentEventNavigation.Topic,
-                    SubTopic = e.ParentEventNavigation.SubTopic,
-                    Organizer = e.ParentEventNavigation.Organizer,
-                    StartDate = e.ParentEventNavigation.StartDate,
-                    EndDate = e.ParentEventNavigation.EndDate,
-                    AllDay = e.ParentEventNavigation.AllDay,
-                } : null,
-
-            }).ToListAsync();
-        var usersId1 = events.SelectMany(x => x.Participants.Select(p => p.Id)).ToList();
-        var userName = _DbContext.Users.Where(u => usersId1.Contains(u.Id)).ToDictionary(x => x.Id, x => x.FullName);
-        foreach (var e in events)
-        {
-            foreach (var par in e.Participants)
-            {
-                par.FullName = userName[par.Id];
-            }
-        }
-
-        return events;
-    }
     public async Task<List<EventFullView>> GetAllOfUser(int userId, EventSearchObject? obj = null, bool withRelatedUserEvents = false, string lang = "ar")
     {
         bool applyRelatedEvent = false;
@@ -1354,180 +1016,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         }
         return true;
     }
-    public async Task<APIResult> UnlinkSubEvent(int id, int byUserId)
-    {
-        APIResult result = new APIResult();
-        var evt = await _DbContext.Events.Where(a => a.Id == id).FirstOrDefaultAsync();
-        if (evt == null)
-        {
-            result.FailMe(-1, "الحدث غير موجود");
-            return result;
-        }
-        if (evt.ParentEvent == null)
-        {
-            result.SuccessMe(id, "الحدث غير مرتبط بحدث أب");
-            return result;
-        }
-        evt.ParentEvent = null;
-        evt.LastUpdatedDate = DateTime.Now;
-        evt.LastUpdatedBy = byUserId;
-        try
-        {
-            _DbContext.Events.Update(evt);
-            await _DbContext.SaveChangesAsync();
-            return result.SuccessMe(id, "تم التعديل بنجاح");
-        }
-        catch
-        {
-            return result.FailMe(-1, "خطأ في التعديل");
-        }
-    }
-
-    public bool IsEmpty(DateTime dateTime)
-    {
-        return dateTime == default(DateTime);
-    }
-
-    public IQueryable<T> WhereIf<T>(IQueryable<T> query, Expression<Func<T, bool>> whereClause)
-    {
-        return query.Where(whereClause);
-    }
-
-    public async Task<APIResult> UpdateEventParticipants(ParticipantsAsObj dtos, int eventId, int addBy, string lang, bool sendNotification, bool sendToAll)
-    {
-
-        APIResult result = new();
-        var eventParticipants = await _DbContext.Participants.Where(p => p.EventId == eventId).Select(p => p.Email).ToListAsync();
-
-        var newEventParticipants = dtos.Participants.ToList();
-
-
-        List<ParicipantDto> paricipantDtos = new List<ParicipantDto>();
-
-
-
-        foreach (var eventParticipant in newEventParticipants)
-        {
-            if (!eventParticipants.Contains(eventParticipant.Email))
-            {
-
-                eventParticipant.EventId = eventId;
-
-                paricipantDtos.Add(eventParticipant);
-            }
-
-        }
-
-        if (paricipantDtos.Count > 0)
-        {
-            await _IParticipantRepository.AddParticipants(paricipantDtos, addBy, lang);
-        }
-
-
-        //foreach(var eventParticipant in eventParticipants)
-        //{
-        //    if (!newEventParticipants.Contains(eventParticipant))
-        //    {
-
-        //        eventParticipant.EventId = eventId;
-
-        //        paricipantDtos.Add(eventParticipant);
-        //    }
-
-        //}
-        return result;
-    }
-
-    public async Task<APIResult> EventById(string eventId)
-    {
-
-        APIResult result = new APIResult();
-
-
-        var allRooms = _DbContext.ConfEvents.ToList();
-        var allUsers = _DbContext.ConfUsers.ToList();
-
-        List<EventFullView> events = await _DbContext.Events.AsNoTracking()
-            .Include(x => x.Participants)
-            .Include(x => x.Meeting)
-            .Include(x => x.InverseParentEventNavigation)
-            .AsNoTracking().Where(m => m.MeetingId.Equals(eventId) && m.ParentEvent == null)
-            .Select(e => new EventFullView
-            {
-                Id = e.Id,
-                CreatedBy = e.CreatedBy,
-                OrderNo = e.OrderNo,
-                CreatedByName = _DbContext.Users.Where(u => u.Id == e.CreatedBy).Select(x => x.FullName).First(),
-
-                Topic = e.Topic,
-                SubTopic = e.SubTopic,
-                Organizer = e.Organizer,
-                Description = e.Description,
-                StartDate = e.StartDate,
-                EndDate = e.EndDate,
-                TimeZone = e.TimeZone,
-                Password = e.Meeting.Password,
-                MeetingId = e.MeetingId,
-                Status = e.RecStatus,
-                AllDay = e.AllDay,
-                Type = e.Type,
-                ParentEventId = e.ParentEvent,
-                MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, "en", allRooms),
-                Participants = e.Participants.Select(p => new ParticipantView
-                {
-                    Id = p.Id,
-                    UserId = p.UserId,
-                    FullName = _DbContext.Users.Where(u => u.Id == p.UserId).Select(x => x.FullName).First(),
-                    Email = p.Email,
-                    Mobile = p.Mobile,
-                    IsModerator = p.IsModerator,
-                    Description = p.Description,
-                    ParticipantStatus = _IGeneralRepository.CheckParticipantStatus(p.Email, e.Id, e.MeetingId, allRooms, allUsers),
-                    Note = p.Note
-                }).ToList(),
-
-                SubEvents = e.InverseParentEventNavigation.Select(e => new EventFullView
-                {
-
-                    Id = e.Id,
-                    CreatedBy = e.CreatedBy,
-                    CreatedByName = _DbContext.Users.Where(u => u.Id == e.CreatedBy).Select(x => x.FullName).First(),
-                    OrderNo = e.OrderNo,
-                    Topic = e.Topic,
-                    SubTopic = e.SubTopic,
-                    Organizer = e.Organizer,
-                    Description = e.Description,
-                    StartDate = e.StartDate,
-                    EndDate = e.EndDate,
-                    TimeZone = e.TimeZone,
-                    Password = e.Meeting.Password,
-                    MeetingId = e.MeetingId,
-                    Status = e.RecStatus,
-                    AllDay = e.AllDay,
-                    Type = e.Type,
-                    MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, "en", allRooms),
-                    ParentEventId = e.ParentEvent,
-                    Participants = e.Participants.Select(p => new ParticipantView
-                    {
-                        Id = p.Id,
-                        UserId = p.UserId,
-                        FullName = _DbContext.Users.Where(u => u.Id == p.UserId).Select(x => x.FullName).First(),
-                        Email = p.Email,
-                        Mobile = p.Mobile,
-                        IsModerator = p.IsModerator,
-                        Description = p.Description,
-                        ParticipantStatus = _IGeneralRepository.CheckParticipantStatus(p.Email, e.Id, e.MeetingId, allRooms, allUsers),
-                        Note = p.Note
-                    }).ToList()
-                }).ToList(),
-
-            }).ToListAsync();
-
-
-        return result.SuccessMe(Int32.Parse(eventId), "Ok", true, APIResult.RESPONSE_CODE.OK, events);
-
-
-    }
 
     public async Task<EventFullView?> EventDetails(int id, int userId, string timeZoneId)
     {
@@ -1607,28 +1095,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             }
         }
         return e;
-    }
-
-    public async Task<APIResult> EventParticipantLinks(int id, int userId)
-    {
-        APIResult result = new();
-        var host = _IConfiguration["CONFOMEET_BASE_URL"];
-        try
-        {
-            var links = await _DbContext.Participants.Where(x => x.EventId == id).Select(x => new MeetingUserLink
-            {
-                Email = x.Email,
-                Mobile = x.Mobile,
-                UserId = x.PartyId,
-                UserType = x.UserType,
-                MeetingLink = Url.Combine(host, "join", Url.Combine(x.Id.ToString(), x.Guid.ToString())) + (x.PartyId != null ? "?partyId=" + x.PartyId.ToString() : string.Empty),
-            }).ToListAsync();
-            return result.SuccessMe(id, $"عدد الروابط : {links.Count}", false, APIResult.RESPONSE_CODE.OK, links);
-        }
-        catch
-        {
-            return result.FailMe(-1, "حدث خطأ ما عند الاستعلام ");
-        }
     }
 
     private async Task<List<EventWParticipant>> BuildRecurrenceEventsListAsync(EventWParticipant dto, List<DateTimeRange> dates, bool MeetingRequired, int addBy, string lang)
@@ -1803,65 +1269,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         }
     }
 
-    public async Task<APIResult> ShiftRecurrenceEvents(int eventId, DateTimeRange dto, int updatedBy, bool updateThis = true, string lang = "ar")
-    {
-        APIResult result = new();
-        bool dateChanged = false, minuteChanged = false;
-        double daysDiffStart = 0, daysDiffEnd = 0, fromS = 0, fromE = 0;
-
-        var evt = await _DbContext.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
-        if (evt == null)
-        {
-            return result.FailMe(-1, "الحدث غير موجود");
-        }
-        if (evt.EGroup == null)
-        {
-            return result.FailMe(-1, "لايوجد أحداث تابعة لهذا الحدث");
-        }
-        var events = await _DbContext.Events.Where(e => e.EGroup == evt.EGroup && (updateThis || e.Id != eventId) && e.StartDate > DateTime.Now).ToListAsync();
-
-        if (dto.StartDateTime.Date != evt.StartDate.Date || dto.EndDateTime.Date != evt.EndDate.Date)
-        {
-            daysDiffStart = (dto.StartDateTime.Date - evt.StartDate.Date).TotalDays;
-            daysDiffEnd = (dto.EndDateTime.Date - evt.EndDate.Date).TotalDays;
-            dateChanged = true;
-        }
-        if (dto.StartDateTime.TimeOfDay != evt.StartDate.TimeOfDay || dto.EndDateTime.TimeOfDay != evt.EndDate.TimeOfDay)
-        {
-            fromS = (dto.StartDateTime.TimeOfDay - evt.StartDate.TimeOfDay).TotalMinutes;
-            fromE = (dto.EndDateTime.TimeOfDay - evt.EndDate.TimeOfDay).TotalMinutes;
-            minuteChanged = true;
-        }
-        foreach (var gEvt in events)
-        {
-            if (dateChanged)
-            {
-                gEvt.StartDate = gEvt.StartDate.AddDays(daysDiffStart/*(dto.StartDateTime.Date - evt.StartDate.Date).TotalDays*/);
-                gEvt.EndDate = gEvt.EndDate.AddDays(daysDiffEnd);
-                //notifySubParticipant = true;
-            }
-            if (minuteChanged)
-            {
-                gEvt.StartDate = gEvt.StartDate.AddMinutes(fromS);
-                gEvt.EndDate = gEvt.EndDate.AddMinutes(fromE);
-
-                //notifySubParticipant = false;
-            }
-            gEvt.LastUpdatedDate = DateTime.Now;
-            gEvt.LastUpdatedBy = updatedBy;
-        }
-        _DbContext.UpdateRange(events);
-        try
-        {
-            await _DbContext.SaveChangesAsync();
-            return result.SuccessMe(1, "ok");
-        }
-        catch
-        {
-            return result.FailMe(-1, "error");
-        }
-    }
-
     public async Task<APIResult> ShiftRecurrenceEvents(int eventId, int updatedBy, DateTime originStartDate, double daysStart, 
         double daysEnd, double minutsStart, double minutsEnd, string? timeZone, UpdateOption opt, bool updateThis = true, string lang = "ar")
     {
@@ -1916,120 +1323,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         catch
         {
             return result.FailMe(-1, Translation.getMessage(lang, "faildUpdate"));
-        }
-    }
-
-
-    public async Task<APIResult> Reschedule(int id, MeetingEventDto dto, int updatedBy, string lang)
-    {
-        APIResult result = new();
-        Models.Event? evt = await _DbContext.Events.Where(a => a.Id == id).Include(p => p.Participants).FirstOrDefaultAsync();
-        if (evt == null)
-            return result.FailMe(-1, "Not found", false, APIResult.RESPONSE_CODE.PageNotFound);
-
-        evt.RecStatus = (sbyte?)EVENT_STATUS.RESCHEDULED;
-        evt.LastUpdatedBy = updatedBy;
-        evt.LastUpdatedDate = DateTime.Now;
-        using var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted }, TransactionScopeAsyncFlowOption.Enabled);
-        _DbContext.Events.Update(evt);
-        await _DbContext.SaveChangesAsync();
-        var newEvent = new EventWParticipant
-        {
-            AllDay = dto.AllDay,
-            AppId = evt.AppId,
-            AutoLobby = false,
-            Description = dto.Description,
-            TimeZone = dto.TimeZone,
-            Topic = dto.Topic,
-            SubTopic = dto.SubTopic,
-            StartDate = dto.StartDate,
-            EndDate = dto.EndDate,
-            MeetingId = null,
-            MeetingRequired = evt.MeetingId != null,
-            EGroup = evt.EGroup,
-            OrderNo = evt.OrderNo,
-            Organizer = dto.Organizer,
-            ParentEventId = evt.ParentEvent,
-            Password = dto.Password,
-            PasswordReq = dto.PasswordReq,
-            RecordingReq = dto.RecordingReq,
-            SingleAccess = dto.SingleAccess,
-            Status = (sbyte)EVENT_STATUS.ACTIVE,
-            Type = dto.Type
-        };
-        newEvent.Participants = dto.Participants;
-        var addEventResult = await AddMeetingEvent(newEvent, updatedBy, false, lang);
-        if (addEventResult.Id < 0)
-        {
-            return addEventResult;
-        }
-        var oldParticipants = await _DbContext.Participants.Where(p => p.EventId == id).Select(p => new ParicipantDto
-        {
-            Description = p.Description,
-            Email = p.Email,
-            EventId = addEventResult.Id,
-            IsModerator = p.IsModerator,
-            LocalUserId = p.UserId,
-            Note = p.Note,
-            UserType = p.UserType,
-            Mobile = p.Mobile,
-        }).ToListAsync();
-        var ParentEventAddParticipant = await AddParticipantsToEvents(oldParticipants, addEventResult.Id, updatedBy, lang, true, false);
-        if (ParentEventAddParticipant.Id < 0)
-        {
-            return ParentEventAddParticipant;
-        }
-        scope.Complete();
-        return addEventResult;
-    }
-
-    public async Task<APIResult> ReNotifyParticipants(int eventId, int addBy, string lang)
-    {
-        APIResult result = new();
-        var receivers = new List<Receiver>();
-        var participants = await _DbContext.Participants.Where(x => x.EventId == eventId).AsNoTracking().ToListAsync();
-        if (participants.Count != 0)
-        {
-            foreach (var participant in participants)
-                receivers.Add(new Receiver
-                {
-                    Email = participant.Email,
-                    Id = participant.UserId,
-                    Mobile = participant.Mobile,
-                    Name = string.Empty,
-                    ParticipantId = participant.Id,
-                    Tokens = null,
-                    UserId = participant.PartyId
-                });
-
-            var e = await _DbContext.Events.FindAsync(eventId);
-            if (e == null)
-                return result.FailMe(-1, "Event not found", false, APIResult.RESPONSE_CODE.PageNotFound);
-            var parameters = new Dictionary<string, string>
-                 {
-                   { FROM_DATE, e.StartDate.ToString("dd-MM-yyyy")},
-                   { TO_DATE, e.EndDate.ToString("dd-MM-yyyy")},
-                   { FROM_TIME, e.StartDate.ToString("hh:mm tt")},
-                   { TO_TIME, e.EndDate.ToString("hh:mm tt")},
-                   { TOPIC, e.Topic},
-                   { TIMEZONE, e.TimeZone},
-                 };
-            int envitationActionId = await _DbContext.Actions.Where(x => x.Shortcut == SEND_INVITATION_ACTION).Select(x => x.Id).FirstOrDefaultAsync();
-            var toSendNoti = await _INotificationSettingRepository.GetNotificationsForAction(envitationActionId, eventId);
-            var a = await _IParticipantRepository.NotifyParticipants(receivers, e.MeetingId, toSendNoti, parameters, INVITATION_TEMPLATE, true, false);
-
-            if (a == null)
-            {
-                return result.FailMe(-1, "حدث خطأ في إرسال الاشعار ", true);
-            }
-            else
-            {
-                return result.SuccessMe(eventId, "تم إشعار الاطراف");
-            }
-        }
-        else
-        {
-            return result.FailMe(-1, "الحدث غير موجود");
         }
     }
 
@@ -2138,148 +1431,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         }
     }
 
-    // ------------------------------------------------------------- //
-    // ------- Endpoints for active, finished meetings realtime ---- //
-    // ------------------------------------------------------------- //
-    // auth: mikal
-    public async Task<APIResult> ActiveMeetings(DateTimeRange range, string lang)
-    {
-        return await MeetingsStatus(range, 1, null, lang);
-    }
-
-    public async Task<APIResult> FinishedMeetings(DateTimeRange range, string meetingId, string lang)
-    {
-        return await MeetingsStatus(range, 2, meetingId, lang);
-    }
-
-    public async Task<APIResult> MeetingDetails(int? id, string meetingId, string lang)
-    {
-        APIResult result = new APIResult();
-
-
-
-        try
-        {
-
-            var confUsers = _DbContext.ConfUsers.ToList();
-
-            var FilePath = "";
-
-
-            List<ConfEventCompactGet> eventLogs = await _DbContext.ConfEvents.OrderByDescending(o => o.Id).Where(x => x.MeetingId == id.ToString())
-            .Select(s => new ConfEventCompactGet
-            {
-                EventTime = s.EventTime,
-
-                Status = EventTypeToStatusText(s, lang),
-
-                UserName = s.UserId
-
-            }).ToListAsync();
-
-            var recordingLogs = await _DbContext.RecordingLogs.OrderByDescending(x=>x.Id).ToListAsync();
-
-            foreach(var log in recordingLogs)
-            {
-                var meetingIdName = log.RecordingfileName.Split('_', System.StringSplitOptions.None);
-
-                if(meetingIdName.Count() > 0)
-                {
-                    if (meetingIdName[0].Equals(meetingId))
-                    {
-                        FilePath = log.RecordingfileName;
-                        break;
-                    }
-                }
-
-            }
-
-            
-
-
-            //var recordingLog = await _DbContext.RecordingLogs.Where(r => r.RecordingfileName.Split('_', System.StringSplitOptions.None).Count() > 0 ? 
-            //meetingId.Equals(r.RecordingfileName.Split('_', System.StringSplitOptions.None)[0]) : r.RecordingfileName.Equals(meetingId)).FirstOrDefaultAsync();
-
-
-
-            foreach (var eventLog in eventLogs)
-            {
-                var userName = confUsers.Where(e => e.Id.ToString().Equals(eventLog.UserName)).Select(o => o.Name).FirstOrDefault();
-
-                eventLog.UserName = userName != null ? userName : "Room";
-            }
-
-            var eventInfo = await _DbContext.Events.Where(x => x.MeetingId == meetingId && x.Id == id).Select(p => new
-            {
-                p.Topic,
-                p.MeetingId
-            }
-            ).FirstOrDefaultAsync();
-
-            if (eventInfo == null)
-            {
-                return result.FailMe(-1, "Requested meeting is not existed");
-            }
-
-            EventViewDetails eventViewDetails = new EventViewDetails
-            {
-                Topic = eventInfo.Topic,
-                MeetingId = eventInfo.MeetingId,
-                EventLogs = eventLogs,
-                VideoLink = FilePath
-            };
-
-            return result.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, eventViewDetails);
-
-
-        }
-        catch
-        {
-            return result.FailMe(-1, "Failed to get events details");
-        }
-    }
-    // Helper functions
-    // auth: mikal
-    private async Task<APIResult> MeetingsStatus(DateTimeRange range, int status, string? meetingId, string lang)
-    {
-        APIResult result = new APIResult();
-
-        var events = await _DbContext.Events.Where(e => meetingId != null ? (e.CreatedDate > range.StartDateTime.Date
-        && e.CreatedDate < range.EndDateTime.AddDays(1).Date)
-        && e.MeetingId.Equals(meetingId)
-        :
-        (e.CreatedDate > range.StartDateTime.Date
-        && e.CreatedDate < range.EndDateTime.AddDays(1).Date)
-
-        ).AsNoTracking().ToListAsync();
-
-        var allRooms = await _DbContext.ConfEvents.ToListAsync();
-
-        List<Models.Event> finishedEvents = new List<Models.Event>();
-
-        try
-        {
-
-            foreach (var ev in events)
-            {
-                var eventStatus = _IGeneralRepository.CheckStatus(ev.StartDate, ev.EndDate, ev.Id, ev.MeetingId, lang, allRooms);
-
-                if (eventStatus.Status == status)
-                {
-                    finishedEvents.Add(ev);
-                }
-            }
-
-            return result.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, finishedEvents);
-        }
-
-        catch
-        {
-            return result.FailMe(-1, "Failed to get events");
-        }
-    }
-
-
     private static string EventTypeToStatusText(ConfEvent ev, string lang)
         {
             int langIndex = lang == "ar" ? 0 : 1;
@@ -2326,58 +1477,4 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         }
         return videoRecords;
     }
-
-    //public async Task<APIResult> GetCiscoMeetingLink( CiscoRequest cisco)
-    //{
-    //    var ciscoWebServiceUrl = _IConfiguration["CiscoUrl"];
-    //    if (ciscoWebServiceUrl == null)  
-    //    {
-    //        ciscoWebServiceUrl= "http://srvadtsswcp01:7004/PPMailCiscoServices/rest/json/common/PPMailServices/scheduleCiscoMeeting/";
-    //    }
-    //    var client = new HttpClient();
-    //    APIResult res = new APIResult();       
-    //    var fullUrl = cisco.BuildPath(ciscoWebServiceUrl);
-    //    HttpResponseMessage httpResponseMessage;
-    //    try
-    //    {
-    //        httpResponseMessage = await client.GetAsync(fullUrl);
-    //        if (httpResponseMessage == null)
-    //        {
-    //            return res.FailMe(-1, "Connection error");
-    //        }
-    //    }
-    //    catch (HttpRequestException ex)
-    //    {
-    //        return res.FailMe(-1, ex.Message);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        return res.FailMe(-1, ex.Message);
-    //    }
-
-    //    string result = await httpResponseMessage.Content.ReadAsStringAsync();
-    //    CiscoResponse cResponse = JsonConvert.DeserializeObject<CiscoResponse>(result);
-    //    var x = httpResponseMessage.StatusCode;
-    //    res.Id = cResponse.StatusCode.ToUpper() == "SUCCESS" ? 1 : -1;
-    //    res.Code =  cResponse.StatusCode.ToUpper() == "SUCCESS" ? APIResult.RESPONSE_CODE.OK : APIResult.RESPONSE_CODE.BadRequest;
-    //    if (cResponse != null && cResponse.StatusMessage != null)
-    //    { 
-    //        res.Message.Add(cResponse.StatusMessage); 
-    //    }
-    //    res.Result = cResponse;
-    //    return res;
-    //}
-    //public CiscoResponse ReceiveCiscoRequest(CiscoRequest request) // Simulate receiving Cisco Response
-    //{
-    //    return new CiscoResponse
-    //    {
-    //        StatusCode = "SUCCESS",
-    //        StatusMessage = "Meeting url created",
-    //        ConferenceId = "88779966",
-    //        Passcode = "0000",
-    //        JoinURI = "555",
-    //        MeetingURL = "https://meet.pp.gov.ae/meet/"
-
-    //    };
-    // }
 }
