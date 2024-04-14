@@ -15,62 +15,14 @@ namespace VideoProjectCore6.Services
 
         // Secret constants.
         public const string otpBase32Secret = "6L4OH6DDC4PLNQBA5422GM67KXRDIQQP";
-        public const string meetingBase32Ssecret = "13edcvfrabovJzNb5Vkumh9BGSgNTiCqirfnt6dL13";//pp video
         public const string OTP_TITLE_AR = "نظام ليلك";
         public const string OTP_TITLE_EN = "Lilac system ";
         public const string OTP_BODY_AR = "كود التحقق: ";
         public const string OTP_BODY_EN = " OTP code: ";
         public const int OTP_PERIOD_If_MISSED_IN_APP_SETTING = 60;
-        public const int MAX_PRIORITY_SMS = 5;
-        public const int MIN_PRIROITY_SMS = 1;
-        public const string DEFAULT_PRIROITY_SMS = "2";
-        //
-        public const int OTP_MAX_TRY = 3;
 
         public const string CANCEL_BODY_AR = " ";
         public const string CANCEL_BODY_EN = "Meeting has been canceled: ";
-
-        public const string UnifiedGateEnotarySystemCode = "Notary System";
-        public const string UnifiedGateEnotarySystemId = "7";
-        public const string UnifiedGateCenterName = "Center";
-
-        // UNIFIED GATE APPLICATIONS STATUS
-        public const string UnifiedGateUnderProcessing = "Under Processing";
-        public const string UnifiedGateApproved = "Approved";
-        public const string UnifiedGateRejected = "Rejected";
-
-
-        public const string UnifiedGateUnderProcessingID = "1";
-        public const string UnifiedGateApprovedID = "2";
-        public const string UnifiedGateRejectedID = "3";
-        public const string UnifiedGateTotal = "0";
-        public const string UnifiedGateWithoutStatus = "-1";
-
-        public const int UnifiedGateEditorConfirmServiceID = 6710;
-
-
-        // constants for payment response message
-        public const string ResponseStatus = "Response.Status";
-        public const string ResponseInvoiceNo = "Response.InvoiceNo";
-        public const string ResponseStatusMessage = "Response.StatusMessage";
-        public const string ResponseConfirmationID = "Response.ConfirmationID";
-        public const string ResponseAmount = "Response.Amount";
-        public const string ResponsePUN = "Response.PUN";
-        public const string ResponseCollectionCenterFees = "Response.CollectionCenterFees";
-        public const string ResponseEDirhamFees = "Response.EDirhamFees";
-        public const string ResponsePaymentMethodType = "Response.PaymentMethodType";
-        public const string ResponseEServiceData = "Response.EServiceData";
-        public const string ResponseSecureHash = "Response.SecureHash";
-        public const string ResponseTransactionResponseDate = "Response.TransactionResponseDate";
-
-        public const string ResponseBankID = "Response.BankID";
-        public const string ResponseMerchantID = "Response.MerchantID";
-        public const string ResponseMerchantModuleSessionID = "Response.MerchantModuleSessionID";
-        public const string ResponseTerminalID = "Response.TerminalID";
-        public const string ResponseReceiptID = "Response.ReceiptID";
-        public const string ResponseCurrency = "Response.Currency";
-
-
 
         // User types
         public const string ADMIN = "1";
@@ -79,16 +31,12 @@ namespace VideoProjectCore6.Services
         public const string POLICE_STATION = "3";
         public const string CABIN = "4";
 
-        
-
         public const string PROSODY_EVENT_ROOM_CREATED = "room_created";
         public const string PROSODY_EVENT_OCCUPANT_JOINED = "occupant_joined";
         public const string PROSODY_EVENT_OCCUPANT_LEAVING = "occupant_leaving";
         public const string PROSODY_EVENT_ROOM_DESTROYED = "end_call_for_all";
         public const string PROSODY_EVENT_ROOM_FINISHED = "room_destroyed"; //"room_destroyed"
         public const string PROSODY_EVENT_USER_LEAVING_LOBBY = "occupant_leaving_lobby";
-
-        // occupant_leaving_lobby
 
         // constants for the maximum number of fault attempts to send notification.
         public const int MAX_NOTIFY_SEND_ATTEMPTS = 3;
