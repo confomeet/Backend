@@ -419,7 +419,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 //_DbContext.UpdateRange(subEvents);
             }
             if (timeChanged || evt.Topic != dto.Topic || evt.SubTopic != dto.SubTopic 
-                || evt.Organizer != dto.Organizer || evt.Type != dto.Type 
+                || evt.Organizer != dto.Organizer
                 || evt.Description != dto.Description || evt.AllDay != dto.AllDay /*|| evt.RecStatus != dto.Status*/)
             {
                 evt.Topic = dto.Topic;
@@ -430,7 +430,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 evt.EndDate = dto.EndDate;
                 evt.TimeZone = dto.TimeZone;
                 evt.ParentEvent = dto.ParentEventId;
-                evt.Type = dto.Type;
                 evt.AllDay = dto.AllDay;
                 evt.RecStatus = dto.Status != null ? dto.Status : evt.RecStatus;
                 evt.LastUpdatedDate = DateTime.Now;

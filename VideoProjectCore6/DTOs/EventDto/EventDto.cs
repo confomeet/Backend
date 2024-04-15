@@ -12,7 +12,6 @@
         public string TimeZone { get; set; }
         public string MeetingId { get; set; } = null;
         public int? ParentEventId { get; set; }
-        public byte? Type { get; set; }
         public sbyte? Status { get; set; }
 
 
