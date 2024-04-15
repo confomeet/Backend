@@ -10,15 +10,10 @@ namespace VideoProjectCore6.Models
         {
 
             OtpLogs = new HashSet<OtpLog>();
-            PartyWorks = new HashSet<PartyWork>();
-            SpecialityCreatedByNavigations = new HashSet<Speciality>();
-            SpecialityLastUpdatedByNavigations = new HashSet<Speciality>();
             UserClaims = new HashSet<UserClaim>();
             UserLogins = new HashSet<UserLogin>();
             UserTokens = new HashSet<UserToken>();
             UserRoles = new HashSet<UserRole>();
-            WorkCreatedByNavigations = new HashSet<Work>();
-            WorkLastUpdatedByNavigations = new HashSet<Work>();
             Roles = new HashSet<Role>();
             Participants = new HashSet<Participant>();
             Contacts = new HashSet<Contact>();
@@ -66,16 +61,11 @@ namespace VideoProjectCore6.Models
         //public string ReCaptchaToken { get; set; }
 
         public virtual ICollection<OtpLog> OtpLogs { get; set; }
-        public virtual ICollection<PartyWork> PartyWorks { get; set; }
-        public virtual ICollection<Speciality> SpecialityCreatedByNavigations { get; set; }
-        public virtual ICollection<Speciality> SpecialityLastUpdatedByNavigations { get; set; }
         public virtual ICollection<UserClaim> UserClaims { get; set; }
         public virtual ICollection<UserLogin> UserLogins { get; set; }
         public virtual ICollection<UserToken> UserTokens { get; set; }
         public virtual ICollection<UserRole> UserRoles { get; set; }
         public virtual ICollection<UserGroup> UserGroups { get; set; }
-        public virtual ICollection<Work> WorkCreatedByNavigations { get; set; }
-        public virtual ICollection<Work> WorkLastUpdatedByNavigations { get; set; }
         public virtual ICollection<Role> Roles { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
         public virtual ICollection<Contact> Contacts { get; set; }

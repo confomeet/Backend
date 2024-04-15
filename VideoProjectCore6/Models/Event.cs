@@ -25,12 +25,10 @@ namespace VideoProjectCore6.Models
         public int? LastUpdatedBy { get; set; }
         public sbyte? RecStatus { get; set; } //  SBYTE TO HOLD -1 STATUS
         public int? ParentEvent { get; set; }
-        public int? OrderNo { get; set; }
         public string TimeZone { get; set; }
         public bool? AllDay { get; set; }
         public ushort? AppId { get; set; } 
 
-        public int? EGroup { get; set; }
         public virtual Meeting Meeting { get; set; }
         public virtual Event ParentEventNavigation { get; set; }
 

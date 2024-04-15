@@ -16,13 +16,11 @@ namespace VideoProjectCore6.DTOs.EventDto
         public string MeetingId { get; set; } = null;
         public bool MeetingRequired { get; set; } = true;
         public int? ParentEventId { get; set; }
-        public int? OrderNo { get; set; }
         public string TimeZone { get; set; }
         public string Password { get; set; }
         public sbyte? Status { get; set; }
         public ushort? AppId { get; set; }
         public bool? AllDay { get; set; }
-        public int? EGroup { get; set; }
         public int? TypeOrder { get; set; }
         public bool PasswordReq { get; set; }
         public bool? RecordingReq { get; set; }
@@ -40,7 +38,6 @@ namespace VideoProjectCore6.DTOs.EventDto
                 Type = Type,
                 MeetingId = MeetingId,                
                 TimeZone = TimeZone,
-                OrderNo = OrderNo,
                 ParentEvent = ParentEventId,
                 
             };

@@ -19,7 +19,6 @@ namespace VideoProjectCore6.DTOs.EventDto
         public DateTime EndDate { get; set; }
         public string TimeZone { get; set; }
         public short? Type  { get; set; }
-        public int? OrderNo { get; set; }
         public int? ParentEventId { get; set; }
         public string MeetingId { get; set; }
         public string MeetingLink { get; set; }
@@ -37,7 +36,6 @@ namespace VideoProjectCore6.DTOs.EventDto
         public string StatusText { get; set; }
         public int SubEventCount { get; set; }
         public bool ToHide { get; set; } = false;
-        public int? EGroup { get; set; }
         
     public EventStatus MeetingStatus { get; set; }
 

@@ -28,8 +28,6 @@
         public string PhoneNumber { get; set; }
         // -------------------------------------------
         // -------------------------------------------
-        public int? OrderNo { get; set; }
-
         public string MeetingId { get; set; }
         public bool IsEmpty()
         {

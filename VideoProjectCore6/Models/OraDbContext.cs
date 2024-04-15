@@ -35,16 +35,11 @@ namespace VideoProjectCore6.Models
         public virtual DbSet<NotificationTemplateDetail> NotificationTemplateDetails { get; set; } = null!;
         public virtual DbSet<OtpLog> OtpLogs { get; set; } = null!;
         public virtual DbSet<Participant> Participants { get; set; } = null!;
-        public virtual DbSet<PartyWork> PartyWorks { get; set; } = null!;
-        public virtual DbSet<PartyWorkSpeciality> PartyWorkSpecialities { get; set; } = null!;
         public virtual DbSet<QueueProcess> QueueProcesses { get; set; } = null!;
-        public virtual DbSet<Speciality> Specialities { get; set; } = null!;
         public virtual DbSet<SysLookupType> SysLookupTypes { get; set; } = null!;
         public virtual DbSet<SysLookupValue> SysLookupValues { get; set; } = null!;
         public virtual DbSet<SysTranslation> SysTranslations { get; set; } = null!;
         public virtual DbSet<Tab> Tabs { get; set; } = null!;
-
-        public virtual DbSet<Work> Works { get; set; } = null!;
 
         public virtual DbSet<ConfEvent> ConfEvents { get; set; } = null!;
 
@@ -155,10 +150,6 @@ namespace VideoProjectCore6.Models
                 .HasColumnType("datetime")
                     .HasColumnName("last_updated_date");
 
-                entity.Property(e => e.EGroup)
-                      .HasPrecision(10)
-                      .HasColumnName("egroup");
-
                 entity.Property(e => e.MeetingId)
                     .HasMaxLength(30)
                     .IsUnicode(false)
@@ -172,10 +163,6 @@ namespace VideoProjectCore6.Models
                 entity.Property(e => e.Type)
                     .HasPrecision(5)
                     .HasColumnName("type");
-                entity.Property(e => e.OrderNo)
-                    .HasPrecision(10)
-                    .HasColumnName("order_no")
-                    .HasDefaultValueSql("1 ");
                 entity.Property(e => e.Organizer)
                       .HasMaxLength(100)
                       .HasColumnName("organizer");
@@ -1134,110 +1121,6 @@ namespace VideoProjectCore6.Models
                     .HasConstraintName("participant_user_id_fk");
             });
 
-            modelBuilder.Entity<PartyWork>(entity =>
-            {
-                entity.ToTable("party_work");
-
-                entity.HasIndex(e => new { e.PartyId, e.WorkId }, "party_work_uk")
-                    .IsUnique();
-
-                entity.Property(e => e.Id)
-                    .HasPrecision(10)
-                    .HasColumnName("id");
-
-                entity.Property(e => e.CreatedBy)
-                    .HasPrecision(10)
-                    .HasColumnName("created_by");
-
-                entity.Property(e => e.CreatedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("created_date");
-
-                entity.Property(e => e.LastUpdatedBy)
-                    .HasPrecision(10)
-                    .HasColumnName("last_updated_by");
-
-                entity.Property(e => e.LastUpdatedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("last_updated_date");
-
-                entity.Property(e => e.PartyId)
-                    .HasPrecision(10)
-                    .HasColumnName("party_id");
-
-                entity.Property(e => e.RecStatus)
-                    .HasPrecision(2)
-                    .HasColumnName("rec_status");
-
-                entity.Property(e => e.WorkId)
-                    .HasPrecision(10)
-                    .HasColumnName("work_id");
-
-                entity.HasOne(d => d.Party)
-                    .WithMany(p => p.PartyWorks)
-                    .HasForeignKey(d => d.PartyId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("party_work_party_id_user_id_fk");
-
-                entity.HasOne(d => d.Work)
-                    .WithMany(p => p.PartyWorks)
-                    .HasForeignKey(d => d.WorkId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("party_work_work_id");
-            });
-
-            modelBuilder.Entity<PartyWorkSpeciality>(entity =>
-            {
-                entity.ToTable("party_work_speciality");
-
-                entity.HasIndex(e => new { e.PartyWorkId, e.SpecialityId }, "party_work_speciality_uk")
-                    .IsUnique();
-
-                entity.Property(e => e.Id)
-                    .HasPrecision(10)
-                    .HasColumnName("id");
-
-                entity.Property(e => e.CreatedBy)
-                    .HasPrecision(10)
-                    .HasColumnName("created_by");
-
-                entity.Property(e => e.CreatedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("created_date");
-
-                entity.Property(e => e.LastUpdatedBy)
-                    .HasPrecision(10)
-                    .HasColumnName("last_updated_by");
-
-                entity.Property(e => e.LastUpdatedDate)
-                    .HasColumnType("date")
-                    .HasColumnName("last_updated_date");
-
-                entity.Property(e => e.PartyWorkId)
-                    .HasPrecision(10)
-                    .HasColumnName("party_work_id");
-
-                entity.Property(e => e.RecStatus)
-                    .HasPrecision(2)
-                    .HasColumnName("rec_status");
-
-                entity.Property(e => e.SpecialityId)
-                    .HasPrecision(10)
-                    .HasColumnName("speciality_id");
-
-                entity.HasOne(d => d.PartyWork)
-                    .WithMany(p => p.PartyWorkSpecialities)
-                    .HasForeignKey(d => d.PartyWorkId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("party_work_speciality_party_work_id_fk");
-
-                entity.HasOne(d => d.Speciality)
-                    .WithMany(p => p.PartyWorkSpecialities)
-                    .HasForeignKey(d => d.SpecialityId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("party_work_speciality_speciality_id_fk");
-            });
-
             modelBuilder.Entity<QueueProcess>(entity =>
             {
                 entity.ToTable("queue_processes");
@@ -1387,60 +1270,6 @@ namespace VideoProjectCore6.Models
                     .HasForeignKey(d => d.RoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("role_claim_role_id_fk");
-            });
-
-            modelBuilder.Entity<Speciality>(entity =>
-            {
-                entity.ToTable("speciality");
-
-                entity.Property(e => e.Id)
-                    .HasPrecision(10)
-                    .HasColumnName("id");
-
-                entity.Property(e => e.CreatedBy)
-                    .HasPrecision(10)
-                    .HasColumnName("created_by");
-
-                entity.Property(e => e.CreatedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("created_date");
-
-                entity.Property(e => e.LastUpdatedBy)
-                    .HasPrecision(10)
-                    .HasColumnName("last_updated_by");
-
-                entity.Property(e => e.LastUpdatedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("last_updated_date");
-
-                entity.Property(e => e.RecStatus)
-                    .HasPrecision(2)
-                    .HasColumnName("rec_status");
-
-                entity.Property(e => e.Shortcut)
-                    .HasMaxLength(150)
-                    .HasColumnName("shortcut");
-
-                entity.Property(e => e.WorkId)
-                    .HasPrecision(10)
-                    .HasColumnName("work_id");
-
-                entity.HasOne(d => d.CreatedByNavigation)
-                    .WithMany(p => p.SpecialityCreatedByNavigations)
-                    .HasForeignKey(d => d.CreatedBy)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("specialty_created_by_fk");
-
-                entity.HasOne(d => d.LastUpdatedByNavigation)
-                    .WithMany(p => p.SpecialityLastUpdatedByNavigations)
-                    .HasForeignKey(d => d.LastUpdatedBy)
-                    .HasConstraintName("specialty_last_updated_by_fk");
-
-                entity.HasOne(d => d.Work)
-                    .WithMany(p => p.Specialities)
-                    .HasForeignKey(d => d.WorkId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("specialty_work_id_fk");
             });
 
             modelBuilder.Entity<SysLookupType>(entity =>
@@ -1994,49 +1823,6 @@ namespace VideoProjectCore6.Models
                     .HasConstraintName("user_token_user_id");
             });
 
-            modelBuilder.Entity<Work>(entity =>
-            {
-                entity.ToTable("work");
-
-                entity.Property(e => e.Id)
-                    .HasPrecision(10)
-                    .HasColumnName("id");
-
-                entity.Property(e => e.CreatedBy)
-                    .HasPrecision(10)
-                    .HasColumnName("created_by");
-
-                entity.Property(e => e.CreatedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("created_date");
-
-                entity.Property(e => e.LastUpdatedBy)
-                    .HasPrecision(10)
-                    .HasColumnName("last_updated_by");
-
-                entity.Property(e => e.LastUpdatedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("last_updated_date");
-
-                entity.Property(e => e.RecStatus)
-                    .HasPrecision(2)
-                    .HasColumnName("rec_status");
-
-                entity.Property(e => e.Shorcut)
-                    .HasMaxLength(250)
-                    .HasColumnName("shorcut");
-
-                entity.HasOne(d => d.CreatedByNavigation)
-                    .WithMany(p => p.WorkCreatedByNavigations)
-                    .HasForeignKey(d => d.CreatedBy)
-                    .HasConstraintName("work_created_by_fk");
-
-                entity.HasOne(d => d.LastUpdatedByNavigation)
-                    .WithMany(p => p.WorkLastUpdatedByNavigations)
-                    .HasForeignKey(d => d.LastUpdatedBy)
-                    .HasConstraintName("work_last_updated_by_fk");
-            });
-
             modelBuilder.Entity<Files>(entity =>
             {
                 entity.ToTable("file");
@@ -2224,9 +2010,6 @@ namespace VideoProjectCore6.Models
             modelBuilder.HasSequence("sequenceformeetingid");
 
             modelBuilder.HasSequence("general_seq");
-
-            modelBuilder.HasSequence("egroup_seq");
-
         }
     }
 }

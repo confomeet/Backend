@@ -82,14 +82,6 @@ namespace VideoProjectCore6.Repositories.IMeetingRepository
 
         Task<APIResult> MeetingJWT(int participantId,Guid guid,int? userId, string lang);
         Task<object> MeetingJWT(string meetingId, int? userId,JoinData user,  string lang);
-        /// <summary>
-        /// Get a list of meeting for a related order no.
-        /// </summary>
-        /// <param name="orderNo">the number of the order</param>
-        /// <returns></returns>
-        Task<List<MeetingGetDto>> GetMeetingByOrderNo(int orderNo);
-
-        Task<IsAttended> IsAttendedByAppNo(int orderNo);
 
         Task<bool> LogInToMeeting(string meetingNo);
         Task<bool> InviteToMeeting(string meetingId, List<string> contacts, string lang = "en",bool local = true);

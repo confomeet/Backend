@@ -31,19 +31,7 @@ public class ParticipantController : ControllerBase
         var result = await _IParticipantRepository.SearchParticipant(toSearch);
         return Ok(result);
     }
-    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [HttpGet("SearchByWork")]
-    public async Task<ActionResult> SearchByWork([FromQuery] int WorkId = 0, [FromHeader] string lang = "ar")
-    {
-        var result = await _IParticipantRepository.SearchByWork(WorkId, lang);
-        return Ok(result);
-    }
-    [HttpGet("SearchBySpeciality")]
-    public async Task<ActionResult> SearchBySearchBySpeciality([FromQuery] int specialityId = 0, [FromHeader] string lang = "ar")
-    {
-        var result = await _IParticipantRepository.SearchBySpeciality(specialityId, lang);
-        return Ok(result);
-    }
+
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id, [FromHeader] string lang)

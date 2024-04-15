@@ -9,8 +9,6 @@ namespace VideoProjectCore6.Repositories.IParticipantRepository;
 public interface IParticipantRepository
 {
     Task<List<ParticipantSearchView>> SearchParticipant(string toSearch);
-    Task<List<ParticipantSearchView>> SearchByWork(int workId, string lang);
-    Task<List<ParticipantSearchView>> SearchBySpeciality(int specialityId, string lang);
     Task<APIResult> AddParticipants(List<ParicipantDto> dto, int addBy, string lang);
     Task<APIResult> AddParticipants(List<ParticipantWParent> dtos, int eventId, int addBy, string lang,List<EntityCabine> toUseCabins, DateTimeRange range, string meetingId, bool checkUserTime = false, bool checkWorkTime = false,bool toExistEvent=false);
     Task<List<MeetingUserLink>> NotifyParticipants(List<Receiver> participants, string? mettingId, List<NotificationLogPostDto> notifications_, Dictionary<string, string> parameters, string template, bool send, bool isDirectInvitation, string? ciscoLink=null);

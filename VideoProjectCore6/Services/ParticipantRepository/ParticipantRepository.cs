@@ -54,34 +54,7 @@ public class ParticipantRepository : IParticipantRepository
         result = await users.Select(x => new ParticipantSearchView { Id = x.Id, Email = x.Email, Mobile = x.PhoneNumber, Name = x.FullName }).ToListAsync();
         return result;
     }
-    public async Task<List<ParticipantSearchView>> SearchByWork(int workId, string lang)
-    {
-        List<ParticipantSearchView> result = new List<ParticipantSearchView>();
-        return await (from w in _DbContext.PartyWorks
-                      join u in _DbContext.Users
-                      on w.PartyId equals u.Id
-                      where w.WorkId == workId
-                      select new ParticipantSearchView
-                      { Id = u.Id, Email = u.Email, Mobile = u.PhoneNumber, Name = u.FullName }).ToListAsync();
 
-    }
-    public async Task<List<ParticipantSearchView>> SearchBySpeciality(int specialityId, string lang)
-    {
-        List<ParticipantSearchView> result = new List<ParticipantSearchView>();
-        return await (from s in _DbContext.PartyWorkSpecialities
-                      join pw in _DbContext.PartyWorks
-                      on s.PartyWorkId equals pw.Id
-                      join u in _DbContext.Users
-                      on pw.PartyId equals u.Id
-                      where s.SpecialityId == specialityId
-                      select new ParticipantSearchView
-                      {
-                          Id = u.Id,
-                          Email = u.Email,
-                          Mobile = u.PhoneNumber,
-                          Name = u.FullName
-                      }).ToListAsync();
-    }
     public async Task<APIResult> AddParticipants(List<ParicipantDto> dtos, int addBy, string lang)
     {
         var Participants = new List<Participant>();

@@ -17,7 +17,6 @@ namespace VideoProjectCore6.DTOs.EventDto
         public string MeetingId { get; set; }
         public bool Invitation { get; set; }
         public int? ParentEventId { get; set; }
-        public int? OrderNo { get; set; }
         public string TimeZone { get; set; }
         public sbyte? Status { get; set; }
 
@@ -46,7 +45,6 @@ namespace VideoProjectCore6.DTOs.EventDto
                 MeetingId = event_.MeetingId,
                 ParentEventId = event_.ParentEvent,
                 TimeZone = event_.TimeZone,
-                OrderNo=event_.OrderNo,
                 Status=event_.RecStatus
             };
             return dto;

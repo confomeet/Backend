@@ -87,20 +87,6 @@ namespace VideoProjectCore6.Controllers.Meeting
             return Ok(result);
         }
 
-        [HttpGet("GetMeetingForOrderNo")]
-        public async Task<ActionResult> GetMeetingForOrderNo(int OrderNo)
-        {
-            var result = await _IMeetingRepository.GetMeetingByOrderNo(OrderNo);
-            return result != null ? StatusCode(StatusCodes.Status200OK, result) : StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
-
-        [HttpGet("IsAttendedByAppNo")]
-        public async Task<ActionResult> IsAttended(int meetingId)
-        {
-            var result = await _IMeetingRepository.IsAttendedByAppNo(meetingId);
-            return Ok(result);
-        }
-
         [HttpGet("hasPassword")]
         public async Task<bool> MeetingHasPassword(string meetingId)
         {

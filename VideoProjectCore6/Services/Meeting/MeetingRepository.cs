@@ -197,23 +197,6 @@ namespace VideoProjectCore6.Services.Meeting
             return MeetingGetDto.GetDTO(createdMeeting);
         }
 
-        public async Task<List<MeetingGetDto>> GetMeetingByOrderNo(int orderNo)
-        {
-            List<MeetingGetDto> res = new List<MeetingGetDto>();
-
-            var createdMeeting = await _DbContext.Meetings.Where(d => d.EventId == orderNo).ToListAsync();
-            if (createdMeeting == null)
-            {
-                return res;
-            }
-
-            foreach (var meet in createdMeeting)
-            {
-                res.Add(MeetingGetDto.GetDTO(meet));
-            }
-            return res;
-        }
-
         public async Task<MeetingGetDto> GetMeetingByMeetingIdAndPassword(string meetingId, string password, string lang)
         {
             Models.Meeting createdMeeting = new Models.Meeting();
@@ -224,34 +207,6 @@ namespace VideoProjectCore6.Services.Meeting
                 throw _exception;
             }
             return MeetingGetDto.GetDTO(createdMeeting);
-        }
-
-        public async Task<IsAttended> IsAttendedByAppNo(int orderNo)
-        {
-            IsAttended isAttended = new IsAttended
-            {
-                IsLate = false,
-                IsOnline = false,
-                LastLogIn = null
-            };
-
-            var meets = await _DbContext.Meetings.Include(x => x.MeetingLoggings).Where(x => x.EventId == orderNo).OrderByDescending(x => x.Id).ToListAsync();
-
-            if (meets.Count > 0)
-            {
-                var meet = meets[0];
-                var meetLooging = meet.MeetingLoggings.Where(x => x.IsModerator == false && x.LoginDate.AddSeconds(300) >= DateTime.Now).OrderBy(x => x.FirstLogin).ToList();
-                if (meetLooging != null && meetLooging.Count() > 0)
-                {
-                    isAttended.IsOnline = true;
-                    isAttended.LastLogIn = meetLooging[0].FirstLogin;
-                    if (meet.MeetingLoggings.Any(x => x.IsModerator == false && x.FirstLogin.AddMinutes(15) < DateTime.Now))
-                    {
-                        isAttended.IsLate = true;
-                    }
-                }
-            }
-            return isAttended;
         }
 
         public async Task<bool> LogInToMeeting(string meetingNo)
@@ -457,7 +412,7 @@ namespace VideoProjectCore6.Services.Meeting
 
             
 
-            if (event_.EGroup == null && eventStatus.Status == 2 && event_.Type == 22)
+            if (eventStatus.Status == 2 && event_.Type == 22)
             {
                 _exception.AttributeMessages.Add(Translation.getMessage(lang, "sessionLifted"));
                 throw _exception;

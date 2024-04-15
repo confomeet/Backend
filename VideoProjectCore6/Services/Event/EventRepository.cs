@@ -67,7 +67,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 Topic = dto.Topic,
                 SubTopic = dto.SubTopic,
                 Organizer = dto.Organizer,
-                OrderNo = dto.OrderNo,
                 CreatedDate = DateTime.Now,
                 EndDate = dto.EndDate,
                 StartDate = dto.StartDate,
@@ -495,7 +494,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             {
                 await _DbContext.SaveChangesAsync();
 
-                if (opt != null && evt.EGroup != null && timeChanged && !opt.JustCurrent && opt.HasOneOption())
+                if (opt != null && timeChanged && !opt.JustCurrent && opt.HasOneOption())
                 {
                     result = await ShiftRecurrenceEvents(id, updatedBy, originStartDate, daysStart, daysEnd, minutsStart, minutsEnd, newTimeZone, opt, false, lang);
                     if (result.Id < 0)
@@ -699,7 +698,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 Id = e.Id,
                 ByMe = e.CreatedBy == userId,
                 CreatedBy = e.CreatedBy,
-                OrderNo = e.OrderNo,
                 Topic = e.Topic,
                 SubTopic = e.SubTopic,
                 Organizer = e.Organizer,
@@ -720,7 +718,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 MeetingLink = e.MeetingId != null && e.CreatedBy == userId && e.ParentEvent == null ?
                 (e.Meeting != null ? e.Meeting.MeetingLog : null) ?? (Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0") : null,
 
-                EGroup = e.EGroup,
                 ParentEventId = e.ParentEvent,
                 StatusText = e.RecStatus == null ? string.Empty : EventStatusValue.ContainsKey((EVENT_STATUS)e.RecStatus) ? EventStatusValue[(EVENT_STATUS)e.RecStatus][lang] : string.Empty,
                 Participants = e.Participants.Select(p => new ParticipantView
@@ -786,7 +783,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                     Id = e.Id,
                     ByMe = e.CreatedBy == userId,
                     CreatedBy = e.CreatedBy,
-                    OrderNo = e.OrderNo,
                     Topic = e.Topic,
                     SubTopic = e.SubTopic,
                     Organizer = e.Organizer,
@@ -808,7 +804,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                     //((e.Meeting.MeetingLog != null) ? e.Meeting.MeetingLog : 
                     MeetingLink = e.MeetingId != null && e.CreatedBy == userId && e.ParentEvent == null ?
                     (e.Meeting != null ? e.Meeting.MeetingLog : null) ?? (Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0") : null,
-                    EGroup = e.EGroup,
                     ParentEventId = e.ParentEvent,
                     StatusText = e.RecStatus == null ? string.Empty : EventStatusValue.ContainsKey((EVENT_STATUS)e.RecStatus) ? EventStatusValue[(EVENT_STATUS)e.RecStatus][lang] : string.Empty,
                     Participants = e.Participants.Select(p => new ParticipantView
@@ -936,7 +931,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
            ByMe = e.CreatedBy == CurrentUserId,
            CreatedBy = e.CreatedBy,
            CreatedByName = e.User.FullName,
-           OrderNo = e.OrderNo,
            Topic = e.Topic,
            SubTopic = e.SubTopic,
            Organizer = e.Organizer,
@@ -1032,7 +1026,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             {
                 Id = e.Id,
                 CreatedBy = e.CreatedBy,
-                OrderNo = e.OrderNo,
                 CreatedByName = e.User.FullName,
                 Topic = e.Topic,
                 SubTopic = e.SubTopic,
@@ -1051,7 +1044,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 Type = e.Type,
                 EventLogs = new List<ConfEventCompactGet>(),
                 ParentEventId = e.ParentEvent,
-                EGroup = e.EGroup,
                 Participants = e.Participants.Select(p => new ParticipantView
                 {
                     Id = p.Id,
@@ -1101,11 +1093,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
     {
         var eventsList = new List<EventWParticipant>();
         APIResult meetingResult = new();
-        int? group = dates.Count > 0 ? _IGeneralRepository.GetNewValueBySec("egroup_seq") : null;
-        if (group != null && group < 0)
-        {
-            return [];
-        }
         foreach (var d in dates)
         {
             if (MeetingRequired)
@@ -1137,7 +1124,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 Description = dto.Description,
                 AllDay = dto.AllDay,
                 MeetingRequired = dto.MeetingRequired,
-                OrderNo = dto.OrderNo,
                 Organizer = dto.Organizer,
                 PasswordReq = dto.PasswordReq,
                 Password = dto.Password,
@@ -1147,7 +1133,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 SingleAccess = dto.SingleAccess,
                 AutoLobby = dto.AutoLobby,
                 MeetingId = meetingResult.Result,
-                EGroup = group
             });
         }
         return eventsList;
@@ -1174,7 +1159,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                     Topic = evt.Topic,
                     SubTopic = evt.SubTopic,
                     Organizer = evt.Organizer,
-                    OrderNo = evt.OrderNo,
                     CreatedDate = DateTime.Now,
                     EndDate = evt.EndDate,
                     StartDate = evt.StartDate,
@@ -1184,7 +1168,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                     RecStatus = evt.Status == null ? (sbyte)EVENT_STATUS.ACTIVE : dto.Status,
                     AppId = evt.AppId,
                     Type = evt.Type,
-                    EGroup = evt.EGroup,
                 });
             }
             _DbContext.Events.AddRange(RecurrenceEvents);
@@ -1278,24 +1261,21 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         {
             return result.FailMe(-1, "الحدث غير موجود");
         }
-        if (evt.EGroup == null)
-        {
-            return result.FailMe(-1, "هذا الحدث لاينتمي لمجموعة أحدث تكرارية");
-        }
-        List<Models.Event> events = new(); //await _DbContext.Events.Where(e => e.EGroup == evt.EGroup && (updateThis || e.Id != eventId) && e.StartDate > DateTime.Now && (opt != null && !opt.HasAllOption() && ((opt.Next && e.StartDate > originStartDate) || (opt.Previous && e.StartDate < originStartDate)))).ToListAsync();
+
+        List<Models.Event> events = new();
         switch (opt.GetCurrentStatus())
         {
             case 0:
                 events = await _DbContext.Events.Where(e => updateThis && e.Id == eventId).ToListAsync();
                 break;
             case 1:
-                events = await _DbContext.Events.Where(e => e.EGroup == evt.EGroup && (updateThis || e.Id != eventId) && e.StartDate > DateTime.Now && e.StartDate > originStartDate).ToListAsync();
+                events = await _DbContext.Events.Where(e => (updateThis || e.Id != eventId) && e.StartDate > DateTime.Now && e.StartDate > originStartDate).ToListAsync();
                 break;
             case -1:
-                events = await _DbContext.Events.Where(e => e.EGroup == evt.EGroup && (updateThis || e.Id != eventId) && e.StartDate > DateTime.Now && e.StartDate < originStartDate).ToListAsync();
+                events = await _DbContext.Events.Where(e => (updateThis || e.Id != eventId) && e.StartDate > DateTime.Now && e.StartDate < originStartDate).ToListAsync();
                 break;
             case 2:
-                events = await _DbContext.Events.Where(e => e.EGroup == evt.EGroup && (updateThis || e.Id != eventId) && e.StartDate > DateTime.Now).ToListAsync();
+                events = await _DbContext.Events.Where(e => (updateThis || e.Id != eventId) && e.StartDate > DateTime.Now).ToListAsync();
                 break;
             default:
 

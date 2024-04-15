@@ -468,7 +468,6 @@ namespace VideoProjectCore6.Services.ConfEventService
             {
                 Id = e.Id,
                 CreatedBy = e.CreatedBy,
-                OrderNo = e.OrderNo,
                 Topic = e.Topic,
                 SubTopic = e.SubTopic,
                 Organizer = e.Organizer,
@@ -488,7 +487,6 @@ namespace VideoProjectCore6.Services.ConfEventService
                 MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, "en", allRooms),
                 MeetingLink = e.MeetingId != null && e.CreatedBy == userId && e.ParentEvent == null ?
                 Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0" : null,
-                EGroup = e.EGroup,
                 ParentEventId = e.ParentEvent,
                 StatusText = e.RecStatus == null ? string.Empty : EventStatusValue.ContainsKey((EVENT_STATUS)e.RecStatus) ? EventStatusValue[(EVENT_STATUS)e.RecStatus]["en"] : string.Empty,
                 Participants = e.Participants.Select(p => new ParticipantView
