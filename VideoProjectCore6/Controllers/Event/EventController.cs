@@ -5,6 +5,7 @@ using VideoProjectCore6.DTOs.EventDto;
 using VideoProjectCore6.Repositories.IEventRepository;
 using VideoProjectCore6.Repositories.IUserRepository;
 using VideoProjectCore6.Services;
+using VideoProjectCore6.Utility.Authorization;
 
 namespace VideoProjectCore6.Controllers.Event
 {
@@ -21,14 +22,14 @@ namespace VideoProjectCore6.Controllers.Event
             _IUserRepository = iUserRepository;
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HasPermission(Permissions.Meeting_Create)]
         [HttpPost("MeetingEvent")]
         public async Task<ActionResult> AddMeetingEvent([FromBody] EventWParticipant dto, [FromHeader] string lang = "ar")
         {
             return Ok(await _IEventRepository.AddMeetingEvent(dto, _IUserRepository.GetUserID(), true, lang));
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HasPermission(Permissions.Meeting_Search_PartOf)]
         [HttpPost("Search")]
         public async Task<ActionResult> SearchLocal([FromBody] EventSearchObject obj, [FromQuery] bool relatedUserEvents, [FromHeader] string lang = "ar")
         {
@@ -41,7 +42,7 @@ namespace VideoProjectCore6.Controllers.Event
             return StatusCode(StatusCodes.Status404NotFound, "error occurred");
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HasPermission(Permissions.Meeting_Update_All)]
         [HttpPut("{id}")]
         public async Task<ActionResult> Update(MeetingEventDto dto, int id, [FromHeader] string lang)
         {
@@ -49,19 +50,7 @@ namespace VideoProjectCore6.Controllers.Event
             return Ok(result);
         }
 
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id, [FromHeader] string lang)
-        {
-            var result = await _IEventRepository.DeleteEvent(id);
-            if (result != 0)
-            {
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
-            else return StatusCode(StatusCodes.Status404NotFound, Translation.getMessage(lang, "zeroResult"));
-        }
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
+        [HasPermission(Permissions.Meeting_Search_All)]
         [HttpPost("All")]
         public async Task<ActionResult> GetAll([FromBody] EventSearchObject obj, [FromQuery] int pageIndex, [FromQuery] int pageSize)
         {
@@ -73,7 +62,7 @@ namespace VideoProjectCore6.Controllers.Event
             return StatusCode(StatusCodes.Status404NotFound, "error occurred");
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HasPermission(Permissions.Meeting_FetchDetails)]
         [HttpGet("{id}/Details")]
         public async Task<ActionResult> EventDetails([FromRoute] int id, [FromHeader] string timeZone, [FromHeader] string lang = "ar")
         {
@@ -85,7 +74,7 @@ namespace VideoProjectCore6.Controllers.Event
             return StatusCode(StatusCodes.Status404NotFound, "Not found");
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HasPermission(Permissions.Meeting_Create)]
         [HttpPost("AddRecurrence")]
         public async Task<ActionResult> AddREvent([FromBody] RecurrenceEvent events, [FromHeader] string lang = "ar")
         {
@@ -93,7 +82,7 @@ namespace VideoProjectCore6.Controllers.Event
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status404NotFound, result);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HasPermission(Permissions.Meeting_Update_All)]
         [HttpPut("Recurrence/{id}")]
         public async Task<ActionResult> Update(EventWUpdatOption dto, int id, [FromHeader] string lang)
         {
@@ -101,7 +90,7 @@ namespace VideoProjectCore6.Controllers.Event
             return Ok(result);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HasPermission(Permissions.Meeting_Cancel_All)]
         [HttpPut("{id}/Cancel")]
         public async Task<ActionResult> Cancel([FromRoute] int id,  [FromHeader] string lang)
         {
