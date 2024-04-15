@@ -2,14 +2,13 @@
 
 
 #nullable disable
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using VideoProjectCore6.DTOs.SmtpConfigDto;
 using VideoProjectCore6.Repositories.ISmtpConfigRepository;
 using VideoProjectCore6.Repositories.IUserRepository;
 using VideoProjectCore6.Services;
+using VideoProjectCore6.Utility.Authorization;
 
 
 namespace VideoProjectCore6.Controllers.SmtpConfigController
@@ -30,7 +29,7 @@ namespace VideoProjectCore6.Controllers.SmtpConfigController
             _IUserRepository = iUserRepository;
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
+        [HasPermission(Permissions.SmtpConfig_CreateUpdate)]
         [HttpPost("CreateUpdate")]
         public async Task<IActionResult> SmtpConfig([FromBody] SmtpConfigPostDto smtpConfigPostDto, [FromHeader] string lang)
         {
@@ -38,7 +37,7 @@ namespace VideoProjectCore6.Controllers.SmtpConfigController
             return Ok(obj);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
+        [HasPermission(Permissions.SmtpConfig_Read)]
         [HttpGet()]
         public async Task<IActionResult> DisplaySmtpConfig([FromHeader] string lang)
         {

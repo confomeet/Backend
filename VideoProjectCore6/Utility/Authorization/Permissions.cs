@@ -22,6 +22,9 @@ public static class Permissions
     public const string Profile_EditPassword = "Profile.EditPassword";
     public const string Profile_Update = "Profile.Update";
     public const string Profile_Read = "Profile.Read";
+    public const string SmtpConfig_CreateUpdate = "SmtpConfig_CreateUpdate";
+    public const string SmtpConfig_Read = "SmtpConfig_Read";
+    public const string SystemStats_Read = "SystemStats_Read";
     public const string User_Configure2FA_All = "User.Configure2FA.All";
     public const string User_Configure2FA_Self = "User.Configure2FA.Self";
     public const string User_Create = "User.Create";
