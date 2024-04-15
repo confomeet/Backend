@@ -72,6 +72,8 @@ namespace VideoProjectCore6.Models
 
         public virtual DbSet<S3Recording> S3Recordings { get; set; } = null!;
 
+        public virtual DbSet<Permission> Permissions { get; set; } = null!;
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
         }
@@ -1337,6 +1339,28 @@ namespace VideoProjectCore6.Models
                     .HasPrecision(2)
                     .HasColumnName("rec_status");
             });
+
+            modelBuilder.Entity<Permission>(entity =>
+            {
+                entity.ToTable("permission");
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(64)
+                    .HasColumnName("name")
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RoleId)
+                    .HasPrecision(10)
+                    .HasColumnName("role_id");
+
+                entity.HasOne(d => d.Role)
+                    .WithMany(p => p.RolePermissions)
+                    .HasForeignKey(d => d.RoleId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired()
+                    .HasConstraintName("permission_role_id_fk");
+            });
+
 
             modelBuilder.Entity<RoleClaim>(entity =>
             {

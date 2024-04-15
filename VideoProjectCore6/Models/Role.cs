@@ -19,5 +19,6 @@ namespace VideoProjectCore6.Models
         public virtual ICollection<RoleClaim> RoleClaims { get; set; }
         public virtual ICollection<UserRole> UserRoles { get; set; }
         public virtual ICollection<User> Users { get; set; }
+        public virtual ICollection<Permission> RolePermissions { get; set; }
     }
 }

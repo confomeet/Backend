@@ -55,6 +55,8 @@ using VideoProjectCore6.Repositories.IAclRepository;
 using VideoProjectCore6.Services.AclRepository;
 using VideoProjectCore6.Controllers.Account;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Authorization;
+using VideoProjectCore6.Utility.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -133,6 +135,8 @@ builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounte
 builder.Services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
 builder.Services.AddSingleton<IRateLimitConfiguration, CustomRateLimitConfiguration>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, HasPermissionPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionsBasedAuthorizationHandler>();
 
 builder.Services.Configure<ClientRateLimitOptions>(options =>
 {
