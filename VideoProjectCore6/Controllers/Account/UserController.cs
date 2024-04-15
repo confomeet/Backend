@@ -13,6 +13,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using System.Text.Json;
 using System.Text;
+using VideoProjectCore6.Utility.Authorization;
 #nullable disable
 namespace VideoProjectCore6.Controllers.Account
 {
@@ -38,7 +39,7 @@ namespace VideoProjectCore6.Controllers.Account
             _ILogger = logger;
         }
 
-        //// [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
+        [HasPermission(Permissions.User_Create)]
         [TypeFilter(typeof(KeyAttribute))]
         [HttpPost("Create")]
         public async Task<IActionResult> CreateUser([FromBody] UserPostDto UserPostDto, [FromHeader] string lang)
@@ -48,7 +49,7 @@ namespace VideoProjectCore6.Controllers.Account
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
+        [HasPermission(Permissions.User_Delete)]
         [HttpPost("{id}/Delete")]
         public async Task<IActionResult> DeleteUser([FromRoute] int id)
         {
@@ -56,7 +57,7 @@ namespace VideoProjectCore6.Controllers.Account
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HasPermission(Permissions.Profile_EditPassword)]
         [HttpPost("EditPassword")]
         public async Task<IActionResult> EditPassword(EditUserPasswordDTO editUserPasswordDTO, [FromHeader] string lang)
         {
@@ -64,7 +65,7 @@ namespace VideoProjectCore6.Controllers.Account
             return Ok(obj);
         }
 
-
+        [AllowAnonymous]
         [HttpPost("Register")]
         public async Task<IActionResult> Register(RegisterDTO registerDTO, [FromHeader] string lang)
         {
@@ -76,7 +77,7 @@ namespace VideoProjectCore6.Controllers.Account
 
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
+        [HasPermission(Permissions.User_Create)]
         [HttpPost("AdminRegisterNewUser")]
         public async Task<IActionResult> AdminRegisterNewUser(RegisterDTO registerDTO, [FromHeader] string lang)
         {
@@ -88,19 +89,21 @@ namespace VideoProjectCore6.Controllers.Account
 
         }
 
+        [AllowAnonymous]
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string token, string email, [FromHeader] string lang)
         {
             return Ok(await _IUserRepository.ConfirmEmail(token, email, lang));
         }
 
-
+        [HasPermission(Permissions.User_Update)]
         [HttpGet("ResendActivation")]
         public async Task<IActionResult> ResendActivation(string email, [FromHeader] string lang)
         {
             return Ok(await _IUserRepository.ResendActivation(email, lang));
         }
 
+        [AllowAnonymous]
         [HttpPost]
         #pragma warning disable ASP0023  // See https://github.com/dotnet/aspnetcore/issues/49777
         [Route("[action]")]
@@ -110,6 +113,7 @@ namespace VideoProjectCore6.Controllers.Account
             return Ok(obj);
         }
 
+        [AllowAnonymous]
         [HttpPost]
         #pragma warning disable ASP0023  // See https://github.com/dotnet/aspnetcore/issues/49777
         [Route("[action]")]
@@ -126,7 +130,7 @@ namespace VideoProjectCore6.Controllers.Account
         }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
+        [HasPermission(Permissions.User_Read)]
         [HttpGet]
         public async Task<IActionResult> AllUser([FromQuery] int pageIndex, [FromQuery] int pageSize, [FromHeader] string lang = "ar")
         {
@@ -141,7 +145,7 @@ namespace VideoProjectCore6.Controllers.Account
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HasPermission(Permissions.User_Read)]
         [HttpGet("Search")]
         public async Task<IActionResult> SearchUser([FromQuery] string email, [FromQuery] int pageIndex, [FromQuery] int pageSize, [FromHeader] string lang = "ar")
         {
@@ -156,7 +160,7 @@ namespace VideoProjectCore6.Controllers.Account
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HasPermission(Permissions.User_Read)]
         [HttpPost("SearchFilterUser")]
         public async Task<IActionResult> SearchFilterUser([FromBody] UserFilterDto userFilterDto, [FromHeader] string lang = "ar")
         {
@@ -176,7 +180,7 @@ namespace VideoProjectCore6.Controllers.Account
 
         // -------------------------------------
         // Temporary endpoint
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HasPermission(Permissions.User_Read)]
         [HttpGet("FilterUsers")]
         public async Task<IActionResult> SearchFilterUser([FromQuery] string text, [FromQuery] string name, [FromQuery] string email,
             [FromQuery] int pageIndex, [FromQuery] int pageSize, [FromHeader] string lang = "ar")
@@ -195,7 +199,7 @@ namespace VideoProjectCore6.Controllers.Account
         }
         // -----------------------------------
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
+        [HasPermission(Permissions.User_Enable)]
         [HttpPost("{id}/UnLock")]
         public async Task<IActionResult> UnLockAccount([FromRoute] int id, [FromHeader] string lang = "ar")
         {
@@ -203,14 +207,15 @@ namespace VideoProjectCore6.Controllers.Account
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
+        [HasPermission(Permissions.User_Disable)]
         [HttpPost("{id}/Lock")]
         public async Task<IActionResult> LockAccount([FromRoute] int id, [FromHeader] string lang = "ar")
         {
             var result = await _IUserRepository.LockAccount(id, null, lang);
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
         }
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
+
+        [HasPermission(Permissions.User_Enable)]
         [HttpPost("{id}/Activate")]
         public async Task<IActionResult> ActivateAccount([FromRoute] int id, [FromHeader] string lang = "ar")
         {
@@ -248,7 +253,7 @@ namespace VideoProjectCore6.Controllers.Account
         //    return imageName;
         //}
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme/*, Roles = Constants.EmployeePolicy*/)]
+        [HasPermission(Permissions.Profile_Update)]
         [HttpPost("EditProfile/{id}")]
         public async Task<IActionResult> EditUser([FromRoute] int id, [FromBody] UserPostDto userPostDto, [FromHeader] string lang)
         {
@@ -261,7 +266,7 @@ namespace VideoProjectCore6.Controllers.Account
         }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme/*, Roles = Constants.EmployeePolicy*/)]
+        [HasPermission(Permissions.User_Update)]
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> EditUserWithRole([FromRoute] int id, [FromBody] UserView dto, [FromHeader] string lang)
         {
@@ -273,6 +278,7 @@ namespace VideoProjectCore6.Controllers.Account
             return Ok(obj);
         }
 
+        [HasPermission(Permissions.User_Read)]
         [HttpGet("FindUserById/{id}")]
         public async Task<IActionResult> FindUserById(int id, [FromHeader] string lang)
         {
@@ -283,13 +289,15 @@ namespace VideoProjectCore6.Controllers.Account
             //}
             return Ok(await _IUserRepository.FindUserById(id, lang));
         }
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+
+        [HasPermission(Permissions.User_Read)]
         [HttpGet("RelatedUsers")]
         public async Task<IActionResult> GetRelatedUsers([FromHeader] string lang = "ar")
         {
             return Ok(await _IUserRepository.GetRelatedUsers(_IUserRepository.GetUserID(), lang));
         }
 
+        [AllowAnonymous]
         [HttpPost("LogIn")]
         public async Task<IActionResult> LogIn(LogInDto logInDto, [FromHeader] string lang)
         {
@@ -301,6 +309,7 @@ namespace VideoProjectCore6.Controllers.Account
             return Ok(obj);
         }
 
+        [AllowAnonymous]
         [HttpPost("VerifyOTP")]
         public async Task<IActionResult> VerifyOTP(OtpLogInDto otpLogInDto, [FromHeader] string lang)
         {
@@ -312,6 +321,7 @@ namespace VideoProjectCore6.Controllers.Account
             return Ok(obj);
         }
 
+        [AllowAnonymous]
         [HttpGet("LoginWithToken")]
         public async Task<IActionResult> LoginWithToken([FromQuery] string redirectUrl, [FromQuery] string token) {
             if (string.IsNullOrEmpty(token)) {
@@ -333,7 +343,7 @@ namespace VideoProjectCore6.Controllers.Account
             return Ok(obj);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HasPermission(Permissions.Profile_Read)]
         [HttpGet("MyProfile")]
         public async Task<IActionResult> MyProfile([FromHeader] string lang = "ar")
         {
@@ -343,7 +353,7 @@ namespace VideoProjectCore6.Controllers.Account
             return Ok(obj);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme/*, Roles = Constants.EmployeePolicy*/)]
+        [HasPermission(Permissions.Profile_Update)]
         [HttpPost("EditMyProfilePhoto")]
         public async Task<IActionResult> EditProfilePhoto([FromForm] FilePostDto filePostDto, [FromHeader] string lang)
         {

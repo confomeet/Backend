@@ -8,6 +8,7 @@ using VideoProjectCore6.DTOs.ParticipantDto;
 using VideoProjectCore6.Repositories.IMeetingRepository;
 using VideoProjectCore6.Repositories.IUserRepository;
 using VideoProjectCore6.Services;
+using VideoProjectCore6.Utility.Authorization;
 #nullable disable
 namespace VideoProjectCore6.Controllers.Meeting
 {
@@ -113,7 +114,8 @@ namespace VideoProjectCore6.Controllers.Meeting
             return Ok(obj);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        // Join by public link
+        [AllowAnonymous]
         [HttpPost("Join")]
         public async Task<IActionResult> moderatorJWT(string meetingId, [FromHeader] string lang)
         {
@@ -121,12 +123,17 @@ namespace VideoProjectCore6.Controllers.Meeting
             return Ok(obj);
         }
 
+        // Join by public link
+        [AllowAnonymous]
         [HttpPost("Join/{meetingId}")]
         public async Task<IActionResult> joinAnonymous([FromRoute] string meetingId, [FromBody] JoinData userData, [FromHeader] string lang = "ar")
         {
             object obj = await _IMeetingRepository.MeetingJWT(meetingId, null, userData, lang);
             return Ok(obj);
         }
+
+        // Join by button in UI
+        [HasPermission(Permissions.Meeting_FetchDetails_IfParticipant)]
         [HttpPost("Join/{userId}/{meetingId}")]
         public async Task<IActionResult> joinTo([FromRoute] string meetingId, [FromRoute] int userId , [FromHeader] string lang = "ar")
         {
@@ -134,6 +141,7 @@ namespace VideoProjectCore6.Controllers.Meeting
             return Ok(obj);
         }
 
+        // Join by personal link
         [HttpPost("Verify/{ParticipantId}/{Guid}")]
         public async Task<IActionResult> joinTo_([FromRoute] int ParticipantId,[FromQuery] int? partyId, [FromRoute] Guid Guid, [FromHeader] string lang = "ar")
         {

@@ -29,7 +29,7 @@ namespace VideoProjectCore6.Controllers.Event
             return Ok(await _IEventRepository.AddMeetingEvent(dto, _IUserRepository.GetUserID(), true, lang));
         }
 
-        [HasPermission(Permissions.Meeting_Search_PartOf)]
+        [HasPermission(Permissions.Meeting_Search_IfParticipant)]
         [HttpPost("Search")]
         public async Task<ActionResult> SearchLocal([FromBody] EventSearchObject obj, [FromQuery] bool relatedUserEvents, [FromHeader] string lang = "ar")
         {
@@ -62,7 +62,7 @@ namespace VideoProjectCore6.Controllers.Event
             return StatusCode(StatusCodes.Status404NotFound, "error occurred");
         }
 
-        [HasPermission(Permissions.Meeting_FetchDetails)]
+        [HasPermission(Permissions.Meeting_FetchDetails_IfParticipant)]
         [HttpGet("{id}/Details")]
         public async Task<ActionResult> EventDetails([FromRoute] int id, [FromHeader] string timeZone, [FromHeader] string lang = "ar")
         {
