@@ -2006,10 +2006,6 @@ namespace VideoProjectCore6.Models
             });
 
             modelBuilder.HasSequence("sequence_login");
-
-            modelBuilder.HasSequence("sequenceformeetingid");
-
-            modelBuilder.HasSequence("general_seq");
         }
     }
 }
