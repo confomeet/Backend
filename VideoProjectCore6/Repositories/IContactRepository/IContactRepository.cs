@@ -8,8 +8,6 @@ namespace VideoProjectCore6.Repositories.IContactRepository
 {
     public interface IContactRepository
     {
-        Task<APIResult> Add(ContactDto dto, int addBy, string lang);
-
         Task<APIResult> Add(ContactIndividualDto dto, int addBy, IFormFile file, string lang);
 
         Task<APIResult> Update(int id, ContactDto dto, int updateBy, string lang);
@@ -21,7 +19,6 @@ namespace VideoProjectCore6.Repositories.IContactRepository
 
         Task<ListCount> Search(int localUser, string? name, string? email, int pageIndex = 1, int pageSize = 25);
 
-        Task<object> MeetingJWT(string meetingId, string hash, string lang);
         Task<APIResult> GenerateDirectContactUrl(int v);
 
         Task<ListCount> AllMyContacts(SearchFilterDto searchFilterDto, int currentUserId, string lang);

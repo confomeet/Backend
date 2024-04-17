@@ -47,80 +47,6 @@ namespace VideoProjectCore6.Services.ContactService
             _IFileRepository = fileRepository;
         }
 
-        //public async Task<APIResult> Add(ContactDto dto, int addBy, string lang)
-        //{
-        //    APIResult result = new APIResult();
-        //    if (dto.ContactId==null)
-        //    { 
-        //        var userId = await _DbContext.Users.Where(u => u.NormalizedEmail.Equals(dto.Email.ToUpper())).AsNoTracking().Select(x=>x.Id).FirstOrDefaultAsync();
-        //        if (userId > 0)
-        //        {
-        //            dto.ContactId = userId;
-        //        }
-        //    }
-        //    Contact contact = new Contact()
-        //    {
-        //        ContactId = dto.ContactId,
-        //        DisplayName = dto.DisplayName,
-        //        UserId = dto.UserId==null || dto.UserId <=0 ?addBy: dto.UserId,
-        //        Mobile = dto.Mobile,
-        //        Home = dto.Home,
-        //        Office = dto.Office,
-        //        Email = dto.Email,
-        //        CreatedBy = addBy,
-        //        CreatedDate = DateTime.Now
-        //    };
-        //    try
-        //    {
-        //        await _DbContext.Contacts.AddAsync(contact);
-        //        await _DbContext.SaveChangesAsync();
-        //        return result.SuccessMe(contact.Id, "Contact added", true, APIResult.RESPONSE_CODE.CREATED);
-        //    }
-        //    catch
-        //    {
-        //        return result.FailMe(-1, "Error adding contact");
-        //    }
-        //}
-        // When user click on the button, it send the user data and his id.
-
-        public async Task<APIResult> Add(ContactDto dto, int addBy, string lang)
-        {
-            APIResult result = new APIResult();
-            if (dto.ContactId == null)
-            {
-                var userId = await _DbContext.Users.Where(u => u.NormalizedEmail.Equals(dto.Email.ToUpper())).AsNoTracking().Select(x => x.Id).FirstOrDefaultAsync();
-                if (userId > 0)
-                {
-                    dto.ContactId = userId;
-                }
-            }
-            Contact contact = new Contact()
-            {
-                ContactId = dto.ContactId,
-                DisplayName = dto.DisplayName,
-                UserId = /*dto.UserId == null || dto.UserId <= 0 ? */addBy/* : dto.UserId*/,
-                Mobile = dto.Mobile,
-                Home = dto.Home,
-                Office = dto.Office,
-                Email = dto.Email,
-                CreatedBy = addBy,
-                CreatedDate = DateTime.Now
-            };
-            try
-            {
-
-                await _DbContext.Contacts.AddAsync(contact);
-                await _DbContext.SaveChangesAsync();
-                return result.SuccessMe(contact.Id, "Contact added", true, APIResult.RESPONSE_CODE.CREATED);
-            }
-            catch
-            {
-                return result.FailMe(-1, "Error adding contact");
-            }
-        }
-
-
-
         public async Task<APIResult> Add(ContactIndividualDto dto, int addBy, IFormFile file, string lang)
         {
             APIResult result = new APIResult();
@@ -287,110 +213,6 @@ namespace VideoProjectCore6.Services.ContactService
             }
         }
 
-        //public async Task<APIResult> InitiatePMeeting(JoinData data, int addBy, string lang, bool sendNotification)
-        //{
-        //    APIResult result = new APIResult();
-
-        //    List<Receiver> receivers = new List<Receiver>();
-        //    if(data != null)
-        //    {
-        //        Receiver receiver = new Receiver()
-        //        {
-        //            Name = data.Name,
-        //            Mobile = data.Mobile,
-        //            Email = data.Email,
-        //        };
-        //        receivers.Add(receiver);
-        //    }
-
-
-        //    try
-        //    {
-
-        //        var user = await _DbContext.Users.Where(e => e.Id == addBy).FirstOrDefaultAsync();
-
-        //        DateTime now = DateTime.Now;
-
-        //        string meetingId = user.meetingId;
-
-        //        int envitationActionId = await _DbContext.Actions.Where(x => x.Shortcut == "SEND_INVITATION").Select(x => x.Id).FirstOrDefaultAsync();
-
-        //        var toSendNoti = await _INotificationSettingRepository.GetNotificationsForAction(envitationActionId, null);
-
-        //        var token = _generalRepository.generateMeetingToken(user, meetingId, true);
-
-        //        var parameters = new Dictionary<string, string>
-        //        {
-        //            { FROM_DATE, DateTime.Now.ToString("dd-MM-yyyy")},
-        //            { TO_DATE, "Open time"},
-        //            { FROM_TIME, DateTime.Now.ToString("hh:mm tt")},
-        //            { TO_TIME, "Open time"},
-        //            { TOPIC, "Personal meeting"},
-        //            { TIMEZONE, " "},
-        //        };
-
-
-        //        var a = await _IParticipantRepository.NotifyParticipants(receivers, meetingId, toSendNoti, parameters, INVITATION_TEMPLATE, sendNotification, true);
-        //        if (a == null)
-        //        {
-        //            return result.FailMe(envitationActionId, "Error sending notification", true);
-        //        }
-
-        //        return result.SuccessMe(addBy, "Ok", true, APIResult.RESPONSE_CODE.OK,
-        //            string.Format("{0}/{1}?jwt={2}", _IConfiguration["PUBLIC_URL"], meetingId, token));
-        //    }
-
-        //    catch
-        //    {
-        //        return result.FailMe(-1, "Error generating the link");
-        //    }
-        //}
-        public async Task<object> MeetingJWT(string meetingId, string hash, string lang)
-        {
-
-            var email = _generalRepository.Base64Decode(hash);
-
-            var contact = await _DbContext.Contacts.Where(x => x.Email.Equals(email)).FirstOrDefaultAsync();
-
-            if (contact == null)
-            {
-                _exception.AttributeMessages.Add(Translation.getMessage(lang, "wrongParameter or contact not found ") + meetingId);
-                throw _exception;
-            }
-
-            bool isModerator = false;
-
-            string confUrlPrefix = _IConfiguration["PUBLIC_URL"];
-            if (confUrlPrefix == null || confUrlPrefix.Length == 0)
-            {
-                _exception.AttributeMessages.Add("Missing configuration for lilac CONF_URL_PREFIX ");
-                throw _exception;
-            }
-
-            User user = new User()
-            {
-                FullName = contact.DisplayName,
-                PhoneNumber = contact.Mobile,
-                Email = contact.Email,
-
-            };
-
-            string sub = confUrlPrefix;
-            if (confUrlPrefix.StartsWith("https://"))
-            {
-                sub = confUrlPrefix.Substring("https://".Length);
-            }
-
-            if (confUrlPrefix.StartsWith("http://"))
-            {
-                sub = confUrlPrefix.Substring("http://".Length);
-            }
-
-            var token = _generalRepository.generateMeetingToken(user, meetingId, isModerator);
-
-            return new { meetingLink = string.Format("{0}/{1}?jwt={2}", confUrlPrefix, meetingId, token) };
-        }
-
         public async Task<APIResult> Delete(int id, int deletedBy, string lang)
         {
             var result = new APIResult();
@@ -417,38 +239,6 @@ namespace VideoProjectCore6.Services.ContactService
                 return result.FailMe(-1, Translation.getMessage(lang, "faildDelete"));
             }
         }
-
-        public async Task<List<ContactGetDto>> MyContactRemote(int id, string lang)
-        {
-
-            List<ContactGetDto> contacts = new List<ContactGetDto>();
-
-            contacts.AddRange(await _DbContext.Contacts.Where(x => x.UserId == id).Select(dto => new ContactGetDto
-            {
-                ContactId = dto.ContactId,
-                DisplayName = dto.DisplayName,
-                UserId = dto.UserId,
-                Mobile = dto.Mobile,
-                Home = dto.Home,
-                Office = dto.Office,
-                Email = dto.Email,
-                Country = dto.Country,
-                Website = dto.Website,
-                Address = dto.Address,
-                Type = dto.Type,
-                JobDesc = dto.JobDesc,
-                Specialization = dto.Specialization,
-                DirectManageId = dto.DirectManageId,
-                CompanyId = dto.CompanyId,
-                SectionId = dto.SectionId,
-                Sections = dto.Companies
-
-            }).ToListAsync());
-
-            return contacts;
-
-        }
-
 
         // All Individuals Contacts that belong to a company are shared by default with all sections.
 
@@ -981,19 +771,6 @@ namespace VideoProjectCore6.Services.ContactService
 
         }
 
-        private async Task<List<ContactSearchView>> FilterSearch(int id, string toSearch)
-        {
-            var result = new List<ContactSearchView>();
-            IQueryable<Contact> contacts = Enumerable.Empty<Contact>().AsQueryable();
-            if (!string.IsNullOrWhiteSpace(toSearch))
-            {
-                contacts = double.TryParse(toSearch, out _) ? _DbContext.Contacts.Where(x => x.UserId == id && x.Mobile != null && x.Mobile.Contains(toSearch)).AsNoTracking()
-                      : _DbContext.Contacts.Where(x => x.UserId == id && (x.Email != null && x.Email.Contains(toSearch)) || (x.DisplayName != null && x.DisplayName.Contains(toSearch))).AsNoTracking();
-            }
-            result = await contacts.Select(x => new ContactSearchView { Id = x.Id, Email = x.Email, Mobile = x.Mobile, DisplayName = x.DisplayName, ContactId = x.ContactId, UserId = x.UserId }).ToListAsync();
-            return result;
-        }
-
         public async Task<APIResult> ContactById(int id, int currentUserId, string lang)
         {
 
@@ -1065,43 +842,6 @@ namespace VideoProjectCore6.Services.ContactService
             var RolesId = await _DbContext.IndividualSections.Include(p => p.Individual).Where(x => SectionIds.Contains(x.SectionId)).ToListAsync();
 
             return RolesId;
-        }
-
-        // Add individual to sections
-        public async Task<APIResult> AddIndividualsToSection(List<int?> individualsIds, int sectionId)
-        {
-            APIResult result = new APIResult();
-
-
-            try
-            {
-
-                List<IndividualsSections> individualsSections = new List<IndividualsSections>();
-                foreach (var ids in individualsIds)
-                {
-                    IndividualsSections individualsSections1 = new IndividualsSections
-                    {
-                        IndividualId = ids,
-                        SectionId = sectionId
-                    };
-
-                    individualsSections.Add(individualsSections1);
-                }
-
-
-                await _DbContext.IndividualSections.AddRangeAsync(individualsSections);
-
-                return result.SuccessMe(1, "succeed", true, APIResult.RESPONSE_CODE.OK);
-
-            }
-            catch
-            {
-
-                return result.FailMe(-1, "Failed");
-            }
-
-
-            //return RolesId;
         }
 
 

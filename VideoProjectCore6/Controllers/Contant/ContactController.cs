@@ -34,11 +34,6 @@ namespace VideoProjectCore6.Controllers.Contant
             return result.Id > 0 ? Ok(result) : BadRequest(result);
         }
 
-        public async Task<ActionResult> AddRemote([FromBody] ContactDto dto, [FromQuery] int userId, [FromHeader] string lang = "ar")
-        {
-            return Ok(await _IContantRepository.Add(dto, userId, lang));
-        }
-
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet()]
         public async Task<ActionResult> Contact([FromQuery] byte tabId, [FromHeader] string lang = "ar")
@@ -60,12 +55,6 @@ namespace VideoProjectCore6.Controllers.Contant
             return Ok(await _IContantRepository.ContactById(Id, _IUserRepository.GetUserID(), lang));
         }
 
-        [HttpPut("Remote/{id}")]
-        public async Task<ActionResult> RemotUpdate(int id, [FromBody] ContactDto dto, [FromQuery] int userId, [FromHeader] string lang = "ar")
-        {
-            return Ok(await _IContantRepository.Update(id, dto, userId, lang));
-        }
-
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut("{id}")]
         public async Task<ActionResult> Update(int id, [FromBody] ContactDto dto, [FromHeader] string lang = "ar")
@@ -80,11 +69,6 @@ namespace VideoProjectCore6.Controllers.Contant
         {
             var result = await _IContantRepository.Delete(id, _IUserRepository.GetUserID(), lang);
             return result.Id > 0 ? Ok(result) : BadRequest(result);
-        }
-        [HttpDelete("Remote/{id}")]
-        public async Task<ActionResult> RemoteDelete(int id, [FromQuery] int userId, [FromHeader] string lang)
-        {
-            return Ok(await _IContantRepository.Delete(id, userId, lang));
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -101,15 +85,6 @@ namespace VideoProjectCore6.Controllers.Contant
                 return BadRequest("Error getting users");
             }
         }
-
-        [HttpPost("PrivateJoin/{meetingId}/{hash}")]
-        public async Task<IActionResult> joinTo([FromRoute] string meetingId, [FromRoute] string hash, [FromHeader] string lang = "ar")
-        {
-            object obj = await _IContantRepository.MeetingJWT(meetingId, hash, lang);
-            return Ok(obj);
-        }
-
-
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("GenerateDirectContactUrl")]
