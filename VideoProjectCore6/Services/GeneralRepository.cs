@@ -131,54 +131,6 @@ namespace VideoProjectCore6.Services
             return false;
         }
 
-        public string generateMeetingToken(User user, string meetingId, bool isAdmin)
-        {
-            DateTime now = DateTime.Now;
-
-            //int mId = _DbContext.Events.
-
-            UserStruct userInfo = new UserStruct()
-            {
-                id = Guid.NewGuid().ToString(),
-                avatar = "",
-                name = user.FullName,
-                email = "Not available",
-               // groudId = Guid.NewGuid().ToString(), //
-            };
-
-            string groupId = Guid.NewGuid().ToString();
-
-            DateTime expirationDate = now.AddDays(1);
-            DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            TimeSpan diff = expirationDate - origin;
-            double doublec = Math.Floor(diff.TotalSeconds);
-
-            Context contxt = new Context()
-            {
-                user = userInfo,
-                group = groupId
-            };
-
-            var payload = new Dictionary<string, object>
-            {
-                { "iss", _IConfiguration["Meeting:iss"] },
-                { "aud", _IConfiguration["Meeting:aud"] },
-                { "sub", _IConfiguration["Meeting:sub"] },
-                { "room", meetingId},
-                { "moderator", isAdmin },
-                { "context", contxt },
-                { "exp", doublec }
-            };
-
-            IJwtAlgorithm algorithm = new HMACSHA256Algorithm();
-            IJsonSerializer serializer = new JsonNetSerializer();
-            IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
-            IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
-            
-            return encoder.Encode(payload, _IConfiguration["Meeting:secret"]);
-
-        }
-
         public  string Base64Encode(string plainText)
         {
 
@@ -211,31 +163,6 @@ namespace VideoProjectCore6.Services
 
         }
 
-        public  string Base64Decode(string base64EncodedData)
-        {
-
-            byte[] iv = new byte[16];
-            byte[] buffer = Convert.FromBase64String(Base64UrlDecode(base64EncodedData));
-
-            using (Aes aes = Aes.Create())
-            {
-                aes.Key = Encoding.UTF8.GetBytes(_Key);
-                aes.IV = iv;
-                ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-
-                using (MemoryStream memoryStream = new MemoryStream(buffer))
-                {
-                    using (CryptoStream cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
-                    {
-                        using (StreamReader streamReader = new StreamReader(cryptoStream))
-                        {
-                            return streamReader.ReadToEnd();
-                        }
-                    }
-                }
-            }
-        }
-
         private static string Base64UrlEncode(string input)
         {
 
@@ -243,13 +170,6 @@ namespace VideoProjectCore6.Services
               .Replace('+', '-')
               .Replace('/', '_');
 
-        }
-
-
-        private static string Base64UrlDecode(string input)
-        {
-
-            return input.Replace('-', '+').Replace('_', '/');
         }
 
         public async Task<int> DeleteTranslation(string shortCut)

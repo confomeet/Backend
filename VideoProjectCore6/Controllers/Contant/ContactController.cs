@@ -86,20 +86,6 @@ namespace VideoProjectCore6.Controllers.Contant
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("GenerateDirectContactUrl")]
-        public async Task<ActionResult> GenerateCurrentUserUrl()
-        {
-            var result = await _IContantRepository.GenerateDirectContactUrl(_IUserRepository.GetUserID());
-
-            if (result != null)
-            {
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
-
-            else return StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
-
         /// <summary>
         /// ////////////////////////Section/Company search//////////////////////////
         /// </summary>

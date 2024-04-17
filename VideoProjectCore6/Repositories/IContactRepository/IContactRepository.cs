@@ -19,8 +19,6 @@ namespace VideoProjectCore6.Repositories.IContactRepository
 
         Task<ListCount> Search(int localUser, string? name, string? email, int pageIndex = 1, int pageSize = 25);
 
-        Task<APIResult> GenerateDirectContactUrl(int v);
-
         Task<ListCount> AllMyContacts(SearchFilterDto searchFilterDto, int currentUserId, string lang);
 
         Task<APIResult> SearchSections(int id, int companyId, string text, string lang);

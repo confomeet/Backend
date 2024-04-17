@@ -804,32 +804,6 @@ namespace VideoProjectCore6.Services.ContactService
 
         }
 
-        public async Task<APIResult> GenerateDirectContactUrl(int v)
-        {
-            APIResult result = new APIResult();
-
-
-            try
-            {
-                var sender = await _DbContext.Users.Where(e => e.Id == v).FirstOrDefaultAsync();
-
-
-                var meetingId = sender.meetingId;
-
-
-                var token = _generalRepository.generateMeetingToken(sender, meetingId, true);
-
-
-                return result.SuccessMe(v, "Ok", true, APIResult.RESPONSE_CODE.OK,
-                    string.Format("{0}/{1}?jwt={2}", _IConfiguration["PUBLIC_URL"], meetingId, token));
-
-            }
-            catch
-            {
-                return result.FailMe(-1, "Failed to generate link");
-            }
-        }
-
         public async Task<List<IndividualsSections>> GetSectionsByIndividuals(int? IndividualId)
         {
             var RolesId = await _DbContext.IndividualSections.Include(p => p.Section).Where(x => x.IndividualId == IndividualId).ToListAsync();

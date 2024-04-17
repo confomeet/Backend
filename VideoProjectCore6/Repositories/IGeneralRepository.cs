@@ -7,7 +7,6 @@ namespace VideoProjectCore6.Repositories
     public interface IGeneralRepository
     {
         string GenerateShortCut(string tableName, string columnName);
-         string Base64Decode(string base64EncodedData);
 
          string Base64Encode(string plainText);
 
@@ -18,7 +17,6 @@ namespace VideoProjectCore6.Repositories
         Task<Dictionary<string, string>> getTranslationsForShortCut(string shortCut);
         int GetNewValueBySec();
         Task<string> GetTranslateByShortCut(string lang, string shortCut);
-        string generateMeetingToken(User user, string meetingId, bool isAdmin);
         Boolean CheckParticipantStatus(string email, int id, string? meetingId, List<ConfEvent> allRooms, List<ConfUser> allUsers);
         Task<Dictionary<int, string>> GetActions(string lang);
     }
