@@ -1,6 +1,5 @@
 ﻿
 using VideoProjectCore6.DTOs.EventDto;
-using VideoProjectCore6.DTOs.SysLookUpDtos;
 using VideoProjectCore6.Models;
 
 namespace VideoProjectCore6.Repositories
