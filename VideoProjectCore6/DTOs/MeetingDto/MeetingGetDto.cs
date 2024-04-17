@@ -11,7 +11,6 @@ namespace VideoProjectCore6.DTOs.MeetingDto
         public DateTime EndDate { get; set; }
         public string TimeZone { get; set; }
         public string Password { get; set; }
-        public bool? PasswordReq { get; set; }
         public bool? RecordingReq { get; set; }
         public string MeetingId { get; set; }
         public int Status { get; set; }
@@ -39,7 +38,6 @@ namespace VideoProjectCore6.DTOs.MeetingDto
                 EndDate = meeting.EndDate,
                 TimeZone = meeting.TimeZone,
                 Password = meeting.Password,
-                PasswordReq = Convert.ToBoolean(meeting.PasswordReq),
                 RecordingReq = Convert.ToBoolean(meeting.RecordingReq),
                 AutoLobby = Convert.ToBoolean(meeting.AutoLobby),
                 UserId = meeting.UserId,

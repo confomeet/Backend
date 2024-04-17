@@ -109,7 +109,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             var meetingResult = await _IMeetingRepository.AddMeeting(new MeetingPostDto
             {
                 Password = dto.Password,
-                PasswordReq = dto.PasswordReq,//!string.IsNullOrWhiteSpace(dto.Password)
                 RecordingReq = dto.RecordingReq,
                 SingleAccess = dto.SingleAccess,
                 AllDay = dto.AllDay,
@@ -455,13 +454,11 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                         needUpdate = true;
                     }
                     if (meeting.Password != dto.Password 
-                        || meeting.PasswordReq != dto.PasswordReq
                         || meeting.RecordingReq != dto.RecordingReq
                         || meeting.SingleAccess != dto.SingleAccess 
                         || meeting.AutoLobby != dto.AutoLobby)
                     {
                         meeting.Password = dto.Password;
-                        meeting.PasswordReq = dto.PasswordReq;
                         meeting.RecordingReq = dto.RecordingReq;
                         meeting.SingleAccess = dto.SingleAccess;
                         meeting.AutoLobby = dto.AutoLobby;
@@ -658,7 +655,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 EndDate = e.EndDate,
                 TimeZone = e.TimeZone,
                 Password = e.Meeting != null ? (e.Meeting.Password ?? null) : null,
-                PasswordReq = e.Meeting != null && e.Meeting.PasswordReq,
                 RecordingReq = e.Meeting != null && (e.Meeting.RecordingReq ?? false),
                 SingleAccess = e.Meeting != null && (e.Meeting.SingleAccess ?? false),
                 AllDay = e.AllDay != null && (bool)e.AllDay,
@@ -827,7 +823,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
            EndDate = e.EndDate,
            TimeZone = e.TimeZone,
            Password = e.Meeting.Password,
-           PasswordReq = e.Meeting != null && e.Meeting.PasswordReq,
            RecordingReq = e.Meeting != null && (e.Meeting.RecordingReq ?? false),
            SingleAccess = e.Meeting != null && (e.Meeting.SingleAccess ?? false),
            MeetingId = e.MeetingId,
@@ -922,7 +917,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 EndDate = e.EndDate,
                 TimeZone = e.TimeZone,
                 Password = e.Meeting.Password,
-                PasswordReq = e.Meeting != null && e.Meeting.PasswordReq,
                 RecordingReq = e.Meeting != null && (e.Meeting.RecordingReq ?? false),
                 SingleAccess = e.Meeting != null && (e.Meeting.SingleAccess ?? false),
                 MeetingId = e.MeetingId,
@@ -986,7 +980,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 meetingResult = await _IMeetingRepository.AddMeeting(new MeetingPostDto
                 {
                     Password = dto.Password,
-                    PasswordReq = dto.PasswordReq,
                     RecordingReq = dto.RecordingReq,
                     SingleAccess = dto.SingleAccess,
                     AllDay = dto.AllDay,
@@ -1011,7 +1004,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 AllDay = dto.AllDay,
                 MeetingRequired = dto.MeetingRequired,
                 Organizer = dto.Organizer,
-                PasswordReq = dto.PasswordReq,
                 Password = dto.Password,
                 TimeZone = dto.TimeZone,
                 Type = dto.Type,

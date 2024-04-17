@@ -18,7 +18,6 @@ namespace VideoProjectCore6.Models
         public DateTime EndDate { get; set; }
         public string TimeZone { get; set; } = null!;
         public string Password { get; set; } 
-        public bool PasswordReq { get; set; }
         public string MeetingId { get; set; } = null!;
         public sbyte Status { get; set; }
         public int UserId { get; set; }

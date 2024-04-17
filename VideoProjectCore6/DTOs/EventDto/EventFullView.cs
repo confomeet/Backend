@@ -23,7 +23,6 @@ namespace VideoProjectCore6.DTOs.EventDto
         public string MeetingId { get; set; }
         public string MeetingLink { get; set; }
         public string Password { get; set; }
-        public bool PasswordReq { get; set; }
         public bool? RecordingReq { get; set; }
 
         public bool? SingleAccess { get; set; }

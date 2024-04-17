@@ -729,9 +729,6 @@ namespace VideoProjectCore6.Models
                     .HasMaxLength(50)
                     .HasColumnName("password");
 
-                entity.Property(e => e.PasswordReq)
-                    .HasColumnName("password_req");
-
                 entity.Property(e => e.RecordingReq)
                       .HasColumnName("recording_req");
 

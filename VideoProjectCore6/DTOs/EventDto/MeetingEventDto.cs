@@ -5,7 +5,6 @@ namespace VideoProjectCore6.DTOs.EventDto
 {
     public class MeetingEventDto : EventDto
     {
-        public bool PasswordReq { get; set; }
         public string Password { get; set; }
         public bool? RecordingReq { get; set; }
         public bool? SingleAccess { get; set; }

@@ -304,11 +304,6 @@ namespace VideoProjectCore6.Services.Meeting
             return originalMeeting.Id;
         }
 
-        public async Task<bool> MeetingHasPassword(string meetingId)
-        {
-            return await _DbContext.Meetings.AnyAsync(x => x.MeetingId == meetingId && x.PasswordReq);
-        }
-
         public async Task<bool> IfExistMeeting(string meetingId)
         {
             return await _DbContext.Meetings.AnyAsync(x => x.MeetingId == meetingId);
@@ -488,13 +483,10 @@ namespace VideoProjectCore6.Services.Meeting
                 isModerator = false;
                 userInfo.name = userData.Name;
                 userInfo.email = userData.Email;
-                if (meeting.PasswordReq)
+                if (meeting.Password != userData.Password)
                 {
-                    if (meeting.Password != userData.Password)
-                    {
-                        _exception.AttributeMessages.Add(Translation.getMessage(lang, "errorAuthentication"));
-                        throw _exception;
-                    }
+                    _exception.AttributeMessages.Add(Translation.getMessage(lang, "errorAuthentication"));
+                    throw _exception;
                 }
             }
             else

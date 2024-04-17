@@ -476,7 +476,6 @@ namespace VideoProjectCore6.Services.ConfEventService
                 EndDate = e.EndDate,
                 TimeZone = e.TimeZone,
                 Password = e.Meeting != null ? (e.Meeting.Password ?? null) : null,
-                PasswordReq = e.Meeting != null && e.Meeting.PasswordReq,
                 RecordingReq = e.Meeting != null && (e.Meeting.RecordingReq ?? false),
                 SingleAccess = e.Meeting != null && (e.Meeting.SingleAccess ?? false),
                 AllDay = e.AllDay != null && (bool)e.AllDay,

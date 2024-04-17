@@ -20,7 +20,6 @@ namespace VideoProjectCore6.DTOs.MeetingDto
 
         [Required]
         public string Password { get; set; }
-        public bool PasswordReq { get; set; } = false;
         public bool? RecordingReq { get; set; }
         public bool? SingleAccess { get; set; }
 
@@ -55,7 +54,6 @@ namespace VideoProjectCore6.DTOs.MeetingDto
                 EndDate = EndDate,
                 TimeZone = TimeZone,
                 Password = Password,
-                PasswordReq = PasswordReq,
                 Status = Status,
                 RecordingReq = RecordingReq,
                 SingleAccess = SingleAccess,

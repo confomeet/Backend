@@ -22,7 +22,6 @@ namespace VideoProjectCore6.DTOs.EventDto
         public ushort? AppId { get; set; }
         public bool? AllDay { get; set; }
         public int? TypeOrder { get; set; }
-        public bool PasswordReq { get; set; }
         public bool? RecordingReq { get; set; }
         public bool? SingleAccess { get; set; }
         public bool? AutoLobby { get; set; }

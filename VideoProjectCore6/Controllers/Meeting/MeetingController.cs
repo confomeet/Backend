@@ -87,12 +87,6 @@ namespace VideoProjectCore6.Controllers.Meeting
             return Ok(result);
         }
 
-        [HttpGet("hasPassword")]
-        public async Task<bool> MeetingHasPassword(string meetingId)
-        {
-            return await _IMeetingRepository.MeetingHasPassword(meetingId);
-        }
-
         [HttpPost("anonymJWT")]
         public async Task<IActionResult> anonymJWT(string meetingId, [FromBody] JoinData userData, [FromHeader] string lang)
         {

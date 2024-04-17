@@ -67,13 +67,6 @@ namespace VideoProjectCore6.Repositories.IMeetingRepository
         Task<int> SetMeetingStatus(string meetingId, Constants.MEETING_STATUS newStatus, bool cahngeAppointment, string lang);
 
         /// <summary>
-        /// Get true if the password of the meeting is required otherwise false.
-        /// </summary>
-        /// <param name="meetingId">The id of the meeting</param>
-        /// <exception cref="INVALD_ENTRY_ERROR">Thrown when ....</exception>
-        Task<bool> MeetingHasPassword(string meetingId);
-
-        /// <summary>
         /// Determine if meeting id is existed before.
         /// </summary>
         /// <param name="meetingId"></param>
