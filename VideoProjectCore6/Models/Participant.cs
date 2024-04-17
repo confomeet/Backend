@@ -19,7 +19,6 @@ namespace VideoProjectCore6.Models
         public int CreatedBy { get; set; }
         public int? LastUpdatedBy { get; set; }
         public byte? RecStatus { get; set; }
-        public byte? UserType { get; set; }
         public bool IsModerator { get; set; }
         public Guid? Guid { get; set; }
         public int? GroupIn { get; set; }
@@ -37,7 +36,6 @@ namespace VideoProjectCore6.Models
                 Mobile = Mobile,
                 IsModerator = IsModerator,
                 UserId = PartyId,
-                UserType = UserType
             };
         }
     }

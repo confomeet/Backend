@@ -1104,9 +1104,6 @@ namespace VideoProjectCore6.Models
                 entity.Property(e => e.UserId)
                     .HasPrecision(10)
                     .HasColumnName("user_id");
-                entity.Property(e => e.UserType)
-                      .HasPrecision(2)
-                      .HasColumnName("user_type");
 
                 entity.HasOne(d => d.Event)
                     .WithMany(p => p.Participants)
@@ -1386,8 +1383,6 @@ namespace VideoProjectCore6.Models
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("user_");
-                entity.HasIndex(e => new { e.UserId, e.UserType }, "USER_USERTYPE_USERID_UK")
-                   .IsUnique();
                 entity.Property(e => e.Id)
                     .HasPrecision(10)
                     .HasColumnName("id");
@@ -1408,10 +1403,6 @@ namespace VideoProjectCore6.Models
                     .HasColumnType("datetime")
                     .HasColumnName("birthday_date");
 
-                entity.Property(e => e.City)
-                    .HasPrecision(2)
-                    .HasColumnName("city");
-
                 entity.Property(e => e.ConcurrencyStamp)
                     .HasMaxLength(200)
                     .HasColumnName("concurrency_stamp");
@@ -1431,18 +1422,6 @@ namespace VideoProjectCore6.Models
                     .HasMaxLength(50)
                     .HasColumnName("email_lang");
 
-                entity.Property(e => e.Emirate)
-                    .HasPrecision(2)
-                    .HasColumnName("emirate");
-
-                entity.Property(e => e.EmiratesId)
-                    .HasMaxLength(25)
-                    .HasColumnName("emirates_id");
-
-                entity.Property(e => e.EndEffectiveDate)
-                    .HasColumnType("date")
-                    .HasColumnName("end_effective_date");
-
                 entity.Property(e => e.EntityId)
                     .HasPrecision(10)
                     .HasColumnName("entity_id");
@@ -1459,9 +1438,6 @@ namespace VideoProjectCore6.Models
                     .HasMaxLength(200)
                     .HasColumnName("image");
 
-                entity.Property(e => e.IsEntity)
-                    .HasColumnName("is_entity");
-
                 entity.Property(e => e.LastUpdatedDate)
                     .HasColumnType("date")
                     .HasColumnName("last_updated_date");
@@ -1476,10 +1452,6 @@ namespace VideoProjectCore6.Models
 
                 entity.Property(e => e.LockoutEndDateUtc).HasColumnType("datetime")
                 .HasColumnName("lockoutenddateutc"); ;
-
-                entity.Property(e => e.ManagerId)
-                    .HasPrecision(10)
-                    .HasColumnName("manager_id");
 
                 entity.Property(e => e.NatId)
                     .HasPrecision(10)
@@ -1538,14 +1510,6 @@ namespace VideoProjectCore6.Models
                     .HasMaxLength(50)
                     .HasColumnName("sms_lang");
 
-                entity.Property(e => e.StartEffectiveDate)
-                    .HasColumnType("date")
-                    .HasColumnName("start_effective_date");
-
-                entity.Property(e => e.Status)
-                    .HasPrecision(10)
-                    .HasColumnName("status");
-
                 entity.Property(e => e.TelNo)
                     .HasMaxLength(50)
                     .HasColumnName("tel_no");
@@ -1559,16 +1523,6 @@ namespace VideoProjectCore6.Models
                 entity.Property(e => e.UserName)
                     .HasMaxLength(200)
                     .HasColumnName("user_name");
-                entity.Property(e => e.UserType)
-                      .HasPrecision(2)
-                      .HasColumnName("user_type");
-                entity.Property(e => e.UuId)
-                      .HasMaxLength(25)
-                      .HasColumnName("uuid");
-
-                entity.Property(e => e.Website)
-                    .HasMaxLength(100)
-                    .HasColumnName("website");
 
                 //entity.Property(e => e.ReCaptchaToken)
                 //.HasMaxLength(1000)

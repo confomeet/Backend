@@ -391,17 +391,6 @@ namespace VideoProjectCore6.Services.ContactService
             return new { meetingLink = string.Format("{0}/{1}?jwt={2}", confUrlPrefix, meetingId, token) };
         }
 
-        public async Task<APIResult> Add(ContactDto dto, int userId, int userType, string lang)
-        {
-            APIResult result;
-            result = await _IUserRepository.GetLocalUserId(userId, userType);
-            if (result.Id < 0)
-            {
-                return result;
-            }
-            return await Add(dto, result.Id, lang);
-        }
-
         public async Task<APIResult> Delete(int id, int deletedBy, string lang)
         {
             var result = new APIResult();
@@ -857,9 +846,9 @@ namespace VideoProjectCore6.Services.ContactService
             return new ListContacts();
         }
 
-        public async Task<List<ContactGetDto>> MyContact(int userId, int userType, string lang)
+        public async Task<List<ContactGetDto>> MyContact(int userId, string lang)
         {
-            APIResult result = await _IUserRepository.GetLocalUserId(userId, userType);
+            APIResult result = await _IUserRepository.GetLocalUserId(userId);
             if (result.Id < 0)
             {
                 return null;
@@ -911,15 +900,7 @@ namespace VideoProjectCore6.Services.ContactService
                 return result.FailMe(-1, "Error Updating contact");
             }
         }
-        public async Task<APIResult> Update(int id, ContactDto dto, int userId, int userType, string lang)
-        {
-            APIResult result = await _IUserRepository.GetLocalUserId(userId, userType);
-            if (result.Id < 0)
-            {
-                return result.FailMe(-1, Translation.getMessage(lang, "NoMatchingUser"));
-            }
-            return await Update(id, dto, result.Id, lang);
-        }
+
         public async Task<ListCount> Search(int localUserId, string name, string email, int pageIndex, int pageSize)
         {
             //var result = new List<ContactSearchView>();
@@ -1026,9 +1007,9 @@ namespace VideoProjectCore6.Services.ContactService
             }
 
         }
-        public async Task<List<ContactSearchView>> Search(int userId, int userType, string toSearch)
+        public async Task<List<ContactSearchView>> Search(int userId, string toSearch)
         {
-            var result = await _IUserRepository.GetLocalUserId(userId, userType);
+            var result = await _IUserRepository.GetLocalUserId(userId);
             if (result.Id < 0)
             {
                 return (List<ContactSearchView>)Enumerable.Empty<ContactSearchView>();
@@ -1047,16 +1028,6 @@ namespace VideoProjectCore6.Services.ContactService
             }
             result = await contacts.Select(x => new ContactSearchView { Id = x.Id, Email = x.Email, Mobile = x.Mobile, DisplayName = x.DisplayName, ContactId = x.ContactId, UserId = x.UserId }).ToListAsync();
             return result;
-        }
-
-        public async Task<APIResult> Delete(int id, int userId, int userType, string lang)
-        {
-            APIResult result = await _IUserRepository.GetLocalUserId(userId, userType);
-            if (result.Id < 0)
-            {
-                return result.FailMe(-1, Translation.getMessage(lang, "NoMatchingUser"));
-            }
-            return await Delete(id, result.Id, lang);
         }
 
         public async Task<APIResult> ContactById(int id, int currentUserId, string lang)

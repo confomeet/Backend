@@ -30,32 +30,21 @@ namespace VideoProjectCore6.Models
         public string Gender { get; set; }
         public int? NatId { get; set; }
         public string TelNo { get; set; }
-        public int? Status { get; set; }
         public string EmailLang { get; set; }
         public string SmsLang { get; set; }
         public int? AreaId { get; set; }
         public int? NotificationType { get; set; }
         public int? ProfileStatus { get; set; }
         public string Address { get; set; }
-        public string EmiratesId { get; set; }
         public string Image { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? LastUpdatedDate { get; set; }
-        public DateTime? StartEffectiveDate { get; set; }
-        public DateTime? EndEffectiveDate { get; set; }
         public byte? RecStatus { get; set; }
         public DateTime? LockoutEndDateUtc { get; set; }
         public string Sign { get; set; }
-        public bool? IsEntity { get; set; }
         public int? EntityId { get; set; }
-        public int? ManagerId { get; set; }
-        public byte? Emirate { get; set; }
-        public byte? City { get; set; }
-        public string Website { get; set; }
         public uint? UserId { get; set; }
-        public byte? UserType { get; set; }
         public string meetingId { get; set; }
-        public string UuId { get; set; }
 
         //[Required]
         //public string ReCaptchaToken { get; set; }

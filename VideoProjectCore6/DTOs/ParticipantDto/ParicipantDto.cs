@@ -15,13 +15,12 @@ namespace VideoProjectCore6.DTOs.ParticipantDto
         public bool IsModerator { get; set; }
         public string Mobile { get; set; }
         public string Email { get; set; }
-        public byte? UserType { get; set; }
         public uint? UserId { get; set; }//--- UserId as it come from PP Request
         public int? GroupIn { get; set; }
 
         public Receiver asReceiver(int? participantId)
         {          
-         return new Receiver(LocalUserId, FullName, Mobile, Email, null, participantId,null,null,null,null);
+         return new Receiver(LocalUserId, FullName, Mobile, Email, null, participantId,null,null);
         }
     }
 }

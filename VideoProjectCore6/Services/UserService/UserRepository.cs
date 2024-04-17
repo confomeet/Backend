@@ -150,8 +150,7 @@ namespace VideoProjectCore6.Services.UserService
                                                          x.UserName.Trim().ToLower().Contains(value) ||
                                                          x.PhoneNumber.Trim().ToLower().Contains(value) ||
                                                          x.FullName.Trim().ToLower().Contains(value) ||
-                                                         x.Address.Trim().ToLower().Contains(value) ||
-                                                         x.EmiratesId.Trim().ToLower().Contains(value)
+                                                         x.Address.Trim().ToLower().Contains(value)
                                                          ).ToListAsync();
             foreach (var user in users)
             {
@@ -172,12 +171,10 @@ namespace VideoProjectCore6.Services.UserService
                     UserName = user.UserName,
                     Email = user.Email,
                     FullName = user.FullName,
-                    EmiratesId = user.EmiratesId,
                     Address = user.Address,
                     AreaId = user.AreaId,
                     BirthdayDate = user.BirthdayDate,
                     EmailLang = user.EmailLang,
-                    Emarit = user.EmiratesId,
                     Gender = user.Gender,
                     NatId = user.NatId,
                     PhoneNumber = user.PhoneNumber,
@@ -318,7 +315,6 @@ namespace VideoProjectCore6.Services.UserService
                         BirthdayDate = userInfo.BirthdayDate,
                         Email = userInfo.Email,
                         EmailLang = userInfo.EmailLang,
-                        EmiratesId = userInfo.EmiratesId,
                         FullName = userInfo.FullName,
                         Gender = userInfo.Gender,
                         Id = userInfo.Id,
@@ -408,15 +404,9 @@ namespace VideoProjectCore6.Services.UserService
             APIResult result = new();
             if (outerReq)
             {
-                if (dto.UserId == null && dto.UserType == null)
+                if (dto.UserId == null)
                 {
                     return result.FailMe(-1, Translation.getMessage(lang, "MissingTypeOrUserId"));
-                }
-                int id = await _DbContext.Users.Where(x => (x.UserId != null && x.UserId == dto.UserId && x.UserType == dto.UserType) /*|| (x.Email != null && x.Email == dto.Email)*/).Select(x => x.Id).FirstOrDefaultAsync();
-                if (id > 0)
-                {
-                    //Return Success result even if user already exist
-                    return result.SuccessMe(id, Translation.getMessage(lang, "UserExisted"), true, APIResult.RESPONSE_CODE.ERROR);
                 }
                 if (!string.IsNullOrEmpty(dto.Email))
                 {
@@ -426,7 +416,6 @@ namespace VideoProjectCore6.Services.UserService
                         try
                         {
                             checkUser.UserId = dto.UserId;
-                            checkUser.UserType = dto.UserType;
                             var update = await _userManager.UpdateAsync(checkUser);
                         }
                         catch
@@ -457,12 +446,6 @@ namespace VideoProjectCore6.Services.UserService
                     }
                 }
 
-            }
-
-            if (dto.EmiratesId != null && await _DbContext.Users.AnyAsync(x => x.EmiratesId.Trim() == dto.EmiratesId.Trim()))
-            {
-                result.FailMe(-1, "EmiratesID Existed Before");
-                return result;
             }
 
             if (dto.PhoneNumber != null && dto.PhoneNumber.Length > 0)
@@ -530,12 +513,10 @@ namespace VideoProjectCore6.Services.UserService
                 Gender = dto.Gender,
                 TelNo = dto.TelNo,
                 Address = dto.Address,
-                EmiratesId = dto.EmiratesId,
                 Image = ImageUrl,//UserPostDto.Image,
                 CreatedDate = DateTime.Now,
                 ProfileStatus = Convert.ToInt32(PROFILE_STATUS.SUSPENDED),
                 UserId = dto.UserId != null ? dto.UserId : GetNewValueByMeetingSec(),
-                UserType = dto.UserType,
                 EntityId = dto.EntityId,
                 RecStatus = dto.RecStatus
             };
@@ -549,7 +530,7 @@ namespace VideoProjectCore6.Services.UserService
 
             catch (Exception ex)
             {
-                string obj = " fullName is " + dto.FullName + " emaritId is " + dto.EmiratesId;
+                string obj = " fullName is " + dto.FullName;
                 // _logger.LogInformation("Error in create new user the error message is" + ex.Message + " for the user " + obj);
                 result.FailMe(-1, "UserCreateError" + ex.Message);
                 return result;
@@ -1123,11 +1104,9 @@ namespace VideoProjectCore6.Services.UserService
             user.Gender = userPostDto.Gender;
             user.TelNo = userPostDto.TelNo;
             user.Address = userPostDto.Address;
-            user.EmiratesId = userPostDto.EmiratesId;
             user.SecurityQuestionId = userPostDto.SecurityQuestionId;
             user.NatId = userPostDto.NatId;
             user.SecurityQuestionAnswer = userPostDto.SecurityQuestionAnswer;
-            user.Status = userPostDto.Status;
             user.EmailLang = userPostDto.EmailLang;
             user.SmsLang = userPostDto.SmsLang;
             user.AreaId = userPostDto.AreaId;
@@ -1698,11 +1677,11 @@ namespace VideoProjectCore6.Services.UserService
             return sequenceNum;
         }
 
-        public async Task<APIResult> GetLocalUserId(int userId, int userType)
+        public async Task<APIResult> GetLocalUserId(int userId)
         {
             APIResult result = new APIResult();
 
-            int localUserId = await _DbContext.Users.Where(x => x.UserId == userId && x.UserType == userType).Select(x => x.Id).FirstOrDefaultAsync();
+            int localUserId = await _DbContext.Users.Where(x => x.UserId == userId).Select(x => x.Id).FirstOrDefaultAsync();
 
             if (localUserId > 0)
 
@@ -1775,7 +1754,7 @@ namespace VideoProjectCore6.Services.UserService
 
             
             
-            bool twoArePassed = userFilterDto != null ? userFilterDto.name != null && userFilterDto.email != null && userFilterDto.userType.Count() > 0 : false;
+            bool twoArePassed = userFilterDto != null ? userFilterDto.name != null && userFilterDto.email != null : false;
 
 
             List<ValueId> defaultGroup = new List<ValueId>();
@@ -1790,7 +1769,7 @@ namespace VideoProjectCore6.Services.UserService
 
             (userFilterDto.text == null
 
-            && userFilterDto.email == null && userFilterDto.userType == null
+            && userFilterDto.email == null
 
 
 
@@ -1834,12 +1813,11 @@ namespace VideoProjectCore6.Services.UserService
                             Enable2FA = u.TwoFactorEnabled
                         }).ToListAsync();
 
-            if(userFilterDto.userType?.Count() > 0 || userFilterDto.userGroups?.Count() > 0 || userFilterDto.isLocked != null || userFilterDto.isConfirmed != null)
+            if (userFilterDto.userGroups?.Count() > 0 || userFilterDto.isLocked != null || userFilterDto.isConfirmed != null)
             {
 
                 query = query.Where(q => 
-                ((userFilterDto.userType == null || userFilterDto.userType?.Count < 1) || (userFilterDto.userType != null && q.Roles.Any(w => userFilterDto.userType.Contains(w)))) 
-                && (!userFilterDto.isLocked.HasValue || q.Locked == userFilterDto.isLocked) 
+                (!userFilterDto.isLocked.HasValue || q.Locked == userFilterDto.isLocked)
                 && (!userFilterDto.isConfirmed.HasValue || q.Confirmed == userFilterDto.isConfirmed)
                 && ((userFilterDto.userGroups == null || userFilterDto.userGroups?.Count < 1) || (userFilterDto.userGroups!= null && q.UserGroups.Select(e => e.Id).Any(w => userFilterDto.userGroups.Contains(w))))).ToList();
             }
@@ -1964,37 +1942,7 @@ namespace VideoProjectCore6.Services.UserService
             }
             else
             {
-                if (!string.IsNullOrWhiteSpace(dto.UUID))
-                {
-                    var u = await _DbContext.Users.Where(x => x.UuId == dto.UUID.Trim()).FirstOrDefaultAsync();
-                    if (u != null)
-                    {
-
-                        if (!string.IsNullOrWhiteSpace(dto.EmiratesId) && !string.IsNullOrWhiteSpace(u.EmiratesId) && dto.EmiratesId != u.EmiratesId)
-                        {
-                            _logger.LogInformation(Translation.getMessage(lang, "SameUserIdentity") + "- UUID: " + dto.UUID);
-                            //---*********-------Stop check
-                           // return result.FailMe(-1, Translation.getMessage(lang, "SameUserIdentity") + " : " + dto.UUID);
-                        }
-                        return result.SuccessMe(u.Id, "UUID Existed Before", true, APIResult.RESPONSE_CODE.CREATED, u.Email);
-                    }
-                }
                 //--Now UUID Id not found --------
-                if (!string.IsNullOrWhiteSpace(dto.EmiratesId))
-                {
-                    var u = await _DbContext.Users.Where(x => x.EmiratesId == dto.EmiratesId.Trim()).FirstOrDefaultAsync();
-                    if (u != null)
-                    {
-
-                        if (!string.IsNullOrWhiteSpace(dto.UUID) && !string.IsNullOrWhiteSpace(u.UuId) && dto.UUID != u.UuId)
-                        {
-                            _logger.LogInformation(Translation.getMessage(lang, "SameUserIdentity") + "- EmiratesId: " + dto.EmiratesId);
-                            //---*********-------Stop check 
-                            // return result.FailMe(-1, Translation.getMessage(lang, "SameUserIdentity") + " : " + dto.EmiratesId);
-                        }
-                        return result.SuccessMe(u.Id, "EmiratesID Existed Before", true, APIResult.RESPONSE_CODE.CREATED, u.Email);
-                    }
-                }
                 bool searchEmail = false;
                 if (string.IsNullOrEmpty(dto.Email))
                 {
@@ -2048,9 +1996,7 @@ namespace VideoProjectCore6.Services.UserService
                 LockoutEnabled = false,
                 AccessFailedCount = 0,
                 FullName = dto.FullName,
-                EmiratesId = dto.EmiratesId,
                 CreatedDate = DateTime.Now,
-                UuId = dto.UUID,
                 ProfileStatus = Convert.ToInt32(PROFILE_STATUS.SUSPENDED)
             };
 
@@ -2061,7 +2007,7 @@ namespace VideoProjectCore6.Services.UserService
             }
             catch (Exception ex)
             {
-                string obj = " fullName is " + dto.FullName + " emaritId is " + dto.EmiratesId;
+                string obj = " fullName is " + dto.FullName;
                 _logger.LogInformation("Error in create new user the error message is" + ex.Message + " for the user " + obj);
                 return result.FailMe(-1, "UserCreateError" + ex.Message);
             }
@@ -2095,7 +2041,6 @@ namespace VideoProjectCore6.Services.UserService
                 BirthdayDate = userInfo.BirthdayDate,
                 Email = userInfo.Email,
                 EmailLang = userInfo.EmailLang,
-                EmiratesId = userInfo.EmiratesId,
                 FullName = userInfo.FullName,
                 Gender = userInfo.Gender,
                 Id = userInfo.Id,
@@ -2377,7 +2322,6 @@ namespace VideoProjectCore6.Services.UserService
             result.FullName = user.FullName;
             result.Email = user.Email;
             result.PhoneNumber = user.PhoneNumber;
-            result.EmirateId = user.EmiratesId;
             result.BirthdayDate = user.BirthdayDate;
             result.RolesName = await _userManager.GetRolesAsync(user);
             result.RolesId = await _IRoleRepository.GetRolesIdByUserId(user.Id);
@@ -2385,7 +2329,6 @@ namespace VideoProjectCore6.Services.UserService
             result.CountryId = user.NatId /*await getUserCountryId(user.NatId)*/;
             result.AreaId = user.AreaId;
             result.LastLogin = lastLogInDate;
-            result.UserType = user.UserType;
             result.RemoteUserId = user.UserId;
             result.EntityId = user.EntityId;
             result.RemoteEntityId = remoteEntityId;

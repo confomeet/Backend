@@ -37,9 +37,9 @@ namespace VideoProjectCore6.Controllers.Contant
 
         [TypeFilter(typeof(KeyAttribute))]
         [HttpPost("Remote")]
-        public async Task<ActionResult> AddRemote([FromBody] ContactDto dto, [FromQuery] int userId, [FromQuery] int userType, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> AddRemote([FromBody] ContactDto dto, [FromQuery] int userId, [FromHeader] string lang = "ar")
         {
-            return Ok(await _IContantRepository.Add(dto, userId, userType, lang));
+            return Ok(await _IContantRepository.Add(dto, userId, lang));
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -58,9 +58,9 @@ namespace VideoProjectCore6.Controllers.Contant
 
         [TypeFilter(typeof(KeyAttribute))]
         [HttpGet("Remote")]
-        public async Task<ActionResult> MyContactRemote([FromQuery] int userId, int userType, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> MyContactRemote([FromQuery] int userId, [FromHeader] string lang = "ar")
         {
-            return Ok(await _IContantRepository.MyContact(userId, userType, lang));
+            return Ok(await _IContantRepository.MyContact(userId, lang));
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -72,9 +72,9 @@ namespace VideoProjectCore6.Controllers.Contant
 
         [TypeFilter(typeof(KeyAttribute))]
         [HttpPut("Remote/{id}")]
-        public async Task<ActionResult> RemotUpdate(int id, [FromBody] ContactDto dto, [FromQuery] int userId, [FromQuery] int userType, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> RemotUpdate(int id, [FromBody] ContactDto dto, [FromQuery] int userId, [FromHeader] string lang = "ar")
         {
-            return Ok(await _IContantRepository.Update(id, dto, userId, userType, lang));
+            return Ok(await _IContantRepository.Update(id, dto, userId, lang));
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -94,9 +94,9 @@ namespace VideoProjectCore6.Controllers.Contant
         }
         [TypeFilter(typeof(KeyAttribute))]
         [HttpDelete("Remote/{id}")]
-        public async Task<ActionResult> RemoteDelete(int id, [FromQuery] int userId, [FromQuery] int userType, [FromHeader] string lang)
+        public async Task<ActionResult> RemoteDelete(int id, [FromQuery] int userId, [FromHeader] string lang)
         {
-            return Ok(await _IContantRepository.Delete(id, userId, userType, lang));
+            return Ok(await _IContantRepository.Delete(id, userId, lang));
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -116,9 +116,9 @@ namespace VideoProjectCore6.Controllers.Contant
 
         [TypeFilter(typeof(KeyAttribute))]
         [HttpGet("Remote/Search")]
-        public async Task<ActionResult> search_(int userId, int userType, string toSearch, [FromHeader] string lang)
+        public async Task<ActionResult> search_(int userId, string toSearch, [FromHeader] string lang)
         {
-            return Ok(await _IContantRepository.Search(userId, userType, toSearch));
+            return Ok(await _IContantRepository.Search(userId, toSearch));
         }
 
         [HttpPost("PrivateJoin/{meetingId}/{hash}")]

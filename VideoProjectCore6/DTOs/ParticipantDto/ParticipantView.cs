@@ -11,7 +11,6 @@
         public bool IsModerator { get; set; }
         public string Description { get; set; }
         public string Note { get; set; }
-        public byte? UserType { get; set; }
         public Boolean ParticipantStatus { get; set; }
         public bool Remind { get; set; } = false;
         public int?  GroupIn { get; set; }

@@ -12,20 +12,17 @@ namespace VideoProjectCore6.Repositories.IContactRepository
 
         Task<APIResult> Add(ContactIndividualDto dto, int addBy, IFormFile file, string lang);
 
-        Task<APIResult> Add(ContactDto dto, int userId, int userType, string lang);
         Task<APIResult> Update(int id, ContactDto dto, int updateBy, string lang);
-        Task<APIResult> Update(int id, ContactDto dto, int userId, int userType, string lang);
         Task<APIResult> Delete(int id, int deletedBy, string lang);
-        Task<APIResult> Delete(int id, int userId, int userType, string lang);
         Task<ListContacts> Contacts(int id, byte? classId, string lang);
 
 
         Task<APIResult> ContactById(int id, int currentUserId, string lang);
 
         //Task<List<ContactDto>> MyContact(int id, string lang)
-        Task<List<ContactGetDto>> MyContact(int userId, int userType, string lang);
+        Task<List<ContactGetDto>> MyContact(int userId, string lang);
         Task<ListCount> Search(int localUser, string? name, string? email, int pageIndex = 1, int pageSize = 25);
-        Task<List<ContactSearchView>> Search(int userId, int userType, string toSearch);
+        Task<List<ContactSearchView>> Search(int userId, string toSearch);
 
         Task<object> MeetingJWT(string meetingId, string hash, string lang);
         Task<APIResult> GenerateDirectContactUrl(int v);

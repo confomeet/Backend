@@ -14,7 +14,6 @@ namespace VideoProjectCore6.DTOs.AccountDto
         public string Gender { get; set; }
         public string TelNo { get; set; }
         public string Address { get; set; }
-        public string EmiratesId { get; set; }
         //public IFormFile ImageFile { get; set; }
         public List<int> UserRoles { get; set; }
         public int SecurityQuestionId { get; set; }
@@ -28,7 +27,6 @@ namespace VideoProjectCore6.DTOs.AccountDto
         public int NotificationType { get; set; }
         public int ProfileStatus { get; set; }
         public uint? UserId { get; set; }
-        public byte? UserType { get; set; }
         public int? EntityId { get; set; }
 
         public byte? RecStatus { get; set; }
@@ -55,7 +53,6 @@ namespace VideoProjectCore6.DTOs.AccountDto
         public string Gender { get; set; }
         public string TelNo { get; set; }
         public string Address { get; set; }
-        public string EmiratesId { get; set; }
         public IFormFile ImageFile { get; set; }
         public List<int> UserRoles { get; set; }
         public int SecurityQuestionId { get; set; }

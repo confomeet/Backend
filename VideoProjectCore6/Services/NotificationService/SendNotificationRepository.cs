@@ -483,9 +483,7 @@ namespace VideoProjectCore6.Services.NotificationService
                             Mobile = r.Mobile,
                             Id = r.Id,
                             UserId = r.UserId,
-                            UserType = r.UserType,
                             MeetingLink = meetingLink,
-                            EmiratesId = r.EmiratesId,
                             UuId = r.UuId,
                             MeetingId = meetingId,
                         });
@@ -502,9 +500,7 @@ namespace VideoProjectCore6.Services.NotificationService
                             Mobile = r.Mobile,
                             Id = r.Id,
                             UserId = r.UserId,
-                            UserType = r.UserType,
                             MeetingLink = cisco,
-                            EmiratesId = r.EmiratesId,
                             UuId = r.UuId,
                             MeetingId = meetingId,
                         });

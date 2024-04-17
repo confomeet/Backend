@@ -501,7 +501,6 @@ namespace VideoProjectCore6.Services.ConfEventService
                     ParticipantStatus = _IGeneralRepository.CheckParticipantStatus(p.Email, e.Id, e.MeetingId, allRooms, allUsers),
                     Note = p.Note,
                     GroupIn = p.GroupIn,
-                    UserType = p.UserType,
                     MeetingLink = e.MeetingId != null && (p.UserId == userId) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
                     PartyId = p.PartyId,
                 }).ToList(),

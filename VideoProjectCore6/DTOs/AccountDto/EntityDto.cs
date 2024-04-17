@@ -9,7 +9,6 @@
         public string Password { get; set; }
         public string PhoneNumber { get; set; }
         public uint? UserId { get; set; }
-        public byte? UserType { get; set; }
 
     }
 }

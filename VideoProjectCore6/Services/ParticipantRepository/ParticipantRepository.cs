@@ -75,7 +75,6 @@ public class ParticipantRepository : IParticipantRepository
                 Guid = Guid.NewGuid(),
                 IsModerator = dto.IsModerator,
                 RecStatus = 1,
-                UserType = dto.UserType,
             });
         }
         try
@@ -184,11 +183,6 @@ public class ParticipantRepository : IParticipantRepository
         //    return result.FailMe(-1, Translation.getMessage(lang, "SameEmail"));
         //}
         //--------STOP CHECK DUBLICATE EMIRATE ID OR UUID--------------
-        //ptc = dtos.Where(p => !string.IsNullOrEmpty(p.EmiratesId)).Select(c => c.EmiratesId).ToList();
-        //if (ptc.Count() != ptc.Distinct().Count())
-        //{
-        //    return result.FailMe(-1, Translation.getMessage(lang, "SameEmiratesId"));
-        //}
         //ptc = dtos.Where(p => !string.IsNullOrEmpty(p.UUID)).Select(c => c.UUID).ToList();
         //if (ptc.Count() != ptc.Distinct().Count())
         //{
@@ -219,7 +213,6 @@ public class ParticipantRepository : IParticipantRepository
                     {
                         FullName = dto.FullName,
                         //UserId = dto.UserId,
-                        UserType = dto.UserType,
                         UserName = dto.Email != null ? dto.Email : dto.Mobile,
                         Email = dto.Email,
                         PhoneNumber = dto.Mobile,
@@ -248,105 +241,10 @@ public class ParticipantRepository : IParticipantRepository
                 }
             }
 
-
-            //if (dto.LocalUserId != null && string.IsNullOrEmpty(dto.Email))
-            //{
-            //    var user = await _DbContext.Users.Where(x => x.Id == dto.LocalUserId).AsNoTracking().Select(x => new { Email = x.Email, Mobile = x.PhoneNumber, UserId = x.UserId, UserType = x.UserType, EmiratesId = x.EmiratesId }).FirstOrDefaultAsync();
-            //    dto.Email = user.Email;
-            //    dto.UserId = user.UserId;
-            //    dto.UserType = user.UserType;
-            //    dto.EmiratesId = user.EmiratesId;
-            //}
-
-
-            //if (dto.EntityId != null && dto.EntityType != null)
-            //{
-            //    var e = ((int)dto.EntityId).ToString() + "-" + ((int)dto.EntityType).ToString();
-            //    var c = toUseCabins==null || !toUseCabins.Any() ? null: toUseCabins.Where(x => x.EntityId == dto.EntityId && x.EntityType == dto.EntityType).FirstOrDefault();
-            //    if (c !=null /*&& !departments.Contains(e)*/)
-            //    {
-            //        dto.GroupIn = c.CabineId;
-            //        if (!departments.Contains(e))
-            //        { 
-            //         departments.Add(e);
-            //         ps.Add(new Participant
-            //            {
-            //                Guid = Guid.NewGuid(),
-            //                CreatedBy = addBy,
-            //                CreatedDate = DateTime.Now,
-            //                Email = c.Email,
-            //                Mobile = c.Mobile,
-            //                EventId = eventId,
-            //                IsModerator = false,
-            //                UserId = c.CabineId,
-            //                UserType=c.UserType,
-            //                Note=c.Note,
-            //            });
-            //        }
-            //    }
-            //    else
-            //    {
-            //        //var e = ((int)dto.EntityId).ToString() + "-" + ((int)dto.EntityType).ToString();
-            //        if (!departments.Contains(e))
-            //        {
-            //            var p = await getUserByWorkAsParticipant(eventId, "WORK_CABINET", addBy, /*checkWorkTime ?*/ range /*: null*/, checkWorkTime, new OuterUser { UserId = (uint)dto.EntityId, UserType = (int)dto.EntityType }, lang);
-            //            if (p != null)
-            //            {
-            //                //p.Description = p.Description + " " + dto.Email;
-            //                var pt = p.asParticipant();
-            //                pt.Guid = Guid.NewGuid();
-            //                pt.CreatedBy = addBy;
-            //                pt.CreatedDate = DateTime.Now;
-            //                ps.Add(pt);
-            //                Workdtos.Add(new ParticipantWParent
-            //                {
-            //                    LocalUserId = p.LocalUserId,
-            //                    UserId = p.UserId,
-            //                    UserType = p.UserType,
-            //                });
-            //                departments.Add(e);
-            //                CabinDic.Add(e, (int)p.LocalUserId);
-            //                try
-            //                {
-            //                    //------------   occure when the same user is duplicate as a participant  *** TO CHECK ***
-            //                    userGroupDic.Add((int)dto.LocalUserId, (int)p.LocalUserId);
-            //                }
-            //                catch { }
-            //                toUseCabins.Add(new EntityCabine { 
-            //                    EntityId = (int)dto.EntityId,
-            //                    EntityType = (int)dto.EntityType,
-            //                    CabineId = (int)p.LocalUserId,
-            //                    Email=p.Email,
-            //                    Mobile= p.Mobile,
-            //                    UserType=p.UserType,
-            //                    Note=p.Note,
-            //                });
-
-            //            }
-            //            else
-            //            {
-            //                //return result.FailMe(-1, Translation.getMessage(lang, "NoAvailableCabin"));
-            //                errorMsgs.Add($"{ Translation.getMessage(lang, "NoAvailableCabin")} >> entityId {dto.EntityId} , entityType {dto.EntityType}");
-            //            }
-            //        }
-            //        else
-            //        {
-            //            int v;                        
-            //            try
-            //            {
-            //                userGroupDic.Add((int)dto.LocalUserId, CabinDic.TryGetValue(e, out v) ? v : 0);
-            //            }
-            //            catch
-            //            {
-            //            }
-            //        }
-            //    }
-            //}
             var newPart = new Participant
             {
                 EventId = eventId,
                 UserId = (int)dto.LocalUserId,
-                UserType = dto.UserType,
                 CreatedBy = addBy,
                 CreatedDate = DateTime.Now,
                 Guid = Guid.NewGuid(),
@@ -390,7 +288,6 @@ public class ParticipantRepository : IParticipantRepository
                     Name = dtos.Where(d => d.LocalUserId == p.UserId).Select(c => c.FullName).FirstOrDefault(),
                     ParticipantId = p.Id,
                     //UserId = dtos.Where(d => d.LocalUserId == p.UserId).Select(c => c.UserId).FirstOrDefault(),
-                    UserType = dtos.Where(d => d.LocalUserId == p.UserId).Select(c => c.UserType).FirstOrDefault(),
                     Tokens = null,
                     UserId = dtos.Where(d => d.LocalUserId == p.UserId).Select(c => c.UserId).FirstOrDefault(),
                     IsModerator = p.IsModerator,

@@ -21,12 +21,10 @@ namespace VideoProjectCore6.DTOs.AccountDto
         public int? AreaId { get; set; }
         public int ProfileStatus { get; set; }
         public string Address { get; set; }
-        public string EmiratesId { get; set; }
         public List<RoleGetDto> RolesName { get; set; }
         public string Image { get; set; }
         public string Sign { get; set; }
         public string ConnectionId { get; set; }
-        public string Emarit { get; set; }
         public int? Location { get; set; }
         public string LocationName { get; set; }
 

@@ -7,8 +7,6 @@ namespace VideoProjectCore6.DTOs.AccountDto
 {
     public class UserFilterDto
     {
-        public List<int> userType { get; set; } = null;
-
         public List<int> userGroups { get; set; } = null;
 
 

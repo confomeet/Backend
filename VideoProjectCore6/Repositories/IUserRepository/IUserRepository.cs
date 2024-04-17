@@ -35,7 +35,7 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         public Task<IdentityResult> EditUserRolesAsync(int userId, List<int> userRoles, string lang);
         Task<List<int>> GetUserClaimPermissions(int userId, string claimType);
         public void SignOut();
-        public Task<APIResult> GetLocalUserId(int userId,int userType);
+        public Task<APIResult> GetLocalUserId(int userId);
         public  Task<ListCount> GetUsers(string lang, int pageIndex = 1, int pageSize = 25);
         public  Task<APIResult> DisableAccount(int id,string lang="ar");
         public  Task<APIResult> EnableAccount(int id,string lang= "ar");

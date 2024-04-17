@@ -652,7 +652,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
 
         if (withRelatedUserEvents)
         {
-            //bool? isEntity = await _DbContext.Users.Where(x => x.Id == userId).Select(x => x.IsEntity).FirstOrDefaultAsync();
             relatedUsers = await _DbContext.Users.Where(u => u.EntityId == userId).Select(u => u.Id).ToListAsync();
             if (relatedUsers.Count != 0)
             {
@@ -731,7 +730,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                     ParticipantStatus = _IGeneralRepository.CheckParticipantStatus(p.Email, e.Id, e.MeetingId, allRooms, allUsers),
                     Note = p.Note,
                     GroupIn = p.GroupIn,
-                    UserType = p.UserType,
                     //MeetingLink = e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
                     MeetingLink = (e.Meeting != null ? e.Meeting.MeetingLog : null) ?? (e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null),
                     PartyId = p.PartyId,
@@ -817,7 +815,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                         ParticipantStatus = _IGeneralRepository.CheckParticipantStatus(p.Email, e.Id, e.MeetingId, allRooms, allUsers),
                         Note = p.Note,
                         GroupIn = p.GroupIn,
-                        UserType = p.UserType,
                         //MeetingLink = e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
                         MeetingLink = (e.Meeting != null ? e.Meeting.MeetingLog : null) ?? (e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null),
                         PartyId = p.PartyId,
@@ -1055,7 +1052,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                     Note = p.Note,
                     GroupIn = p.GroupIn,
                     MeetingLink = e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
-                    UserType = p.UserType,
                     PartyId = p.PartyId,
                 }).ToList(),
             }).FirstOrDefaultAsync();
@@ -1194,7 +1190,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                             UserId = (int)p.LocalUserId!,
                             Mobile = p.Mobile,
                             Note = p.Note,
-                            UserType = p.UserType,
                             Guid = Guid.NewGuid(),
                             CreatedBy = addBy,
                             CreatedDate = DateTime.Now
