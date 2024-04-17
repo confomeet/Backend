@@ -1422,10 +1422,6 @@ namespace VideoProjectCore6.Models
                     .HasMaxLength(50)
                     .HasColumnName("email_lang");
 
-                entity.Property(e => e.EntityId)
-                    .HasPrecision(10)
-                    .HasColumnName("entity_id");
-
                 entity.Property(e => e.FullName)
                     .HasMaxLength(200)
                     .HasColumnName("full_name");
@@ -1517,9 +1513,7 @@ namespace VideoProjectCore6.Models
                 entity.Property(e => e.TwoFactorEnabled)
                     .HasPrecision(1)
                     .HasColumnName("two_factor_enabled");
-                entity.Property(e => e.UserId)
-                      .HasPrecision(10)
-                      .HasColumnName("user_id");
+
                 entity.Property(e => e.UserName)
                     .HasMaxLength(200)
                     .HasColumnName("user_name");

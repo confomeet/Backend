@@ -241,7 +241,7 @@ public class ParticipantRepository : IParticipantRepository
                             Email = p.Email,
                             PhoneNumber = p.Mobile,
                             PasswordHash = "P@ssw0rd_"
-                        }, null, false, "ar", false);
+                        }, null, false, "ar");
 
                         if (result.Id > 0)
                         {

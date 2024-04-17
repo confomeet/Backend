@@ -19,10 +19,7 @@ namespace VideoProjectCore6.Repositories.IContactRepository
 
         Task<APIResult> ContactById(int id, int currentUserId, string lang);
 
-        //Task<List<ContactDto>> MyContact(int id, string lang)
-        Task<List<ContactGetDto>> MyContact(int userId, string lang);
         Task<ListCount> Search(int localUser, string? name, string? email, int pageIndex = 1, int pageSize = 25);
-        Task<List<ContactSearchView>> Search(int userId, string toSearch);
 
         Task<object> MeetingJWT(string meetingId, string hash, string lang);
         Task<APIResult> GenerateDirectContactUrl(int v);

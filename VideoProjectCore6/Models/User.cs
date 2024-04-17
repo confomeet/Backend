@@ -42,8 +42,6 @@ namespace VideoProjectCore6.Models
         public byte? RecStatus { get; set; }
         public DateTime? LockoutEndDateUtc { get; set; }
         public string Sign { get; set; }
-        public int? EntityId { get; set; }
-        public uint? UserId { get; set; }
         public string meetingId { get; set; }
 
         //[Required]

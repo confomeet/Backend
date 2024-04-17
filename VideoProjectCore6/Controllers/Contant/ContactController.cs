@@ -56,13 +56,6 @@ namespace VideoProjectCore6.Controllers.Contant
             return Ok(await _IContantRepository.AllMyContacts(searchFilterDto, _IUserRepository.GetUserID(), lang));
         }
 
-        [TypeFilter(typeof(KeyAttribute))]
-        [HttpGet("Remote")]
-        public async Task<ActionResult> MyContactRemote([FromQuery] int userId, [FromHeader] string lang = "ar")
-        {
-            return Ok(await _IContantRepository.MyContact(userId, lang));
-        }
-
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("ContactById")]
         public async Task<ActionResult> ContactById(int Id, [FromHeader] string lang = "ar")
@@ -112,13 +105,6 @@ namespace VideoProjectCore6.Controllers.Contant
             {
                 return BadRequest("Error getting users");
             }
-        }
-
-        [TypeFilter(typeof(KeyAttribute))]
-        [HttpGet("Remote/Search")]
-        public async Task<ActionResult> search_(int userId, string toSearch, [FromHeader] string lang)
-        {
-            return Ok(await _IContantRepository.Search(userId, toSearch));
         }
 
         [HttpPost("PrivateJoin/{meetingId}/{hash}")]

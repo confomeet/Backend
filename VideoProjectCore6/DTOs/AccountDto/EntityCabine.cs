@@ -3,7 +3,6 @@
 {
     public class EntityCabine
     {
-        public int EntityId { get; set; }
         public int EntityType { get; set; }
         public int CabineId { get; set; }
         public string Mobile { get; set; }

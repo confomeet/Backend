@@ -27,7 +27,6 @@ namespace VideoProjectCore6.DTOs.AccountDto
         public int NotificationType { get; set; }
         public int ProfileStatus { get; set; }
         public uint? UserId { get; set; }
-        public int? EntityId { get; set; }
 
         public byte? RecStatus { get; set; }
 }

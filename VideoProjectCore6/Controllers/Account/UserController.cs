@@ -39,16 +39,6 @@ namespace VideoProjectCore6.Controllers.Account
             _ILogger = logger;
         }
 
-        [HasPermission(Permissions.User_Create)]
-        [TypeFilter(typeof(KeyAttribute))]
-        [HttpPost("Create")]
-        public async Task<IActionResult> CreateUser([FromBody] UserPostDto UserPostDto, [FromHeader] string lang)
-        {
-            string ImageUrl = null; //"wwwroot/transactions/UsersPhoto/" + SaveImage(UserPostDto.ImageFile);
-            APIResult result = await _IUserRepository.CreateUser(UserPostDto, ImageUrl, false, "ar", true);
-            return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
-        }
-
         [HasPermission(Permissions.User_Delete)]
         [HttpPost("{id}/Delete")]
         public async Task<IActionResult> DeleteUser([FromRoute] int id)
@@ -290,11 +280,10 @@ namespace VideoProjectCore6.Controllers.Account
             return Ok(await _IUserRepository.FindUserById(id, lang));
         }
 
-        [HasPermission(Permissions.User_Read)]
         [HttpGet("RelatedUsers")]
-        public async Task<IActionResult> GetRelatedUsers([FromHeader] string lang = "ar")
+        public async Task<IActionResult> GetRelatedUsers()
         {
-            return Ok(await _IUserRepository.GetRelatedUsers(_IUserRepository.GetUserID(), lang));
+            return await Task.FromResult(Ok(new List<ValueId>()));
         }
 
         [AllowAnonymous]

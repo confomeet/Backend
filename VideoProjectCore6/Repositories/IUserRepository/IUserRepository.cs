@@ -29,13 +29,12 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         public Task<APIResult> ConfirmEmail(string token, string email, string lang);
         public Task<APIResult> ResendActivation(string email, string lang);
         public Task<APIResult> SendResetPasswordEmail(MultiLangMessage multiLangMessage, string email, string lang);
-        public Task<APIResult> CreateUser(UserPostDto UserPostDto, string ImageUrl, bool updateRoles, string lang, bool FromUg);
+        public Task<APIResult> CreateUser(UserPostDto UserPostDto, string ImageUrl, bool updateRoles, string lang);
         public Task<APIResult> DeleteUser(int id);
         public Task<UserPermissionsDTO> GetUserPermissions(int userId);
         public Task<IdentityResult> EditUserRolesAsync(int userId, List<int> userRoles, string lang);
         Task<List<int>> GetUserClaimPermissions(int userId, string claimType);
         public void SignOut();
-        public Task<APIResult> GetLocalUserId(int userId);
         public  Task<ListCount> GetUsers(string lang, int pageIndex = 1, int pageSize = 25);
         public  Task<APIResult> DisableAccount(int id,string lang="ar");
         public  Task<APIResult> EnableAccount(int id,string lang= "ar");
@@ -46,7 +45,6 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         public Task<UserView> Search(string email);
         public Task<ListCount> SearchFilterUsers(UserFilterDto userFilterDto, int currentUser, string lang = "ar");
         public Task<APIResult> CheckEMailAddress(string email,string lang);
-        public Task<List<ValueId>> GetRelatedUsers(int userId, string lang);
         public Task<APIResult> CreateParticipantUser(BasicUserInfo dto, string lang, bool outerReq);
 
         public Task Update(UserDto userDto);

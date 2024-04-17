@@ -21,10 +21,6 @@ namespace VideoProjectCore6.DTOs.AccountDto
         public int? CountryId { get; set; }
         public int? AreaId { get; set; }
         public DateTime? LastLogin { get; set; }
-        public uint? RemoteUserId{ get; set; }
-        public uint? RemoteEntityId { get; set; }
-        public int? EntityId { get; set; }
-
 
         public LogInResultDto()
         {

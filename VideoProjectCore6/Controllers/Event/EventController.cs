@@ -31,9 +31,9 @@ namespace VideoProjectCore6.Controllers.Event
 
         [HasPermission(Permissions.Meeting_Search_IfParticipant)]
         [HttpPost("Search")]
-        public async Task<ActionResult> SearchLocal([FromBody] EventSearchObject obj, [FromQuery] bool relatedUserEvents, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> SearchLocal([FromBody] EventSearchObject obj, [FromHeader] string lang = "ar")
         {
-            var result = await _IEventRepository.GetAllOfUser(_IUserRepository.GetUserID(), obj, relatedUserEvents, lang);
+            var result = await _IEventRepository.GetAllOfUser(_IUserRepository.GetUserID(), obj, lang);
             if (result != null)
             {
                 return StatusCode(StatusCodes.Status200OK, result);

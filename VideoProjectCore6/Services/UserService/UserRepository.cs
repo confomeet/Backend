@@ -399,54 +399,9 @@ namespace VideoProjectCore6.Services.UserService
             return sequenceNum;
         }
 
-        public async Task<APIResult> CreateUser(UserPostDto dto, string ImageUrl, bool updateRoles, string lang, bool outerReq)
+        public async Task<APIResult> CreateUser(UserPostDto dto, string ImageUrl, bool updateRoles, string lang)
         {
             APIResult result = new();
-            if (outerReq)
-            {
-                if (dto.UserId == null)
-                {
-                    return result.FailMe(-1, Translation.getMessage(lang, "MissingTypeOrUserId"));
-                }
-                if (!string.IsNullOrEmpty(dto.Email))
-                {
-                    var checkUser=await _userManager.FindByEmailAsync(dto.Email);
-                    if(checkUser != null)
-                    {
-                        try
-                        {
-                            checkUser.UserId = dto.UserId;
-                            var update = await _userManager.UpdateAsync(checkUser);
-                        }
-                        catch
-                        {
-
-                        }
-                        return result.SuccessMe(checkUser.Id, "مستخدم موجود مع بيانات تعريف مختلفة");
-                    }
-
-                }
-                if (string.IsNullOrEmpty(dto.Email))
-                {
-                    string Email = INVALID_EMAIL_PREFIX + /*_iGeneralRepository.*/GetNewValueBySec() + INVALID_EMAIL_SUFFIX;
-                    dto.Email = Email;
-                    int index = Email.IndexOf("@");
-                    dto.UserName = Email.Substring(0, index);
-                }
-                else
-                {
-                    try
-                    {
-                        var addr = new MailAddress(dto.Email);
-                    }
-                    catch
-                    {
-                        result.FailMe(-1, Translation.getMessage(lang, "InvalidEmailFormat"));
-                        return result;
-                    }
-                }
-
-            }
 
             if (dto.PhoneNumber != null && dto.PhoneNumber.Length > 0)
             {
@@ -516,8 +471,6 @@ namespace VideoProjectCore6.Services.UserService
                 Image = ImageUrl,//UserPostDto.Image,
                 CreatedDate = DateTime.Now,
                 ProfileStatus = Convert.ToInt32(PROFILE_STATUS.SUSPENDED),
-                UserId = dto.UserId != null ? dto.UserId : GetNewValueByMeetingSec(),
-                EntityId = dto.EntityId,
                 RecStatus = dto.RecStatus
             };
 
@@ -1677,25 +1630,6 @@ namespace VideoProjectCore6.Services.UserService
             return sequenceNum;
         }
 
-        public async Task<APIResult> GetLocalUserId(int userId)
-        {
-            APIResult result = new APIResult();
-
-            int localUserId = await _DbContext.Users.Where(x => x.UserId == userId).Select(x => x.Id).FirstOrDefaultAsync();
-
-            if (localUserId > 0)
-
-            {
-                return result.SuccessMe(localUserId);
-            }
-
-            else
-
-            {
-                return result.FailMe(-1, "No matching user");
-            }
-        }
-
         public async Task<ListCount> GetUsers(string lang, int pageIndex = 1, int pageSize = 25)
         {
             var query = await _DbContext.Users.AsNoTracking().Include(u => u.UserRoles).
@@ -1925,11 +1859,6 @@ namespace VideoProjectCore6.Services.UserService
             return (!lockoutEnabled) ? false : lockoutEnd.HasValue && lockoutEnd.Value.ToLocalTime().LocalDateTime > DateTime.Now ? true : false;
         }
 
-        public async Task<List<ValueId>> GetRelatedUsers(int userId, string lang)
-        {
-            return await _DbContext.Users.Where(u => u.EntityId == userId).Select(u => new ValueId { Id = u.Id, Value = string.IsNullOrWhiteSpace(u.FullName) ? u.UserName : u.FullName }).ToListAsync();
-        }
-        
         // PP
         public async Task<APIResult> CreateParticipantUser(BasicUserInfo dto, string lang, bool outerReq)
         {
@@ -2315,7 +2244,6 @@ namespace VideoProjectCore6.Services.UserService
             {
 
             }
-            var remoteEntityId = user.EntityId != null ? await _DbContext.Users.Where(x => x.Id == user.EntityId).Select(x => x.UserId).FirstOrDefaultAsync() : null;
             result.Token = jwt;
             result.UserId = user.Id;
             result.UserName = user.UserName;
@@ -2329,10 +2257,6 @@ namespace VideoProjectCore6.Services.UserService
             result.CountryId = user.NatId /*await getUserCountryId(user.NatId)*/;
             result.AreaId = user.AreaId;
             result.LastLogin = lastLogInDate;
-            result.RemoteUserId = user.UserId;
-            result.EntityId = user.EntityId;
-            result.RemoteEntityId = remoteEntityId;
-            //result.ShowAadel = !await IsEmployee(user.Id);
 
             return new APIResult(1, result, APIResult.RESPONSE_CODE.OK, ["Welcome"]);
         }

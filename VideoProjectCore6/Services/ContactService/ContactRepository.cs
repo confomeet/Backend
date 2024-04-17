@@ -421,25 +421,7 @@ namespace VideoProjectCore6.Services.ContactService
         public async Task<List<ContactGetDto>> MyContactRemote(int id, string lang)
         {
 
-            var users = await _DbContext.Users.Where(u => u.EntityId == id).ToListAsync();
-
             List<ContactGetDto> contacts = new List<ContactGetDto>();
-
-            foreach (User user in users)
-
-            {
-
-                ContactGetDto newContact = new ContactGetDto()
-                {
-                    DisplayName = user.FullName,
-                    Email = user.Email,
-                    Mobile = user.PhoneNumber,
-                    Home = user.PhoneNumber,
-                    Office = user.PhoneNumber,
-                };
-
-                contacts.Add(newContact);
-            }
 
             contacts.AddRange(await _DbContext.Contacts.Where(x => x.UserId == id).Select(dto => new ContactGetDto
             {
@@ -846,15 +828,6 @@ namespace VideoProjectCore6.Services.ContactService
             return new ListContacts();
         }
 
-        public async Task<List<ContactGetDto>> MyContact(int userId, string lang)
-        {
-            APIResult result = await _IUserRepository.GetLocalUserId(userId);
-            if (result.Id < 0)
-            {
-                return null;
-            }
-            return await MyContactRemote(result.Id, lang);
-        }
         public async Task<APIResult> Update(int id, ContactDto dto, int updateBy, string lang)
         {
             APIResult result = new APIResult();
@@ -1006,15 +979,6 @@ namespace VideoProjectCore6.Services.ContactService
                 };
             }
 
-        }
-        public async Task<List<ContactSearchView>> Search(int userId, string toSearch)
-        {
-            var result = await _IUserRepository.GetLocalUserId(userId);
-            if (result.Id < 0)
-            {
-                return (List<ContactSearchView>)Enumerable.Empty<ContactSearchView>();
-            }
-            return await FilterSearch(result.Id, toSearch);
         }
 
         private async Task<List<ContactSearchView>> FilterSearch(int id, string toSearch)

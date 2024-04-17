@@ -608,23 +608,12 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         return ValidateEvent(postDto, lang);
     }
 
-    public async Task<List<EventFullView>> GetAllOfUser(int userId, EventSearchObject? obj = null, bool withRelatedUserEvents = false, string lang = "ar")
+    public async Task<List<EventFullView>> GetAllOfUser(int userId, EventSearchObject? obj = null, string lang = "ar")
     {
         bool applyRelatedEvent = false;
         bool serverSearch = obj != null && obj.HasDateSearch();
         bool localSearch = obj != null && obj.HasStringSearch();
         var relatedUsers = new List<int>();
-
-        if (withRelatedUserEvents)
-        {
-            relatedUsers = await _DbContext.Users.Where(u => u.EntityId == userId).Select(u => u.Id).ToListAsync();
-            if (relatedUsers.Count != 0)
-            {
-                applyRelatedEvent = true;
-                relatedUsers.Add(userId);
-                relatedUsers = relatedUsers.Distinct().ToList();
-            }
-        }
 
         var host = _IConfiguration["CONFOMEET_BASE_URL"];
 
@@ -728,67 +717,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             }).ToListAsync();
         List<int> parentIds = events.Where(e => e.ParentEventId != null).Select(e => e.ParentEventId ?? -1).Distinct().ToList();
         var exitingParentIds = events.Where(e => e.SubEventCount > 0).Select(e => e.Id).Distinct().ToList();
-        //---------------Show Parent Event Of subEvent THAT Contain cabins-------------------------
-        var missedParentEvents = new List<EventFullView>();
-        if (withRelatedUserEvents)
-        {
-            var NotExitingParentIds = parentIds.Except(events.Select(x => x.Id).ToList()).ToList();
-            missedParentEvents = await _DbContext.Events.AsNoTracking()
-                .Include(x => x.Participants)
-                .Include(x => x.Meeting)
-                .Include(x => x.InverseParentEventNavigation)
-                .Where(x => NotExitingParentIds.Contains(x.Id))
-                .AsNoTracking()
-                .OrderByDescending(e => e.StartDate)
-                .Select(e => new EventFullView
-                {
-                    Id = e.Id,
-                    ByMe = e.CreatedBy == userId,
-                    CreatedBy = e.CreatedBy,
-                    Topic = e.Topic,
-                    SubTopic = e.SubTopic,
-                    Organizer = e.Organizer,
-                    Description = e.Description,
-                    StartDate = e.StartDate,
-                    EndDate = e.EndDate,
-                    TimeZone = e.TimeZone,
-                    Password = e.Meeting != null ? (e.Meeting.Password ?? null) : null,
-                    PasswordReq = e.Meeting != null && e.Meeting.PasswordReq,
-                    RecordingReq = e.Meeting != null && (e.Meeting.RecordingReq ?? false),
-                    SingleAccess = e.Meeting != null && (e.Meeting.SingleAccess ?? false),
-                    AllDay = e.AllDay != null && (bool)e.AllDay,
-                    AutoLobby = e.Meeting != null && (e.Meeting.AutoLobby ?? false),
-                    MeetingId = e.MeetingId,
-                    Status = e.RecStatus,
-                    Type = e.Type,
-                    MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, lang, allRooms),
-                    //MeetingLink = e.MeetingId != null && e.CreatedBy == userId && e.ParentEvent == null ?
-                    //((e.Meeting.MeetingLog != null) ? e.Meeting.MeetingLog : 
-                    MeetingLink = e.MeetingId != null && e.CreatedBy == userId && e.ParentEvent == null ?
-                    (e.Meeting != null ? e.Meeting.MeetingLog : null) ?? (Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0") : null,
-                    ParentEventId = e.ParentEvent,
-                    StatusText = e.RecStatus == null ? string.Empty : EventStatusValue.ContainsKey((EVENT_STATUS)e.RecStatus) ? EventStatusValue[(EVENT_STATUS)e.RecStatus][lang] : string.Empty,
-                    Participants = e.Participants.Select(p => new ParticipantView
-                    {
-                        Id = p.Id,
-                        UserId = p.UserId,
-                        FullName = p.User.FullName,
-                        Email = !p.Email.StartsWith(INVALID_EMAIL_PREFIX, StringComparison.OrdinalIgnoreCase) ? p.Email : string.Empty,
-                        Mobile = p.Mobile,
-                        IsModerator = p.IsModerator,
-                        Description = p.Description,
-                        ParticipantStatus = _IGeneralRepository.CheckParticipantStatus(p.Email, e.Id, e.MeetingId, allRooms, allUsers),
-                        Note = p.Note,
-                        GroupIn = p.GroupIn,
-                        //MeetingLink = e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
-                        MeetingLink = (e.Meeting != null ? e.Meeting.MeetingLog : null) ?? (e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null),
-                        PartyId = p.PartyId,
-                    }).ToList(),
-                    SubEventCount = e.InverseParentEventNavigation != null ? e.InverseParentEventNavigation.Count() : 0,
-                }).ToListAsync();
-        }
-        //--------------------------------------
-
 
         foreach (var e in events)
         {
@@ -852,8 +780,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             //    events = events.Where(e => e.Participants.Any(p => p!=null && p.FullName.Contains(obj.Participant) || p.Email.ToLower().Contains(obj.Participant.ToLower()))).ToList();
             //}
         }
-        events!.AddRange(missedParentEvents);        
-        return [.. events.OrderByDescending(x=>x.StartDate)];
+        return [.. events!.OrderByDescending(x=>x.StartDate)];
     }
 
     public async Task<ListCount> GetAll(int CurrentUserId, EventSearchObject? obj = null, int pageIndex = 1, int pageSize = 25, string lang = "ar")
@@ -974,7 +901,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
 
     public async Task<EventFullView?> EventDetails(int id, int userId, string timeZoneId)
     {
-        var relatedUsers = await _DbContext.Users.Where(u => u.EntityId == userId).Select(u => u.Id).ToListAsync();
         var allUsers = await _DbContext.ConfUsers.ToListAsync();
 
         var host = _IConfiguration["CONFOMEET_BASE_URL"];
@@ -1016,7 +942,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                     Description = p.Description,
                     Note = p.Note,
                     GroupIn = p.GroupIn,
-                    MeetingLink = e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
+                    MeetingLink = e.MeetingId != null && p.UserId == userId ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
                     PartyId = p.PartyId,
                 }).ToList(),
             }).FirstOrDefaultAsync();
