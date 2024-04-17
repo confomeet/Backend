@@ -7,6 +7,6 @@ namespace VideoProjectCore6.Repositories.ISmtpConfigRepository
     {
         Task<APIResult> CreateUpdate(int currentUser, SmtpConfigPostDto smtpConfigPostDto, string lang);
 
-        Task<APIResult> DisplaySmtpConfig(string lang);
+        Task<APIResult> GetCurrentSMTPConfig(string lang);
     }
 }

@@ -6,21 +6,14 @@ using VideoProjectCore6.Repositories.ISmtpConfigRepository;
 
 namespace VideoProjectCore6.Services.SmtpConfigService
 {
-    public class SmtpConfigRepository : ISmtpConfigRepository
+    public class SmtpConfigRepository(OraDbContext context) : ISmtpConfigRepository
     {
 
-        //private readonly IFilesUploaderRepository _iFilesUploaderRepositiory;
-        private readonly OraDbContext _context;
-
-        public SmtpConfigRepository(OraDbContext context/*, IFilesUploaderRepository iFilesUploaderRepositiory*/)
-        {
-            _context = context;
-            //_iFilesUploaderRepositiory = iFilesUploaderRepositiory;
-        }
+        private readonly OraDbContext _context = context;
 
         public async Task<APIResult> CreateUpdate(int currentUserId, SmtpConfigPostDto smtpConfigPostDto, string lang)
         {
-            APIResult result = new APIResult();
+            APIResult result = new();
 
             DateTime currentTime = DateTime.Now;
 
@@ -51,7 +44,7 @@ namespace VideoProjectCore6.Services.SmtpConfigService
                     });
                 }
 
-                SmtpConfig newSmtpConfig = new SmtpConfig
+                SmtpConfig newSmtpConfig = new()
                 {
                     DisplayName = smtpConfigPostDto.DisplayName,
                     Email = smtpConfigPostDto.Email,
@@ -75,29 +68,24 @@ namespace VideoProjectCore6.Services.SmtpConfigService
                     Port = smtpConfigPostDto.Port,
                     Host = smtpConfigPostDto.Host
                 });
-            } 
-            
+            }
             catch
             {
                 return result.FailMe(-1, "Error creating the SMTP CONFIGURATION");
             }
         }
 
-        public async Task<APIResult> DisplaySmtpConfig(string lang)
+        public async Task<APIResult> GetCurrentSMTPConfig(string lang)
         {
-            APIResult result = new APIResult();
-
-
+            APIResult result = new();
             try
             {
                 var existingConfig = await _context.SmtpConfigs.FirstOrDefaultAsync();
-
                 if(existingConfig == null)
                 {
                     return result.FailMe(-1, "Could not find any smtp configuration");
                 }
-
-                SmtpConfigGetDto smtpConfigGetDto = new SmtpConfigGetDto
+                SmtpConfigGetDto smtpConfigGetDto = new()
                 {
                     Id = existingConfig.Id,
                     DisplayName = existingConfig.DisplayName,
@@ -105,15 +93,12 @@ namespace VideoProjectCore6.Services.SmtpConfigService
                     Port = existingConfig.Port,
                     Host = existingConfig.Host
                 };
-
                 return result.SuccessMe(1, "Success", false, APIResult.RESPONSE_CODE.CREATED, smtpConfigGetDto);
-
             }
             catch
             {
                 return result.FailMe(-1, "Error gettting configuration");
             }
-
         }
     }
 }

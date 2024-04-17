@@ -41,7 +41,7 @@ namespace VideoProjectCore6.Controllers.SmtpConfigController
         [HttpGet()]
         public async Task<IActionResult> DisplaySmtpConfig([FromHeader] string lang)
         {
-            var obj = await _ISmtpConfigRepository.DisplaySmtpConfig(lang);
+            var obj = await _ISmtpConfigRepository.GetCurrentSMTPConfig(lang);
             return Ok(obj);
         }
 
