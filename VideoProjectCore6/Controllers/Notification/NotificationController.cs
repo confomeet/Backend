@@ -47,20 +47,5 @@ namespace VideoProjectCore6.Controllers.Notification
 
             else return StatusCode(StatusCodes.Status404NotFound, "error occurred");
         }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("CallNotifications")]
-        public async Task<ActionResult> CallNotifications([FromHeader] string lang = "ar", int pageIndex = 1, int pageSize = 25)
-        {
-            var result = await _INotificationLogRepository.GetNotificationsLogSignalR(_IUserRepository.GetUserID().ToString(), lang, pageIndex, pageSize);
-            if (result != null)
-            {
-
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
-
-            else return StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
-
     }
 }

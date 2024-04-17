@@ -4,8 +4,6 @@ using VideoProjectCore6.DTOs.NotificationDto;
 using VideoProjectCore6.Models;
 using VideoProjectCore6.Repositories.INotificationRepository;
 using VideoProjectCore6.Repositories;
-using Microsoft.AspNetCore.SignalR;
-using VideoProjectCore6.Hubs;
 using VideoProjectCore6.Utility;
 #nullable disable
 namespace VideoProjectCore6.Services.NotificationService
@@ -35,8 +33,6 @@ namespace VideoProjectCore6.Services.NotificationService
             await _DbContext.NotificationLogs.AddRangeAsync(notifyLog);
 
             await _DbContext.SaveChangesAsync();
-
-            await UserNotifySignalR(notificationsLogPostDto.Select(p => p.UserId).ToHashSet(), "en");
 
             return 1;
         }
@@ -211,108 +207,6 @@ namespace VideoProjectCore6.Services.NotificationService
                 Count = query.Count(),
                 Items = query.Skip((notificationFilterDto.pageIndex - 1) * notificationFilterDto.pageSize).Take(notificationFilterDto.pageSize)
             };
-        }
-
-        public async Task<APIResult> SendSignalRNotification(NotificationDirectCallGetDto notificationLogPostDto, int v, byte? status)
-        {
-            // TODO validation for notification.
-
-            APIResult result = new APIResult();
-
-            try
-            {
-
-                List<NotificationLogPostDto> notificationLogs = new List<NotificationLogPostDto>();
-
-
-                Dictionary<string, List<string>> keyVal = new Dictionary<string, List<string>>();
-
-                keyVal.Add("en", new List<string> { notificationLogPostDto.SenderName, "Call recieved"});
-                keyVal.Add("ar", new List<string> { notificationLogPostDto.SenderName, "استلام اتصال جديد" });
-
-
-
-
-                for (int i = 0; i < keyVal.Count(); i++)
-                {
-                    NotificationLogPostDto notificationLogPost = new NotificationLogPostDto
-                    {
-
-                        NotificationTitle = keyVal.ElementAt(i).Value[0],
-                        NotificationBody = keyVal.ElementAt(i).Value[1],
-                        NotificationChannelId = 42,
-                        UserId = v,
-                        ToAddress = notificationLogPostDto.RecieverId,
-                        Lang = keyVal.ElementAt(i).Key,
-                        CreatedDate = DateTime.Now,
-                        NotificationLink = notificationLogPostDto.NotificationBody != null ? notificationLogPostDto.NotificationBody : "No Link",
-                        RecStatus = status,
-                        CreatedBy = notificationLogPostDto.SenderId
-                    };
-
-
-                    notificationLogs.Add(notificationLogPost);
-                }
-                
-
-               await AddNotificationsLog(notificationLogs);
-
-                //await _DbContext.SaveChangesAsync();
-
-                return result.SuccessMe(1, "Created", true, APIResult.RESPONSE_CODE.OK);
-
-            } 
-            
-            catch
-            {
-
-                return result.FailMe(-1, "Failed to add");
-            }
-            
-        }
-
-
-        public async Task<ListCount> GetNotificationsLogSignalR(string recieverId, string lang = "ar", int pageIndex = 1, int pageSize = 25)
-        {
-            var allUserNotifications = await _DbContext.NotificationLogs.Where(x => x.ToAddress.Equals(recieverId)).
-                Skip((pageIndex - 1) * pageSize).
-                Take(pageSize).ToListAsync();
-
-
-            return new ListCount
-            {
-                Count = allUserNotifications.Count(),
-                Items = allUserNotifications
-            };
-
-        }
-
-        // For participants
-        // Otp notification
-        // Registeration
-        public async Task UserNotifySignalR(HashSet<int?> userIds, string lang)
-        {
-            var scope = _services.CreateScope();
-
-            var notificationHub = scope.ServiceProvider.GetRequiredService<IHubContext<NotificationHub>>();
-
-            NotificationFilterDto notificationFilterDto = new NotificationFilterDto();
-
-            notificationFilterDto.pageIndex = 1;
-            notificationFilterDto.pageSize = 1;
-
-            if (UserHandler.ConnectedIds.Count() > 0)
-            {
-                foreach (var connectedId in UserHandler.ConnectedIds)
-                {
-                    if (userIds.Contains(Int32.Parse(connectedId)))
-                    {
-                        var notifications = await GetNotificationsLog(notificationFilterDto, Int32.Parse(connectedId), lang, 1, 1);
-
-                        await notificationHub.Clients.User(connectedId).SendAsync("notify", notifications);
-                    }
-                }
-            }
         }
     }
 }

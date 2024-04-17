@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.DTOs.ConfEventDto;
-using VideoProjectCore6.Hubs;
 using VideoProjectCore6.Repositories.IConfEventRepository;
 using VideoProjectCore6.Services;
 
@@ -17,7 +16,7 @@ namespace VideoProjectCore6.Controllers.ConfEvent
         [HttpPost("AddProsodyEvent")]
         public async Task<ActionResult> AddProsodyEvent([FromBody] ProsodyEventPostDto prosodyEventPostDto)
         {
-            return Ok(await _IConfEventRepository.AddProsodyEvent(prosodyEventPostDto, EventHub.Current!));
+            return Ok(await _IConfEventRepository.AddProsodyEvent(prosodyEventPostDto));
         }
 
         [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]

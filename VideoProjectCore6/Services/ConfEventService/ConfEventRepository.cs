@@ -1,5 +1,4 @@
 ﻿using Flurl;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Xml;
@@ -7,7 +6,6 @@ using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.DTOs.ConfEventDto;
 using VideoProjectCore6.DTOs.EventDto;
 using VideoProjectCore6.DTOs.ParticipantDto;
-using VideoProjectCore6.Hubs;
 using VideoProjectCore6.Models;
 using VideoProjectCore6.Repositories;
 using VideoProjectCore6.Repositories.IConfEventRepository;
@@ -26,7 +24,7 @@ namespace VideoProjectCore6.Services.ConfEventService
         private readonly IGeneralRepository _IGeneralRepository = GeneralRepository;
         private readonly ILogger<ConfEventRepository> _ILogger = logger;
 
-        public async Task<APIResult> AddProsodyEvent(ProsodyEventPostDto prosodyEventPostDto, IHubContext<EventHub> HubContext)
+        public async Task<APIResult> AddProsodyEvent(ProsodyEventPostDto prosodyEventPostDto)
         {
             APIResult result = new();
 
@@ -46,11 +44,6 @@ namespace VideoProjectCore6.Services.ConfEventService
                     foreach(var connectedId in UserHandler.ConnectedIds)
                     {
                         var userEvents = await GetUserEventsStatus(Int32.Parse(connectedId), confEvent);
-
-                        if (userEvents.Result.Count > 0)
-                        {
-                            await HubContext.Clients.User(connectedId).SendAsync("NotifyEventStatus", userEvents);
-                        }
                     }
                 }
 

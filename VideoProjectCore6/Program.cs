@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
-using VideoProjectCore6.Hubs;
 using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 using VideoProjectCore6;
@@ -176,7 +174,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "VideoProject", Version = "v1" });
-    c.AddSignalRSwaggerGen();
 });
 
 
@@ -285,7 +282,6 @@ builder.Services.AddSwaggerGen(options =>
    options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
-builder.Services.AddSignalR(hubOptions => { hubOptions.EnableDetailedErrors = true; hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(10); hubOptions.HandshakeTimeout = TimeSpan.FromSeconds(5); });
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -294,7 +290,6 @@ var app = builder.Build();
 
 
 
-EventHub.Current = app.Services.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext <EventHub>>();
 // Configure the HTTP request pipeline.
 //if (!app.Environment.IsProduction())
 //{
@@ -318,8 +313,5 @@ app.UseMiddleware(typeof(ErrorHandlingMiddleware));
 app.UseCors();
 app.UseAuthentication();//yhab
 app.UseAuthorization();
-app.MapHub<DirectCallHub>("/directCall"); //eventsStatus
-app.MapHub<EventHub>("/eventsStatus");
-app.MapHub<NotificationHub>("/notifications");
 app.MapControllers();
 app.Run();
