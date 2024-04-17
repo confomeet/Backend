@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VideoProjectCore6.Attributes;
 using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.DTOs.MeetingDto;
 using VideoProjectCore6.DTOs.ParticipantDto;

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics.Contracts;
-using VideoProjectCore6.Attributes;
 using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.DTOs.ContactDto;
 using VideoProjectCore6.Repositories.IContactRepository;
@@ -35,8 +34,6 @@ namespace VideoProjectCore6.Controllers.Contant
             return result.Id > 0 ? Ok(result) : BadRequest(result);
         }
 
-        [TypeFilter(typeof(KeyAttribute))]
-        [HttpPost("Remote")]
         public async Task<ActionResult> AddRemote([FromBody] ContactDto dto, [FromQuery] int userId, [FromHeader] string lang = "ar")
         {
             return Ok(await _IContantRepository.Add(dto, userId, lang));
@@ -63,7 +60,6 @@ namespace VideoProjectCore6.Controllers.Contant
             return Ok(await _IContantRepository.ContactById(Id, _IUserRepository.GetUserID(), lang));
         }
 
-        [TypeFilter(typeof(KeyAttribute))]
         [HttpPut("Remote/{id}")]
         public async Task<ActionResult> RemotUpdate(int id, [FromBody] ContactDto dto, [FromQuery] int userId, [FromHeader] string lang = "ar")
         {
@@ -85,7 +81,6 @@ namespace VideoProjectCore6.Controllers.Contant
             var result = await _IContantRepository.Delete(id, _IUserRepository.GetUserID(), lang);
             return result.Id > 0 ? Ok(result) : BadRequest(result);
         }
-        [TypeFilter(typeof(KeyAttribute))]
         [HttpDelete("Remote/{id}")]
         public async Task<ActionResult> RemoteDelete(int id, [FromQuery] int userId, [FromHeader] string lang)
         {

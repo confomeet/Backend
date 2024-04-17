@@ -23,7 +23,6 @@ namespace VideoProjectCore6.Models
         public virtual DbSet<Event> Events { get; set; } = null!;
         public virtual DbSet<EventLog> EventLogs { get; set; } = null!;
         public virtual DbSet<Contact> Contacts { get; set; } = null!;
-        public virtual DbSet<ClientInfo> ClientInfos { get; set; } = null!;
         public virtual DbSet<Country> Countries { get; set; } = null!;
         public virtual DbSet<FileConfiguration> FileConfigurations { get; set; } = null!;
         public virtual DbSet<Meeting> Meetings { get; set; } = null!;
@@ -237,38 +236,6 @@ namespace VideoProjectCore6.Models
                 entity.Property(e => e.RelatedId)
                     .HasPrecision(10)
                     .HasColumnName("related_id");
-            });
-
-            modelBuilder.Entity<ClientInfo>(entity =>
-            {
-                entity.ToTable("client_info");
-
-                entity.Property(e => e.Id)
-                    .HasPrecision(5)
-                    .ValueGeneratedOnAdd()
-                    .HasColumnName("id");
-
-                entity.Property(e => e.AppKey)
-                    .HasMaxLength(200)
-                    .IsUnicode(false)
-                    .HasColumnName("app_key");
-
-                entity.Property(e => e.AppName)
-                    .HasMaxLength(100)
-                    .IsUnicode(false)
-                    .HasColumnName("app_name");
-
-                entity.Property(e => e.ClientName)
-                    .HasMaxLength(200)
-                    .HasColumnName("client_name");
-
-                entity.Property(e => e.IsActive)
-                    .HasPrecision(1)
-                    .HasColumnName("is_active");
-
-                entity.Property(e => e.Note)
-                    .HasMaxLength(255)
-                    .HasColumnName("note");
             });
 
             modelBuilder.Entity<RecordingLog>(entity =>
