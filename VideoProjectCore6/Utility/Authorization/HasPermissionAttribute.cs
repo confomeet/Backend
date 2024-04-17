@@ -2,13 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace VideoProjectCore6.Utility.Authorization;
 
-public class HasPermissionAttribute : AuthorizeAttribute
+public class HasPermissionAttribute(string permission) : AuthorizeAttribute(PolicyPrefix + permission)
 {
     public const string PolicyPrefix = "HasPermission:";
-    public HasPermissionAttribute(string permission)
-        : base(PolicyPrefix + permission)
-    {
-    }
 
     public string Permission
     {
