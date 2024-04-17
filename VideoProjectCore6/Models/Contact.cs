@@ -57,14 +57,12 @@ namespace VideoProjectCore6.Models
 
         public string ImageUrl { get; set; }
 
-        public virtual Contact ParentEventNavigation { get; set; }
         public virtual Contact ParentCompanyId { get; set; }
         public virtual Contact ParentSectionId { get; set; }
 
 
         //public virtual Contact ChildrenSectionId { get; set; }
 
-        public virtual ICollection<Contact> InverseParentEventNavigation { get; set; }
 
         public virtual ICollection<Contact> Companies { get; set; }
 

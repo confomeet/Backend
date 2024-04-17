@@ -122,9 +122,6 @@ namespace VideoProjectCore6.Models
                 entity.Property(e => e.Id)
                     .HasPrecision(10)
                     .HasColumnName("id");
-                entity.Property(e => e.AppId)
-                    .HasPrecision(5)
-                    .HasColumnName("app_id");
 
                 entity.Property(e => e.CreatedBy)
                     .HasPrecision(10)
@@ -166,9 +163,6 @@ namespace VideoProjectCore6.Models
                 entity.Property(e => e.Organizer)
                       .HasMaxLength(100)
                       .HasColumnName("organizer");
-                entity.Property(e => e.ParentEvent)
-                    .HasPrecision(10)
-                    .HasColumnName("parent_event");
 
                 entity.Property(e => e.RecStatus)
                     .HasPrecision(2)
@@ -205,13 +199,6 @@ namespace VideoProjectCore6.Models
                   // .HasPrincipalKey(p => p.CreateBy)
                    .HasForeignKey(d => d.CreatedBy)
                    .HasConstraintName("fk_user_");
-
-                entity.HasOne(d => d.ParentEventNavigation)
-                   .WithMany(p => p.InverseParentEventNavigation)
-                   .HasForeignKey(d => d.ParentEvent)
-                   .HasConstraintName("event_parent_event_id_fk");
-
-
             });
 
             modelBuilder.Entity<EventLog>(entity =>
@@ -453,12 +440,6 @@ namespace VideoProjectCore6.Models
                     .HasForeignKey(d => d.ContactId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("contact_contact_id_fk");
-
-
-                entity.HasOne(d => d.ParentEventNavigation)
-                   .WithMany(p => p.InverseParentEventNavigation)
-                   .HasForeignKey(d => d.DirectManageId)
-                   .HasConstraintName("fk_contact_3");
 
                 entity.HasOne(d => d.ParentCompanyId)
                    .WithMany(p => p.Companies)

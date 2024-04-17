@@ -11,7 +11,6 @@
         public DateTime EndDate { get; set; }
         public string TimeZone { get; set; }
         public string MeetingId { get; set; } = null;
-        public int? ParentEventId { get; set; }
         public sbyte? Status { get; set; }
 
 

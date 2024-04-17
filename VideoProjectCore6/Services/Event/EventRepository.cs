@@ -61,7 +61,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         {
             Models.Event e = new()
             {
-                ParentEvent = dto.ParentEventId,
                 CreatedBy = addBy,
                 Description = dto.Description,
                 Topic = dto.Topic,
@@ -74,7 +73,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 AllDay = dto.AllDay,
                 TimeZone = dto.TimeZone,
                 RecStatus = dto.Status == null ? (sbyte)EVENT_STATUS.ACTIVE : dto.Status,
-                AppId = dto.AppId,
                 Type = dto.Type
             };
             _DbContext.Events.Add(e);
@@ -91,20 +89,9 @@ public class EventRepository(IMeetingRepository iMeetingRepository
     public async Task<APIResult> AddMeetingEvent(EventWParticipant dto, int addBy, bool sendNotification, string lang)
     {
         APIResult eventResult = new();
-        if (dto.ParentEventId != null)
-        {
-            var parentEvt = await _DbContext.Events.Where(x => x.Id == dto.ParentEventId).FirstOrDefaultAsync();
-            if (!await isOkSubEventDate(dto.StartDate, dto.EndDate, (int)dto.ParentEventId))
-            {
-                return eventResult.FailMe(-1, "تاريخ الحدث الفرعي يجب أن يكون متوافق مع تاريخ الحدث الأب");
-            }
-
-            dto.MeetingId = parentEvt?.MeetingId;
-            dto.AllDay = parentEvt?.AllDay;
-        }
 
         using var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted }, TransactionScopeAsyncFlowOption.Enabled);
-        if (dto.ParentEventId == null && dto.MeetingRequired)
+        if (dto.MeetingRequired)
         {
             var meetingResult = await _IMeetingRepository.AddMeeting(new MeetingPostDto
             {
@@ -317,10 +304,8 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         string message = string.Empty;
         bool dateChanged = false, minuteChanged = false;
         double daysStart = 0, daysEnd = 0, minutsStart = 0, minutsEnd = 0;
-        string fixSubEventMsg = string.Empty;
 
         //bool notifySubParticipant = false;
-        List<Models.Event> subEvents = new();
         Models.Event? evt = await _DbContext.Events.Where(a => a.Id == id).FirstOrDefaultAsync();
         if (evt == null)
         {
@@ -344,19 +329,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 minutsStart = (dto.StartDate.TimeOfDay - evt.StartDate.TimeOfDay).TotalMinutes;
                 minutsEnd = (dto.EndDate.TimeOfDay - evt.EndDate.TimeOfDay).TotalMinutes;
             }
-            if (evt.ParentEvent == null)
-            {
-                subEvents = await _DbContext.Events.Where(a => a.ParentEvent == id).
-                     Include(x => x.Participants)
-                    .ToListAsync();
-            }
-            else
-            {
-                if (!await isOkSubEventDate(dto.StartDate, dto.EndDate, (int)evt.ParentEvent))
-                {
-                    return result.FailMe(-1, "تاريخ الحدث الفرعي يجب أن يكون متوافق مع تاريخ الحدث الأب");
-                }
-            }
            // return await Reschedule(id, dto, updatedBy, lang);
         }
         int actionId = await _DbContext.Actions.Where(x => x.Shortcut == UPDATE_EVENT_ACTION).Select(x => x.Id).FirstOrDefaultAsync();
@@ -364,48 +336,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         // using var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted }, TransactionScopeAsyncFlowOption.Enabled);
         try
         {
-            if (subEvents.Any() && timeChanged)
-            {
-                dateChanged = dto.StartDate.Date != evt.StartDate.Date || dto.EndDate.Date != evt.EndDate.Date;
-                minuteChanged = dto.StartDate.TimeOfDay != evt.StartDate.TimeOfDay || dto.EndDate.TimeOfDay != evt.EndDate.TimeOfDay;
-                var conflictedSEvent = subEvents.Where(x => x.EndDate > dto.EndDate || x.StartDate < dto.StartDate).Select(x => x.Id).ToList();
-                if (conflictedSEvent.Any())
-                {
-                    message = Translation.getMessage(lang, "SubEventDateConflict");
-                    //return result.FailMe(-1, Translation.getMessage(lang, "SubEventDateConflict"), true, APIResult.RESPONSE_CODE.BadRequest, conflictedSEvent);
-                }
-
-                //foreach (var sub in subEvents)
-                //{
-                //    if (dateChanged)
-                //    {
-                //        sub.StartDate = sub.StartDate.AddDays((dto.StartDate.Date - event_.StartDate.Date).TotalDays);
-                //        sub.EndDate = sub.EndDate.AddDays((dto.EndDate.Date - event_.EndDate.Date).TotalDays);
-                //        notifySubParticipant = true;
-                //    }
-                //    if (minuteChanged)
-                //    {
-                //        var fromS = (dto.StartDate.TimeOfDay - event_.StartDate.TimeOfDay).TotalMinutes;
-                //        var fromE = (dto.EndDate.TimeOfDay - event_.EndDate.TimeOfDay).TotalMinutes;
-                //        if (fromS == fromE)
-                //        {
-                //            sub.StartDate = sub.StartDate.AddMinutes(fromS);
-                //            sub.EndDate = sub.EndDate.AddMinutes(fromE);
-                //            notifySubParticipant = true;
-                //        }
-                //        else
-                //        {
-                //            sub.StartDate = dto.StartDate;
-                //            sub.EndDate = dto.EndDate;
-                //            fixSubEventMsg = Translation.getMessage(lang, "FixSubEventDate");
-                //            notifySubParticipant = false;
-                //        }
-                //    }
-                //    sub.LastUpdatedDate = DateTime.Now;
-                //    sub.LastUpdatedBy = updatedBy;
-                //}
-                //_DbContext.UpdateRange(subEvents);
-            }
             if (timeChanged || evt.Topic != dto.Topic || evt.SubTopic != dto.SubTopic 
                 || evt.Organizer != dto.Organizer
                 || evt.Description != dto.Description || evt.AllDay != dto.AllDay /*|| evt.RecStatus != dto.Status*/)
@@ -417,7 +347,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 evt.StartDate = dto.StartDate;
                 evt.EndDate = dto.EndDate;
                 evt.TimeZone = dto.TimeZone;
-                evt.ParentEvent = dto.ParentEventId;
                 evt.AllDay = dto.AllDay;
                 evt.RecStatus = dto.Status != null ? dto.Status : evt.RecStatus;
                 evt.LastUpdatedDate = DateTime.Now;
@@ -446,7 +375,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 bool needUpdate = false;
                 if (meeting != null)
                 {
-                    if (timeChanged && evt.ParentEvent == null)
+                    if (timeChanged)
                     {
                         meeting.StartDate = dto.StartDate;
                         meeting.EndDate = dto.EndDate;
@@ -533,34 +462,8 @@ public class EventRepository(IMeetingRepository iMeetingRepository
 
                 var notification = await _INotificationSettingRepository.GetNotificationsForAction(actionId, id);
                 var n = await _IParticipantRepository.NotifyParticipants(receivers, evt.MeetingId, notification, parameters, INVITATION_TEMPLATE, true, false);
-
-                //--------Notify sub event participants-------------
-                //if (notifySubParticipant)
-                //{
-                //    foreach (var subE in subEvents)
-                //    {
-
-                //        var parametersSub = new Dictionary<string, string>();
-                //        var subReceivers = subE.Participants.Select(x => new Receiver
-                //        {
-                //            Email = x.Email,
-                //            Id = x.UserId,
-                //            Mobile = x.Mobile,
-                //            ParticipantId = x.Id
-                //        }).ToList();
-                //        parametersSub[FROM_DATE] = subE.StartDate.ToString("dd-MM-yyyy");
-                //        parametersSub[TO_DATE] = subE.EndDate.ToString("dd-MM-yyyy");
-                //        parametersSub[FROM_TIME] = subE.StartDate.ToString("hh:mm tt");
-                //        parametersSub[TO_TIME] = subE.EndDate.ToString("hh:mm tt");
-                //        parametersSub[TOPIC] = subE.Topic;
-                //        parametersSub[DESCRIPTION] = subE.Description;
-                //        parametersSub[TIMEZONE] = subE.TimeZone;
-                //        var notificationSub = await _INotificationSettingRepository.GetNotificationsForAction(updateEventActionId, subE.Id);
-                //        var b = await _IParticipantRepository.NotifyParticipants(subReceivers, subE.MeetingId, notificationSub, parametersSub, INVITATION_TEMPLATE, true, false);
-                //    }
-                //}
             }
-            result.SuccessMe(id, /*fixSubEventMsg != string.Empty ? fixSubEventMsg :*/ Translation.getMessage(lang, "sucsessUpdate"));
+            result.SuccessMe(id, Translation.getMessage(lang, "sucsessUpdate"));
         }
         catch (Exception)
         {
@@ -621,7 +524,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         List<EventFullView> events = await _DbContext.Events.AsNoTracking()
             .Include(x => x.Participants)
             .Include(x => x.Meeting)
-            .Include(x => x.InverseParentEventNavigation)
             .Where(x =>
              //(!serverSearch || (obj.StartDate == null || x.StartDate >= obj.StartDate.Value.Date) && (obj.StartDate == null || x.StartDate < obj.EndDate.Value.AddDays(1).Date)) &&
              (!serverSearch
@@ -663,10 +565,9 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 Status = e.RecStatus,
                 Type = e.Type,
                 MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, lang, allRooms),
-                MeetingLink = e.MeetingId != null && e.CreatedBy == userId && e.ParentEvent == null ?
+                MeetingLink = e.MeetingId != null && e.CreatedBy == userId ?
                 (e.Meeting != null ? e.Meeting.MeetingLog : null) ?? (Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0") : null,
 
-                ParentEventId = e.ParentEvent,
                 StatusText = e.RecStatus == null ? string.Empty : EventStatusValue.ContainsKey((EVENT_STATUS)e.RecStatus) ? EventStatusValue[(EVENT_STATUS)e.RecStatus][lang] : string.Empty,
                 Participants = e.Participants.Select(p => new ParticipantView
                 {
@@ -684,42 +585,10 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                     MeetingLink = (e.Meeting != null ? e.Meeting.MeetingLog : null) ?? (e.MeetingId != null && (p.UserId == userId || relatedUsers.Contains(p.UserId)) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null),
                     PartyId = p.PartyId,
                 }).ToList(),
-                SubEventCount = e.InverseParentEventNavigation != null ? e.InverseParentEventNavigation.Count() : 0,
-                //SubEvents = e.InverseParentEventNavigation != null ? e.InverseParentEventNavigation.Select(sub => new EventFullView
-                //{
-                //    Id = sub.Id,
-                //    Description = sub.Description,
-                //    Topic = sub.Topic,
-                //    SubTopic = sub.SubTopic,
-                //    Organizer = sub.Organizer,
-                //    StartDate = sub.StartDate,
-                //    EndDate = sub.EndDate,
-                //    MeetingId = sub.MeetingId,
-                //    MeetingLink = null,
-                //    ParentEventId = sub.ParentEvent,
-                //    StatusText = sub.RecStatus == null ? string.Empty : EventStatusValue.ContainsKey((EVENT_STATUS)sub.RecStatus) ? EventStatusValue[(EVENT_STATUS)sub.RecStatus][lang] : string.Empty,
-                //    Participants = sub.Participants.Select(p => new ParticipantView
-                //    {
-                //        Id = p.Id,
-                //        UserId = p.UserId,
-                //        FullName = "",
-                //        Email = p.Email,
-                //        Mobile = p.Mobile,
-                //        IsModerator = p.IsModerator,
-                //        Description = p.Description,
-                //        Note = p.Note
-                //    }).ToList(),
-                //}).ToList() : null,
             }).ToListAsync();
-        List<int> parentIds = events.Where(e => e.ParentEventId != null).Select(e => e.ParentEventId ?? -1).Distinct().ToList();
-        var exitingParentIds = events.Where(e => e.SubEventCount > 0).Select(e => e.Id).Distinct().ToList();
 
         foreach (var e in events)
         {
-            if (e.ParentEventId != null && exitingParentIds.Contains((int)e.ParentEventId))
-            {
-                e.ToHide = true;
-            }
             e.VideoLogs = await FetchVideoLogs(e.MeetingId, _DbContext, null);
         }
         if (events != null && events.Count > 0)
@@ -744,8 +613,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             }
 
             var usersId1 = events.SelectMany(x => x.Participants.Select(p => p.UserId)).Distinct().ToList();
-            //var usersId2 = events.SelectMany(x => x.SubEvents.SelectMany(p => p.Participants.Select(g => g.UserId).ToList())).Distinct().ToList();
-            //usersId1.AddRange(usersId2);
             usersId1.AddRange(events.Select(x => x.CreatedBy).ToList().Distinct());
             var userName = _DbContext.Users.Where(u => usersId1.Contains(u.Id)).Select(x => new { x.Id, x.FullName }).ToDictionary(x => x.Id, x => x.FullName);
             foreach (var e in events)
@@ -756,14 +623,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 {
                     par.FullName = userName.TryGetValue(par.UserId, out v) ? v : string.Empty;
                 }
-                //foreach (var sub in e.SubEvents)
-                //{
-                //    foreach (var par in sub.Participants)
-                //    {
-                //        b = userName.TryGetValue(par.UserId, out v);
-                //        par.FullName = b ? v : string.Empty;
-                //    }
-                //}
             }
 
             //if (localSearch && obj.Participants != null && obj.Participants.Any())
@@ -793,7 +652,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         var events = await _DbContext.Events
          .Include(x => x.Participants).ThenInclude(u => u.User)
          .Include(x => x.Meeting)
-             .Include(x => x.InverseParentEventNavigation)
          .Where(x => (!serverSearch
                 || (x.StartDate >= obj!.StartDate!.Value.Date && x.StartDate < obj!.EndDate!.Value.AddDays(1).Date)
                 || (x.EndDate > obj.StartDate.Value.Date && x.EndDate <= obj!.EndDate!.Value.AddDays(1).Date)
@@ -829,8 +687,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
            Status = e.RecStatus,
            Type = e.Type,
            AllDay = e.AllDay,
-           MeetingLink = e.MeetingId != null && e.CreatedBy == CurrentUserId && e.ParentEvent == null ? Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0" : null,
-           ParentEventId = e.ParentEvent,
+           MeetingLink = e.MeetingId != null && e.CreatedBy == CurrentUserId ? Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0" : null,
            MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, lang, allRooms),
            StatusText = e.RecStatus == null ? string.Empty : EventStatusValue.ContainsKey((EVENT_STATUS)e.RecStatus) ? EventStatusValue[(EVENT_STATUS)e.RecStatus][lang] : string.Empty,
            Participants = e.Participants.Select(p => new ParticipantView
@@ -845,22 +702,11 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                Description = p.Description,
                Note = p.Note
            }).ToList(),
-           SubEventCount = e.InverseParentEventNavigation != null ? e.InverseParentEventNavigation.Count() : 0,
        }).ToListAsync();
 
         var total = events.Count;
         var items = (obj != null && obj.Pagination) ? PaginatedList<EventFullView>.Create(events.AsQueryable(), pageIndex > 0 ? pageIndex : 1, pageSize > 0 ? pageSize : 25, total) : events;
 
-        var parentIds = items.Where(e => e.ParentEventId != null).Select(e => e.ParentEventId).ToHashSet();
-        var exitingParentIds = items.Where(e => e.SubEventCount > 0).Select(e => e.Id).ToHashSet();
-
-        foreach (var e in items)
-        {
-            if (e.ParentEventId != null && exitingParentIds.Contains((int)e.ParentEventId))
-            {
-                e.ToHide = true;
-            }
-        }
         var filteredResult = PaginatedList<EventFullView>.Create(events.AsQueryable(), pageIndex > 0 ? pageIndex : 1, pageSize > 0 ? pageSize : 25, total);
 
         //if (events != null && events.Any())
@@ -878,20 +724,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             Count = total,
             Items = items
         };
-    }
-
-    private async Task<bool> isOkSubEventDate(DateTime start, DateTime end, int parentEvtId)
-    {
-        var parentEvt = await _DbContext.Events.Where(x => x.Id == parentEvtId).FirstOrDefaultAsync();
-        if (parentEvt == null)
-        {
-            return false;
-        }
-        if (start < parentEvt.StartDate || end > parentEvt.EndDate)
-        {
-            return false;
-        }
-        return true;
     }
 
     public async Task<EventFullView?> EventDetails(int id, int userId, string timeZoneId)
@@ -924,7 +756,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 AllDay = e.AllDay,
                 Type = e.Type,
                 EventLogs = new List<ConfEventCompactGet>(),
-                ParentEventId = e.ParentEvent,
                 Participants = e.Participants.Select(p => new ParticipantView
                 {
                     Id = p.Id,
@@ -1031,7 +862,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             {
                 RecurrenceEvents.Add(new Models.Event
                 {
-                    ParentEvent = evt.ParentEventId,
                     CreatedBy = addBy,
                     Description = evt.Description,
                     Topic = evt.Topic,
@@ -1044,7 +874,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                     AllDay = evt.AllDay,
                     TimeZone = evt.TimeZone,
                     RecStatus = evt.Status == null ? (sbyte)EVENT_STATUS.ACTIVE : dto.Status,
-                    AppId = evt.AppId,
                     Type = evt.Type,
                 });
             }

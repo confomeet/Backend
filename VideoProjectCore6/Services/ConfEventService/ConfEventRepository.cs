@@ -464,7 +464,7 @@ namespace VideoProjectCore6.Services.ConfEventService
 
             var events = await _DbContext.Events.Where(x => x.CreatedBy == userId).Include(x => x.Participants)
             .Include(x => x.Meeting)
-            .Include(x => x.InverseParentEventNavigation).Select(e => new EventFullView
+            .Select(e => new EventFullView
             {
                 Id = e.Id,
                 CreatedBy = e.CreatedBy,
@@ -484,9 +484,8 @@ namespace VideoProjectCore6.Services.ConfEventService
                 Status = e.RecStatus,
                 Type = e.Type,
                 MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, "en", allRooms),
-                MeetingLink = e.MeetingId != null && e.CreatedBy == userId && e.ParentEvent == null ?
+                MeetingLink = e.MeetingId != null && e.CreatedBy == userId ?
                 Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0" : null,
-                ParentEventId = e.ParentEvent,
                 StatusText = e.RecStatus == null ? string.Empty : EventStatusValue.ContainsKey((EVENT_STATUS)e.RecStatus) ? EventStatusValue[(EVENT_STATUS)e.RecStatus]["en"] : string.Empty,
                 Participants = e.Participants.Select(p => new ParticipantView
                 {
@@ -503,7 +502,6 @@ namespace VideoProjectCore6.Services.ConfEventService
                     MeetingLink = e.MeetingId != null && (p.UserId == userId) ? Url.Combine(host, "join", Url.Combine(p.Id.ToString(), p.Guid.ToString())) + "?redirect=0" : null,
                     PartyId = p.PartyId,
                 }).ToList(),
-                SubEventCount = e.InverseParentEventNavigation != null ? e.InverseParentEventNavigation.Count() : 0,
  
             }).ToListAsync();
 

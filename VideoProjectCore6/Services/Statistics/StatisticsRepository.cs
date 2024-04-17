@@ -32,20 +32,11 @@ namespace VideoProjectCore6.Services.Statistics
 
         public async Task<List<ValueIdDesc>> ByApp(DateTimeRange range)
         {
-            var eventSum = await _DbContext.Events
-                .Where(e => e.MeetingId != null && e.AppId != null && e.CreatedDate > range.StartDateTime.Date && e.CreatedDate < range.EndDateTime.AddDays(1).Date)
-                .GroupBy(g => g.AppId)
-                .Select(g => new ValueIdDesc { Id = g.Key ?? 0, Value = g.Count() }).ToListAsync();
-            if (eventSum.Count > 0)
-            {
-                // var appName = await _DbContext.ClientInfos.Where(c => eventSum.Select(e => e.Id).ToList().Contains(c.Id)).ToDictionaryAsync(c => c.Id, c => c.ClientName);
-
-                // foreach (var app in eventSum)
-                // {
-                //     app.Description = appName.TryGetValue((ushort)app.Id, out string? v) ? v : string.Empty;
-                // }
-            }
-            return eventSum;
+            // TODO: need to store app_id somewhere and perform some group by here.
+            // Probably the best way is to have JWT with app_id and app_display_name encoded in the token.
+            // And also we need some table where we can store info about event creation.
+            // We must not make app_id part of Event model.
+            return await Task.FromResult(new List<ValueIdDesc>());
         }
 
         public async Task<List<ValueIdDesc>> ByMeetingStatus(DateTimeRange range)

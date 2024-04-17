@@ -8,7 +8,6 @@ namespace VideoProjectCore6.Models
         public Event()
         {
             Participants = new HashSet<Participant>();
-            InverseParentEventNavigation = new HashSet<Event>();
         }
         public int Id { get; set; }
         public DateTime StartDate { get; set; }
@@ -24,18 +23,12 @@ namespace VideoProjectCore6.Models
         public int CreatedBy { get; set; }      
         public int? LastUpdatedBy { get; set; }
         public sbyte? RecStatus { get; set; } //  SBYTE TO HOLD -1 STATUS
-        public int? ParentEvent { get; set; }
         public string TimeZone { get; set; }
         public bool? AllDay { get; set; }
-        public ushort? AppId { get; set; } 
 
         public virtual Meeting Meeting { get; set; }
-        public virtual Event ParentEventNavigation { get; set; }
-
         public virtual User User { get; set; }
 
         public virtual ICollection<Participant> Participants { get; set; }
-        [NotMapped]
-        public virtual ICollection<Event> InverseParentEventNavigation { get; set; }
     }
 }

@@ -16,12 +16,10 @@ namespace VideoProjectCore6.DTOs.EventDto
         public string Organizer { get; set; }
         public string MeetingId { get; set; }
         public bool Invitation { get; set; }
-        public int? ParentEventId { get; set; }
         public string TimeZone { get; set; }
         public sbyte? Status { get; set; }
 
         public bool? AllDay { get; set; }
-        public EventGetDto ParentEvent { get; set; }
 
 
         public EventGetDto()
@@ -43,7 +41,6 @@ namespace VideoProjectCore6.DTOs.EventDto
                 Topic = event_.Topic,
                 SubTopic= event_.SubTopic,
                 MeetingId = event_.MeetingId,
-                ParentEventId = event_.ParentEvent,
                 TimeZone = event_.TimeZone,
                 Status=event_.RecStatus
             };

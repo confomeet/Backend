@@ -11,7 +11,6 @@
         //public List<string> Participants { get; set; }
         public string Participant { get; set; }
         public bool Pagination { get; set; } = true;
-        public bool ShowSubEvent { get; set; } = true;
 
         public short? TypeOrder { get; set; }
 

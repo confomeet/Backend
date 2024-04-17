@@ -358,7 +358,6 @@ namespace VideoProjectCore6.Services.NotificationService
 
             NotificationLogPostDto notificationLogPostDto = new()
             {
-                //ApplicationId = appId,
                 CreatedDate = DateTime.Now,
                 IsSent = 0,
                 NotificationBody = " Error from  system  " + extraText + " , send time is " + DateTime.Now.ToString(),

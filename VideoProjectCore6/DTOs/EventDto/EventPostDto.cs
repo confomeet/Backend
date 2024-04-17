@@ -15,11 +15,9 @@ namespace VideoProjectCore6.DTOs.EventDto
         public string Organizer { get; set; }
         public string MeetingId { get; set; } = null;
         public bool MeetingRequired { get; set; } = true;
-        public int? ParentEventId { get; set; }
         public string TimeZone { get; set; }
         public string Password { get; set; }
         public sbyte? Status { get; set; }
-        public ushort? AppId { get; set; }
         public bool? AllDay { get; set; }
         public int? TypeOrder { get; set; }
         public bool? RecordingReq { get; set; }
@@ -37,7 +35,6 @@ namespace VideoProjectCore6.DTOs.EventDto
                 Type = Type,
                 MeetingId = MeetingId,                
                 TimeZone = TimeZone,
-                ParentEvent = ParentEventId,
                 
             };
             return queueProcess;
