@@ -30,7 +30,6 @@ namespace VideoProjectCore6.Controllers.Event
         }
 
         [HasPermission(Permissions.Meeting_Search_IfParticipant)]
-        [HasPermission(Permissions.Meeting_Search_All)]
         [HttpPost("Search")]
         public async Task<ActionResult> SearchLocal([FromBody] EventSearchObject obj, [FromQuery] bool relatedUserEvents, [FromHeader] string lang = "ar")
         {
