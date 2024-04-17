@@ -96,11 +96,6 @@ namespace VideoProjectCore6.Services.UserService
             return userID;
         }
 
-        public string GetUserEmail()
-        {
-            string Email = _httpContext.HttpContext.User.FindFirst(ClaimTypes.Email)?.Value;
-            return Email;
-        }
         public string GetUserName()
         {
             string userName = _httpContext.HttpContext.User.FindFirst(ClaimTypes.Name)?.Value;
@@ -110,11 +105,6 @@ namespace VideoProjectCore6.Services.UserService
         {
             return _httpContext.HttpContext.User.IsInRole(AdminPolicy);
         }
-
-        //public bool IsPNSEmployee()
-        //{
-        //    return _httpContext.HttpContext.User.IsInRole(Constants.PNSEmployeePolicy);
-        //}
 
         public async Task<List<RoleGetDto>> GetUserRoles(int userId, string lang)
         {
@@ -1197,70 +1187,6 @@ namespace VideoProjectCore6.Services.UserService
                 return res.FailMe(-1, result.Errors.FirstOrDefault().Description + resUpdateRole.Errors.FirstOrDefault().Description);
             }
         }
-        public async Task<string> AddEditSignature64(string signatureBase64, string lang)
-        {
-            string pathSign = "";
-            User user = _userManager.Users.FirstOrDefault(u => u.Id == GetUserID());
-            if (user == null)
-            {
-                _exception.AttributeMessages.Add(Translation.getMessage(lang, "UserNotExistedBefore"));
-                throw _exception;
-            }
-
-            // pathSign = _IFilesUploaderRepository.FromBase64ToImage(signatureBase64, target);
-            try
-            {
-
-                if (pathSign != "")
-                {
-                    user.Sign = pathSign;
-                    await _userManager.UpdateAsync(user);
-                    return pathSign;
-                }
-            }
-            catch
-            {
-                return pathSign;
-            }
-            return pathSign;
-        }
-
-        public async Task<bool> AddEditSignature(SignaturePostDto signaturePostDto, string lang)
-        {
-            User user = _userManager.Users.FirstOrDefault(u => u.Id == GetUserID());
-            if (user == null)
-            {
-                _exception.AttributeMessages.Add(Translation.getMessage(lang, "UserNotExistedBefore"));
-                throw _exception;
-            }
-
-            string imageName;
-            if (signaturePostDto.SignatureFile != null)
-            {
-                imageName = new String(Path.GetFileNameWithoutExtension(signaturePostDto.SignatureFile.FileName).Take(10).ToArray()).Replace(" ", "_");
-                imageName = imageName + DateTime.Now.ToString("yyyymmdd") + Path.GetExtension(signaturePostDto.SignatureFile.FileName);
-
-                var imagePath = Path.Combine(_IWebHostEnvironment.ContentRootPath, "wwwroot/Signature", imageName);
-                using var fileStream = new FileStream(imagePath, FileMode.Create);
-
-                await signaturePostDto.SignatureFile.CopyToAsync(fileStream);
-                user.Sign = Path.Combine("Signature", imageName);
-
-                var result = await _userManager.UpdateAsync(user);
-
-                if (result.Succeeded)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-
-            }
-
-            return true;
-        }
 
         public async Task<APIResult> SendResetPasswordEmail(MultiLangMessage message, string email, string lang)
         {
@@ -1458,28 +1384,6 @@ namespace VideoProjectCore6.Services.UserService
             return claims.ToArray();
         }
 
-        public async Task<bool> DisabledAccount(int id)
-        {
-            var user = await _userManager.FindByIdAsync(id.ToString());
-            if (user == null) return true;
-            if (user.ProfileStatus == Convert.ToInt32(PROFILE_STATUS.DISABLED)) return true;
-            else return false;
-        }
-        private async Task<bool> EnabledAccount(int id)
-        {
-            User user = await _userManager.FindByIdAsync(id.ToString());
-            if (user == null)
-            {
-                return false;
-            }
-
-            if (user.ProfileStatus == Convert.ToInt32(PROFILE_STATUS.ENABLED))
-            {
-                return true;
-            }
-
-            return false;
-        }
         public async Task<APIResult> DisableAccount(int id, string lang = "ar")
         {
             APIResult result = new APIResult();
@@ -1601,34 +1505,6 @@ namespace VideoProjectCore6.Services.UserService
                 return result.FailMe(-1, Translation.getMessage(lang, "AccountActEr"));
             }
         }
-        public void SignOut()
-        {
-            _signInManager.SignOutAsync();
-
-            //var uSERNAME = _httpContext.HttpContext.User.Identity;
-
-            bool isAuthenticated = _httpContext.HttpContext.User.Identity.IsAuthenticated;
-            if (isAuthenticated)
-            {
-                _signInManager.SignOutAsync();
-            }
-        }
-
-        // TODO
-        private int GetNewValueBySec()
-        {
-            int sequenceNum = 0;
-            var connection = _DbContext.Database.GetDbConnection();
-            connection.Open();
-            using (var cmd = connection.CreateCommand())
-            {
-                cmd.CommandText = "select SEQUENCE_LOGIN.NEXTVAL from dual";
-                decimal obj = (decimal)cmd.ExecuteScalar();
-                sequenceNum = decimal.ToInt32(obj);
-            }
-            connection.Close();
-            return sequenceNum;
-        }
 
         public async Task<ListCount> GetUsers(string lang, int pageIndex = 1, int pageSize = 25)
         {
@@ -1648,40 +1524,13 @@ namespace VideoProjectCore6.Services.UserService
 
                         }).Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
             int total = await _DbContext.Users.CountAsync();
-            //var filteredResult = await PaginatedList<UserView>.CreateAsync(query.AsQueryable(), pageIndex > 0 ? pageIndex : 1, pageSize > 0 ? pageSize : 20, total);
             return new ListCount
             {
                 Count = total,
                 Items = query
             };
         }
-        public async Task<ListCount> Search(string email, int pageIndex = 1, int pageSize = 25, string lang = "ar")
-        {
-            var query = await _DbContext.Users.Where(u => u.NormalizedEmail.Contains(email.ToUpper())).AsNoTracking().
 
-                        Select(u => new UserView
-                        {
-                            Email = u.Email,
-                            FullName = u.FullName,
-                            Id = u.Id,
-                            PhoneNumber = u.PhoneNumber,
-                            UserName = u.UserName,
-                            Locked = CheckLockState(u.LockoutEnabled, u.LockoutEnd),
-                            Confirmed = u.EmailConfirmed,
-                            Enable2FA = u.TwoFactorEnabled,
-
-                        }).ToListAsync();
-
-            int total = query.Count();
-
-            return new ListCount
-            {
-                Count = total,
-                Items = query.Skip((pageIndex - 1) * pageSize).Take(pageSize)
-            };
-        }
-
-        // 
         public async Task<ListCount> SearchFilterUsers(UserFilterDto userFilterDto, int currentUser, string lang = "ar")
         {
 
@@ -1857,135 +1706,6 @@ namespace VideoProjectCore6.Services.UserService
         public static bool CheckLockState(bool lockoutEnabled, DateTimeOffset? lockoutEnd)
         {
             return (!lockoutEnabled) ? false : lockoutEnd.HasValue && lockoutEnd.Value.ToLocalTime().LocalDateTime > DateTime.Now ? true : false;
-        }
-
-        // PP
-        public async Task<APIResult> CreateParticipantUser(BasicUserInfo dto, string lang, bool outerReq)
-        {
-            APIResult result = new();
-            if (!dto.HasIdentity()) // So create user directly
-            {
-                //return result.FailMe(-1, "يرجى ادخال بيان تعريف واحد على الأقل لكل مشترك");
-                dto.UserName = INVALID_EMAIL_PREFIX + GetNewValueBySec();
-                dto.Email = dto.UserName + INVALID_EMAIL_SUFFIX;
-            }
-            else
-            {
-                //--Now UUID Id not found --------
-                bool searchEmail = false;
-                if (string.IsNullOrEmpty(dto.Email))
-                {
-                    dto.UserName = INVALID_EMAIL_PREFIX + GetNewValueBySec();
-                    dto.Email = dto.UserName + INVALID_EMAIL_SUFFIX;
-                }
-                else
-                {
-                    searchEmail = true;
-                    var addr = await CheckEMailAddress(dto.Email, lang);
-                    if (addr.Id < 0)
-                    {
-                        return addr;
-                    }
-                    if (string.IsNullOrEmpty(dto.FullName))
-                    {
-                        dto.FullName = addr.Result;
-                    }
-                }
-                //--Now Emerats Id & UUID not found --------
-                if (searchEmail)
-                {
-                    var u = await _DbContext.Users.Where(x => x.NormalizedEmail == dto.Email.ToUpper()).FirstOrDefaultAsync();
-                    if (u != null)
-                    {
-                        return result.SuccessMe(u.Id, "email Existed Before", true, APIResult.RESPONSE_CODE.CREATED, u.Email);
-                    }
-                }
-            }
-            //if (dto.PhoneNumber != null && dto.PhoneNumber.Length > 0)
-            //{
-            //    dto.PhoneNumber = GetPhoneNumberWithCode(dto.PhoneNumber);
-            //    if (dto.PhoneNumber.Length > 25)
-            //    {
-            //        result.FailMe(-1, "Invalid PhoneNumber");
-            //        return result;
-            //    }
-            //}
-
-            User newUser = new User()
-            {
-                TwoFactorEnabled = false,
-                PhoneNumberConfirmed = false,
-                PhoneNumber = dto.PhoneNumber,
-                PasswordHash = dto.PasswordHash,
-                EmailConfirmed = false, // ----------Switched 
-                NormalizedEmail = dto.Email.ToUpper(),
-                Email = dto.Email,
-                NormalizedUserName = dto.UserName.ToLower(),
-                UserName = dto.UserName,
-                LockoutEnabled = false,
-                AccessFailedCount = 0,
-                FullName = dto.FullName,
-                CreatedDate = DateTime.Now,
-                ProfileStatus = Convert.ToInt32(PROFILE_STATUS.SUSPENDED)
-            };
-
-            IdentityResult createUserRes = new IdentityResult();
-            try
-            {
-                createUserRes = await _userManager.CreateAsync(newUser, dto.PasswordHash);
-            }
-            catch (Exception ex)
-            {
-                string obj = " fullName is " + dto.FullName;
-                _logger.LogInformation("Error in create new user the error message is" + ex.Message + " for the user " + obj);
-                return result.FailMe(-1, "UserCreateError" + ex.Message);
-            }
-            if (!createUserRes.Succeeded)
-            {
-                var errors = createUserRes.Errors.Select(x => x.Description).ToList();
-                string errorResult = string.Empty;
-                foreach (var x in errors)
-                {
-                    errorResult = errorResult + " , " + x;
-                }
-                return result.FailMe(-1, "User creating fails: " + errorResult);
-            }
-            if (newUser.Id == 0)
-            {
-                return result.FailMe(-1, "UserCreateError" + " identity is deleted.");
-            }
-            var assignRole = await _userManager.AddToRoleAsync(newUser, DefaultUserPolicy);
-            if (!assignRole.Succeeded)
-            {
-                return result.FailMe(-1, Translation.getMessage(lang, "UserRolesError"), true, APIResult.RESPONSE_CODE.UnavailableForLegalReasons);
-            }
-            return result.SuccessMe(newUser.Id, "User Created", true, APIResult.RESPONSE_CODE.CREATED, dto.Email);
-        }
-
-        public async Task Update(UserDto userInfo)
-        {
-            User userToUpdate = new User
-            {
-                Address = userInfo.Address,
-                BirthdayDate = userInfo.BirthdayDate,
-                Email = userInfo.Email,
-                EmailLang = userInfo.EmailLang,
-                FullName = userInfo.FullName,
-                Gender = userInfo.Gender,
-                Id = userInfo.Id,
-                Image = userInfo.Image,
-                PhoneNumber = userInfo.PhoneNumber,
-                SmsLang = userInfo.SmsLang,
-                TelNo = userInfo.TelNo,
-                ProfileStatus = (int)userInfo.ProfileStatus,
-                UserName = userInfo.UserName,
-                AreaId = userInfo.AreaId,
-                NatId = userInfo.NatId
-            };
-
-            _DbContext.Users.Update(userToUpdate);
-            await _DbContext.SaveChangesAsync();
-
         }
 
         public async Task<APIResult> LogIn(LogInDto logInDto, string lang)

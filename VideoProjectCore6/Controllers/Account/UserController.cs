@@ -135,21 +135,6 @@ namespace VideoProjectCore6.Controllers.Account
         }
 
         [HasPermission(Permissions.User_Read)]
-        [HttpGet("Search")]
-        public async Task<IActionResult> SearchUser([FromQuery] string email, [FromQuery] int pageIndex, [FromQuery] int pageSize, [FromHeader] string lang = "ar")
-        {
-            try
-            {
-                var result = await _IUserRepository.Search(email, pageIndex, pageSize, lang);
-                return Ok(result);
-            }
-            catch
-            {
-                return BadRequest("Error getting users");
-            }
-        }
-
-        [HasPermission(Permissions.User_Read)]
         [HttpPost("SearchFilterUser")]
         public async Task<IActionResult> SearchFilterUser([FromBody] UserFilterDto userFilterDto, [FromHeader] string lang = "ar")
         {
