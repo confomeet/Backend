@@ -133,7 +133,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         }
         if (!dto.Participants.Any(x => x.LocalUserId == addBy)) //Add Creator as participant
         {
-            dto.Participants.Add(new ParticipantWParent
+            dto.Participants.Add(new ParicipantDto
             {
                 LocalUserId = addBy,
                 IsModerator = true,
