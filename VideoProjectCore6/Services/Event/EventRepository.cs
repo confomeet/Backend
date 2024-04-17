@@ -306,17 +306,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         return result.SuccessMe(eventId, Translation.getMessage(lang, "ParticipantAdded"), true, APIResult.RESPONSE_CODE.OK, result.Result);
     }
 
-    public async Task<APIResult> AddParticipantsToEventsScoped(ParticipantsAsObj dto, int eventId, int addBy, string lang, bool sendNotification, bool sendToAll)
-    {
-        using var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted }, TransactionScopeAsyncFlowOption.Enabled);
-        var result = await AddParticipantsToEvents(dto.Participants, eventId, addBy, lang, sendNotification, sendToAll);
-        if (result.Id > 0)
-        {
-            scope.Complete();
-        }
-        return result;
-    }
-    
     public async Task<APIResult> UpdateEvent(int id, int updatedBy, MeetingEventDto dto, UpdateOption? opt, string lang)
     {
         APIResult result = new APIResult();
@@ -582,30 +571,6 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         }
         return result;
     }
-    public async Task<int> DeleteEvent(int id)
-    {
-        int res = 0;
-        Models.Event? Event = await _DbContext.Events.Where(a => a.Id == id).FirstOrDefaultAsync();
-        if (Event == null)
-        {
-            return res;
-        }
-
-        try
-        {
-
-
-            _DbContext.Events.Remove(Event);
-            await _DbContext.SaveChangesAsync();
-            res = Event.Id;
-        } 
-        catch
-        {
-
-        }
-        return res;
-    }
-
     private APIResult ValidateEvent(EventPostDto dto, string lang)
     {
         APIResult result = new();
