@@ -638,7 +638,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         return [.. events!.OrderByDescending(x=>x.StartDate)];
     }
 
-    public async Task<ListCount> GetAll(int CurrentUserId, EventSearchObject? obj = null, int pageIndex = 1, int pageSize = 25, string lang = "ar")
+    public async Task<ListCount> GetAll(int CurrentUserId, EventSearchObject? obj = null, int pageIndex = 1, int pageSize = 25, string lang = "en")
     {
         bool serverSearch = obj != null && obj.HasDateSearch();
         bool localSearch = obj != null && obj.HasStringSearch();
@@ -647,7 +647,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
 
         var allRooms = await _DbContext.ConfEvents.Where(cv => obj == null || obj.EndDate == null || obj.StartDate == null || (cv.EventTime >= obj.StartDate.Value.Date && cv.EventTime < obj.EndDate.Value.AddDays(1).Date)).ToListAsync();
 
-        var allUsers = await _DbContext.ConfUsers.ToListAsync();
+        // var allUsers = await _DbContext.ConfUsers.ToListAsync();
 
         var events = await _DbContext.Events
          .Include(x => x.Participants).ThenInclude(u => u.User)
@@ -656,11 +656,11 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 || (x.StartDate >= obj!.StartDate!.Value.Date && x.StartDate < obj!.EndDate!.Value.AddDays(1).Date)
                 || (x.EndDate > obj.StartDate.Value.Date && x.EndDate <= obj!.EndDate!.Value.AddDays(1).Date)
                 || (obj.StartDate.Value.Date >= x.StartDate && obj!.EndDate!.Value.Date <= x.EndDate))
-         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.Topic) || x.Topic.Contains(obj!.Topic, StringComparison.CurrentCultureIgnoreCase))
-         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.Entity) || (x.Organizer != null && x.User.FullName.Contains(obj!.Entity, StringComparison.CurrentCultureIgnoreCase)))
-         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.SubTopic) || (x.SubTopic != null && x.SubTopic.Contains(obj!.SubTopic, StringComparison.CurrentCultureIgnoreCase)))
+         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.Topic) || x.Topic.Contains(obj!.Topic))
+         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.Entity) || (x.Organizer != null && x.User.FullName.Contains(obj!.Entity)))
+         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.SubTopic) || (x.SubTopic != null && x.SubTopic.Contains(obj!.SubTopic)))
          && (string.IsNullOrWhiteSpace(obj == null ? null : obj.MeetingId) || x.MeetingId.Equals(obj!.MeetingId))
-         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.Organizer) || (x.Organizer != null && x.Organizer.Contains(obj!.Organizer, StringComparison.CurrentCultureIgnoreCase)))
+         && (string.IsNullOrWhiteSpace(obj == null ? null : obj.Organizer) || (x.Organizer != null && x.Organizer.Contains(obj!.Organizer)))
          && (string.IsNullOrWhiteSpace(obj == null ? null : obj.Email) || x.Participants.Select(e => e.Email).Contains(obj!.Email))
          && (string.IsNullOrWhiteSpace(obj == null ? null : obj.PhoneNumber) || x.Participants.Select(e => e.Mobile).Any(p => p.Equals(obj!.PhoneNumber)))
          && (obj == null || obj.EventType == null || x.Type == obj.EventType)
@@ -688,7 +688,8 @@ public class EventRepository(IMeetingRepository iMeetingRepository
            Type = e.Type,
            AllDay = e.AllDay,
            MeetingLink = e.MeetingId != null && e.CreatedBy == CurrentUserId ? Url.Combine(host, "join", e.Participants.Where(p => p.UserId == e.CreatedBy).Select(p => Url.Combine(p.Id.ToString(), p.Guid.ToString())).FirstOrDefault()) + "?redirect=0" : null,
-           MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, lang, allRooms),
+           //MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, lang, allRooms),
+           MeetingStatus = new EventStatus { Text="", Status = 0 },
            StatusText = e.RecStatus == null ? string.Empty : EventStatusValue.ContainsKey((EVENT_STATUS)e.RecStatus) ? EventStatusValue[(EVENT_STATUS)e.RecStatus][lang] : string.Empty,
            Participants = e.Participants.Select(p => new ParticipantView
            {
@@ -696,7 +697,8 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                UserId = p.UserId,
                FullName = p.User.FullName,
                Email = p.Email,
-               ParticipantStatus = _IGeneralRepository.CheckParticipantStatus(p.Email, e.Id, e.MeetingId, allRooms, allUsers),
+            //    ParticipantStatus = _IGeneralRepository.CheckParticipantStatus(p.Email, e.Id, e.MeetingId, allRooms, allUsers),
+               ParticipantStatus = false,
                Mobile = p.Mobile,
                IsModerator = p.IsModerator,
                Description = p.Description,
