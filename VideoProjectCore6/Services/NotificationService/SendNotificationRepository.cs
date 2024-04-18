@@ -580,9 +580,9 @@ namespace VideoProjectCore6.Services.NotificationService
                     {
                         NotificationChannelId = emailChannel,
                         UserId = userId,
-                        Lang = "en",/*defLang.Trim().ToLower()*/
-                        NotificationTitle = "",
-                        NotificationBody = "",
+                        Lang = "en",
+                        NotificationTitle = Constants.OTP_TITLE_EN,
+                        NotificationBody = Constants.OTP_BODY_EN,
                         ToAddress = email,
                         Template = Constants.DEFAULT_TEMPLATE
                     });
@@ -590,9 +590,9 @@ namespace VideoProjectCore6.Services.NotificationService
                     {
                         NotificationChannelId = emailChannel,
                         UserId = userId,
-                        Lang = "en",
+                        Lang = "ru",
                         NotificationTitle = Constants.OTP_TITLE_EN,
-                        NotificationBody = Constants.OTP_BODY_EN + otpCode + " ",
+                        NotificationBody = Constants.OTP_BODY_RU + otpCode + " ",
                         ToAddress = email,
                         Template = Constants.DEFAULT_TEMPLATE
                     });

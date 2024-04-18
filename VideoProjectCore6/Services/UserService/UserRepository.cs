@@ -1235,7 +1235,7 @@ namespace VideoProjectCore6.Services.UserService
                 CreatedDate = DateTime.Now,
                 NotificationBody = message.Ru,
                 ToAddress = email,
-                NotificationTitle = "Ссылка для сброка пароля",
+                NotificationTitle = "Ссылка для сброса пароля",
                 MeetingId = 0.ToString(),
                 NotificationChannelId = channel
             };

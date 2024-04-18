@@ -19,6 +19,7 @@ namespace VideoProjectCore6.Services
         public const string OTP_TITLE_EN = "Confomeet ";
         public const string OTP_BODY_AR = "كود التحقق: ";
         public const string OTP_BODY_EN = " OTP code: ";
+        public const string OTP_BODY_RU = " Одноразовый код: ";
         public const int OTP_PERIOD_If_MISSED_IN_APP_SETTING = 60;
 
         public const string CANCEL_BODY_AR = " ";
