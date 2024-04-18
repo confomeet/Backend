@@ -94,7 +94,6 @@ namespace VideoProjectCore6.Services.Statistics
             int FinishedMeetingsNum = 0;
             foreach (var ev in lastEvents)
             {
-                _logger.LogInformation("LastEvent: {} {}  {}", ev.MeetingId, ev.MeetingStartTime, ev.EventType);
                 if (ev.EventType == Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED)
                     ActiveMeetingsNum += 1;
                 else if (ev.EventType == null && ev.MeetingStartTime > now)
