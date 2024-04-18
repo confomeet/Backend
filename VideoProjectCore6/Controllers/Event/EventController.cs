@@ -73,7 +73,7 @@ namespace VideoProjectCore6.Controllers.Event
             return StatusCode(StatusCodes.Status404NotFound, "error occurred");
         }
 
-        [HasPermission(Permissions.Meeting_FetchDetails_IfParticipant)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("{id}/Details")]
         public async Task<ActionResult> EventDetails([FromRoute] int id, [FromHeader] string timeZone, [FromHeader] string lang = "en")
         {

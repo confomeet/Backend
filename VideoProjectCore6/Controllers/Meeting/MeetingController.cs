@@ -93,8 +93,8 @@ namespace VideoProjectCore6.Controllers.Meeting
             return Ok(obj);
         }
 
-        // Join by public link
-        [AllowAnonymous]
+        // Join by button in UI
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("Join")]
         public async Task<IActionResult> moderatorJWT(string meetingId, [FromHeader] string lang)
         {
@@ -111,8 +111,7 @@ namespace VideoProjectCore6.Controllers.Meeting
             return Ok(obj);
         }
 
-        // Join by button in UI
-        [HasPermission(Permissions.Meeting_FetchDetails_IfParticipant)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("Join/{userId}/{meetingId}")]
         public async Task<IActionResult> joinTo([FromRoute] string meetingId, [FromRoute] int userId , [FromHeader] string lang = "en")
         {
