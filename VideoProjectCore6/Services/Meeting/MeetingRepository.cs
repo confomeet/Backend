@@ -448,7 +448,7 @@ namespace VideoProjectCore6.Services.Meeting
             string confUrlPrefix = _IConfiguration["PUBLIC_URL"];
             if (confUrlPrefix == null || confUrlPrefix.Length == 0)
             {
-                _exception.AttributeMessages.Add("Missing configuration for lilac CONF_URL_PREFIX ");
+                _exception.AttributeMessages.Add("Missing configuration for CONFOMEET CONF_URL_PREFIX ");
                 throw _exception;
             }
 

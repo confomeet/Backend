@@ -16,7 +16,7 @@ namespace VideoProjectCore6.Services
         // Secret constants.
         public const string otpBase32Secret = "6L4OH6DDC4PLNQBA5422GM67KXRDIQQP";
         public const string OTP_TITLE_AR = "نظام ليلك";
-        public const string OTP_TITLE_EN = "Lilac system ";
+        public const string OTP_TITLE_EN = "Confomeet ";
         public const string OTP_BODY_AR = "كود التحقق: ";
         public const string OTP_BODY_EN = " OTP code: ";
         public const int OTP_PERIOD_If_MISSED_IN_APP_SETTING = 60;

@@ -109,7 +109,6 @@ builder.Services.AddCors(opt =>
                 "https://localhost:4400",
                 "http://localhost:4400",
                 "http://localhost:6500",
-                "https://lilacmeet.infostrategic.com",
                 "https://callpp.infostrategic.com",
                 "https://conf.pp.gov.ae",
                 "https://call.pp.gov.ae",
