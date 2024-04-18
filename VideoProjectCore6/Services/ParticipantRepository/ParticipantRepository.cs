@@ -182,11 +182,11 @@ public class ParticipantRepository : IParticipantRepository
             //}
             if (a == null/* && smsResult.Id<0*/)
             {
-                return result.FailMe(-1, "حدث خطأ في إرسال الاشعار ", true);
+                return result.FailMe(-1, Translation.getMessage(lang, "InvitationNotSent"), true);
             }
             else
             {
-                return result.SuccessMe(1, "تم إشعار المستخدم");
+                return result.SuccessMe(1, Translation.getMessage(lang, "InvitationSent"));
             }
         }
         else

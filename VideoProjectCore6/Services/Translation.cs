@@ -44,6 +44,8 @@
             { "FiledInsendingOTP",   new string[] { "Не удалось отправить одноразовый код", "Failed in sending OTP, please try to log in by your account at undefined gate." } } ,
             { "ExpiredOTP",   new string[]   {"Истекший одноразовый код", "Expired OTP, please renew another OTP" } } ,
             { "IncorrectOTP",   new string[]   {"Неправильный однаразовый код", "Incorrect OTP, please review the sending code" } } ,
+            { "InvitationNotSent", new string[] {"Не удалось отправить приглашение в конференцию", "Failed to send invitation"} },
+            { "InvitationSent", new string[] {"Участнику отправлено приглашение в конференцию", "Invitation sent to participant"} },
             { "FailedAddedUser",     new string[]   {"Не удалось добавить пользователя", "Failed Added User." } },
             { "missedRoleName",   new string[]   {"Не указано название роли",       "Missed Role name!." } },
             { "duplicatedRoleName",  new string[]   {"Роль с таким именем уже сущесвует", "The name of the role is existed before!." } },
