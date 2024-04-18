@@ -58,24 +58,26 @@ namespace VideoProjectCore6.Services.UserService
             try
             {
                 var otp = await _dbContext.OtpLogs.Where(row => row.UserId == user.Id).FirstOrDefaultAsync();
+
                 if (otp == null)
                 {
                     _logger.LogTrace("TOTP code validation failed, no matching record in database");
                     return false;
                 }
-                if (otp.OtpCode == token)
+                bool expired = otp.GeneratedDate.Add(GetOTPLifetime(otp)) < DateTime.UtcNow;
+                if (otp.OtpCode == token && !expired)
                 {
                     _dbContext.OtpLogs.Remove(otp);
                     await _dbContext.SaveChangesAsync();
                 }
-                else if (otp.GeneratedDate.Add(GetOTPLifetime(otp)) < DateTime.UtcNow)
+                else if (expired)
                 {
                     _logger.LogError("TOTP code validation failed: expired. user id is {}", user.Id);
                     return false;
                 }
                 else
                 {
-                    _logger.LogTrace("TOTP code validation failed: user.Id={}  token={}  expected={}", user.Id, token, otp.OtpCode);
+                    _logger.LogTrace("TOTP code validation failed: user.Id={}  token=<{}>  expected=<{}>", user.Id, token, otp.OtpCode);
                     return false;
                 }
             }
