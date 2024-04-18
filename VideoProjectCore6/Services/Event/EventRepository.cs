@@ -309,7 +309,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         Models.Event? evt = await _DbContext.Events.Where(a => a.Id == id).FirstOrDefaultAsync();
         if (evt == null)
         {
-            return result.FailMe(-1, "الحدث غير موجود");
+            return result.FailMe(-1, "Конференция не найдена");
         }
         var originStartDate = evt.StartDate;
         string? newTimeZone = dto.TimeZone != evt.TimeZone ? dto.TimeZone : null;
@@ -853,7 +853,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         APIResult result = new();
         if (rDates.Dates.Any(x => x.StartDateTime >= x.EndDateTime))
         {
-            return result.FailMe(-1, "تحقق من تاريخ الحدث");
+            return result.FailMe(-1, "Неверные параметры конференции");
         }
         using var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted }, TransactionScopeAsyncFlowOption.Enabled);
         var eventsList = await BuildRecurrenceEventsListAsync(dto, rDates.Dates, dto.MeetingRequired, addBy, lang);
@@ -952,11 +952,11 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             //}
 
 
-            return result.SuccessMe(1, "تمت اضافة الاحداث", true, APIResult.RESPONSE_CODE.CREATED, eventsIds);
+            return result.SuccessMe(1, "Конференция создана", true, APIResult.RESPONSE_CODE.CREATED, eventsIds);
         }
         catch
         {
-            return result.FailMe(-1, "خطأ في إضافة الأحداث");
+            return result.FailMe(-1, "Не удалось создать конференцию");
         }
     }
 
@@ -967,7 +967,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         var evt = await _DbContext.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
         if (evt == null)
         {
-            return result.FailMe(-1, "الحدث غير موجود");
+            return result.FailMe(-1, "Конференция не найдена");
         }
 
         List<Models.Event> events = new();
@@ -1020,12 +1020,12 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         var evt = await _DbContext.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
         if (evt == null)
         {
-            return result.FailMe(-1, "الحدث غير موجود");
+            return result.FailMe(-1, "Конференция не найдена");
         }
 
         if(evt.RecStatus == -2)
         {
-            return result.FailMe(-1, "حدث ملغي بالفعل");
+            return result.FailMe(-1, "Конференция уже отменена");
         }
 
         evt.RecStatus = (sbyte?) EVENT_STATUS.CANCELED;
@@ -1042,13 +1042,13 @@ public class EventRepository(IMeetingRepository iMeetingRepository
 
             scope.Complete();
 
-            return result.SuccessMe(eventId, "تم إلغاء الحدث");
+            return result.SuccessMe(eventId, "Конференция отменения");
 
         }
 
         catch
         {
-            return result.FailMe(-1, "خطأ في إلغاء الحدث");
+            return result.FailMe(-1, "Не удалось отменить конференцию");
         }
 
     }
