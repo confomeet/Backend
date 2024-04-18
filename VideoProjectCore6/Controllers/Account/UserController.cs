@@ -111,7 +111,7 @@ namespace VideoProjectCore6.Controllers.Account
             MultiLangMessage multiLangMessage = new MultiLangMessage
             {
                 En = "Please follow the link to reset your password",
-                Ar = "الرجاء الضغط على الرابط لإعادة تعيين كلمة المرور"
+                Ru = "Для сброса пароля перейдите по ссылке"
             };
 
             var obj = await _IUserRepository.SendResetPasswordEmail(multiLangMessage, email, lang);

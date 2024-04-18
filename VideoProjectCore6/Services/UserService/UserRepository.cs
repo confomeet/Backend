@@ -799,8 +799,8 @@ namespace VideoProjectCore6.Services.UserService
             {
                 MultiLangMessage multiLangMessage = new MultiLangMessage
                 {
-                    En = "You have been added to the system, please reset your password",
-                    Ar = "تم اضافتك الى النظام, رجاء اعادة تعيين كلمة المرور"
+                    En = "You have been added to Confomeet, please reset your password",
+                    Ru = "Ваш email зарегистрирован в Confomeet. Чтобы задать пароль от аккаунта, пройдите по ссылке."
                 };
                 var sendNotify = await SendResetPasswordEmail(multiLangMessage, user.Email, "en");
 
@@ -1225,8 +1225,22 @@ namespace VideoProjectCore6.Services.UserService
                 MeetingId = 0.ToString(),
                 NotificationChannelId = channel
             };
+            NotificationLogPostDto notificationPostRu = new()
+            {
+                LinkCaption = "Ссылка для сброса пароля",
+                Template = ACTIVATION_TEMPLATE,
+                NotificationLink = url,
+                Lang = "ru",
+                UserId = user.Id,
+                CreatedDate = DateTime.Now,
+                NotificationBody = message.Ru,
+                ToAddress = email,
+                NotificationTitle = "Ссылка для сброка пароля",
+                MeetingId = 0.ToString(),
+                NotificationChannelId = channel
+            };
 
-            List<NotificationLogPostDto> notifications = new() { notificationPost };
+            List<NotificationLogPostDto> notifications = new() { notificationPost, notificationPostRu };
 
             SendNotificationRepository sendNotificationRepository = new(_DbContext, _mailSetting, _smsSetting, _iGeneralRepository, _iNotificationLogRepository);
             await sendNotificationRepository.DoSend(notifications, true, true, null);
