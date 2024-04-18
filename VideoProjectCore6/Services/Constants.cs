@@ -27,9 +27,6 @@ namespace VideoProjectCore6.Services
         // User types
         public const string ADMIN = "1";
         public const string USER = "2";
-        public const string VISITOR = "22";
-        public const string POLICE_STATION = "3";
-        public const string CABIN = "4";
 
         public const string PROSODY_EVENT_ROOM_CREATED = "room_created";
         public const string PROSODY_EVENT_OCCUPANT_JOINED = "occupant_joined";
