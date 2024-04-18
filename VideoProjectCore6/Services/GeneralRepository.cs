@@ -47,7 +47,7 @@ namespace VideoProjectCore6.Services
                 return new EventStatus()
                 {
                     Status = 3,
-                    Text = lang == "ar" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_COMING][0] 
+                    Text = lang == "ru" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_COMING][0] 
                     : Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_COMING][1],
                 };
             }
@@ -62,7 +62,7 @@ namespace VideoProjectCore6.Services
                         return new EventStatus()
                         {
                             Status = 1,
-                            Text = lang == "ar" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED][0]
+                            Text = lang == "ru" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED][0]
                     : Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_STARTED][1],
 
                         };
@@ -96,7 +96,7 @@ namespace VideoProjectCore6.Services
             return new EventStatus()
             {
                 Status = 2,
-                Text = lang == "ar" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED][0]
+                Text = lang == "ru" ? Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED][0]
                     : Constants.MeetingStatusValue[Constants.EVENT_TYPE.EVENT_TYPE_CONF_FINISHED][1],
             };
         }

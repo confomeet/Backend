@@ -120,14 +120,14 @@ namespace VideoProjectCore6.Services
 
         public static Dictionary<EVENT_TYPE, string[]> MeetingStatusValue = new Dictionary<EVENT_TYPE, string[]>()
         {
-            { EVENT_TYPE.EVENT_TYPE_CONF_COMING,  new string[]  {"القادم" , "Incoming" } },
-            { EVENT_TYPE.EVENT_TYPE_CONF_FINISHED,  new string[]  { "تم انهاء الاجتماع","Call ended" } },
-            { EVENT_TYPE.EVENT_TYPE_CONF_STARTED,  new string[]  { "نشط", "Active"} },
+            { EVENT_TYPE.EVENT_TYPE_CONF_COMING,  new string[]  {"Входящий" , "Incoming" } },
+            { EVENT_TYPE.EVENT_TYPE_CONF_FINISHED,  new string[]  { "Звонок завершен","Call ended" } },
+            { EVENT_TYPE.EVENT_TYPE_CONF_STARTED,  new string[]  { "", "Active"} },
 
 
-            { EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN,  new string[]  { "انضم","User Joined" } },
-            { EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE,  new string[]  { "غادر", "User left"} },
-            { EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE_LOBBY,  new string[]  { "خروج الى اللوبي", "Left to lobby"} }
+            { EVENT_TYPE.EVENT_TYPE_CONF_USER_JOIN,  new string[]  { "Пользователь присоединился","User Joined" } },
+            { EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE,  new string[]  { "Пользователь вышел", "User left"} },
+            { EVENT_TYPE.EVENT_TYPE_CONF_USER_LEAVE_LOBBY,  new string[]  { "Пользователь вышел в лобби", "Left to lobby"} }
 
         };
 
