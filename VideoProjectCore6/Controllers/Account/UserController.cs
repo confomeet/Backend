@@ -40,9 +40,9 @@ namespace VideoProjectCore6.Controllers.Account
 
         [HasPermission(Permissions.User_Delete)]
         [HttpPost("{id}/Delete")]
-        public async Task<IActionResult> DeleteUser([FromRoute] int id)
+        public async Task<IActionResult> DeleteUser([FromRoute] int id, [FromHeader] string lang)
         {
-            APIResult result = await _IUserRepository.DeleteUser(id);
+            APIResult result = await _IUserRepository.DeleteUser(id, lang);
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
         }
 
@@ -310,9 +310,9 @@ namespace VideoProjectCore6.Controllers.Account
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("RefreshToken")]
-        public async Task<IActionResult> RefreshToken()
+        public async Task<IActionResult> RefreshToken([FromHeader] string lang)
         {
-            var obj = await _IUserRepository.RefreshToken();
+            var obj = await _IUserRepository.RefreshToken(lang);
             return Ok(obj);
         }
 

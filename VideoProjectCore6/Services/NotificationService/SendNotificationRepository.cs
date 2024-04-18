@@ -602,7 +602,7 @@ namespace VideoProjectCore6.Services.NotificationService
 
                 await DoSend(notificationsDto, true, true, null);
 
-                return result.FailMe(1, "Success", false, APIResult.RESPONSE_CODE.OK, true);
+                return result.FailMe(1, Translation.getMessage(lang, "Success"), false, APIResult.RESPONSE_CODE.OK, true);
             }
             catch (Exception ex)
             {

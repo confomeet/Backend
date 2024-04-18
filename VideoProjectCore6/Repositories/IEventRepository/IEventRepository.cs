@@ -11,7 +11,7 @@ namespace VideoProjectCore6.Repositories.IEventRepository
         Task<APIResult> UpdateEvent(int id, int updatedBy,MeetingEventDto dto, UpdateOption? opt, string lang, bool checkUpdaterIsOwner);
         Task<List<EventFullView>> GetAllOfUser(int userId,EventSearchObject? obj=null, string lang="en");
         Task<ListCount> GetAll(int CurrentUserId, EventSearchObject? obj = null, int pageIndex = 1, int pageSize = 25, string lang = "en");
-        Task<EventFullView?> EventDetails(int id,int userId, string timeZoneId);
+        Task<EventFullView?> EventDetails(int id,int userId, string timeZoneId, string lang = "en");
         Task<APIResult> AddRecurrenceEvents(EventWParticipant dto, DateTimeOfRule rDates, int addBy,bool sendNotification, string lang);
         Task<APIResult> Cancel(int eventId, int updatedBy, string lang);
     }

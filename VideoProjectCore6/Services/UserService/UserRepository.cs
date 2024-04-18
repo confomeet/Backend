@@ -339,7 +339,7 @@ namespace VideoProjectCore6.Services.UserService
                     }
 
 
-                    return result.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, userDto);
+                    return result.SuccessMe(1, Translation.getMessage(lang, "Success"), true, APIResult.RESPONSE_CODE.OK, userDto);
                 }
                 else
                 {
@@ -1279,7 +1279,7 @@ namespace VideoProjectCore6.Services.UserService
             return true;
         }
 
-        public async Task<APIResult> DeleteUser(int id)
+        public async Task<APIResult> DeleteUser(int id, string lang)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
@@ -1296,7 +1296,7 @@ namespace VideoProjectCore6.Services.UserService
                 return new APIResult { Id = 1, Code = APIResult.RESPONSE_CODE.ERROR, Message = new List<string> { "USER NOT DELETE DUE TO SERVICE INTERNAL ERROR" } };
             }
 
-            return new APIResult { Id = 1, Code = APIResult.RESPONSE_CODE.OK, Message = new List<string> { "SUCCESS" } };
+            return new APIResult { Id = 1, Code = APIResult.RESPONSE_CODE.OK, Message = new List<string> { Translation.getMessage(lang, "SUCCESS") } };
         }
 
         public async Task<UserResultDto> EnableUser(int id)
@@ -1309,7 +1309,7 @@ namespace VideoProjectCore6.Services.UserService
             else return new UserResultDto { Message = result.Errors.FirstOrDefault().Description, User = null };
         }
 
-        public async Task<APIResult> RefreshToken()
+        public async Task<APIResult> RefreshToken(string lang)
         {
             APIResult result = new APIResult();
 
@@ -1322,7 +1322,7 @@ namespace VideoProjectCore6.Services.UserService
                     refreshToken = MakeAuthJwt(user, true);
                 }
 
-                return result.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, refreshToken);
+                return result.SuccessMe(1, Translation.getMessage(lang, "Success"), true, APIResult.RESPONSE_CODE.OK, refreshToken);
             }
             catch
             {
@@ -1856,7 +1856,7 @@ namespace VideoProjectCore6.Services.UserService
                     CreateConfLink = BuildCreateConfUrl(currentUser, pathToTokenLogin),
                 };
 
-                return res.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, userProfileGetDto);
+                return res.SuccessMe(1, Translation.getMessage(lang, "Success"), true, APIResult.RESPONSE_CODE.OK, userProfileGetDto);
 
             }
 
@@ -1894,7 +1894,7 @@ namespace VideoProjectCore6.Services.UserService
                     {
                         //foreach (var attach in userProfilePostDto.ProfilePhoto)
                         //{
-                        var attachCreated = await _IFileRepository.Create(filePostDto.UserPhoto);
+                        var attachCreated = await _IFileRepository.Create(filePostDto.UserPhoto, lang);
                         Files resAttachment = (Files)attachCreated.Result;
                         user.UserPhotos.Add(resAttachment);
                         //}
@@ -1906,13 +1906,13 @@ namespace VideoProjectCore6.Services.UserService
                         var existingAttach = user.UserPhotos.FirstOrDefault();
 
 
-                        await _IFileRepository.Delete(existingAttach.Id);
+                        await _IFileRepository.Delete(existingAttach.Id, lang);
 
                         user.UserPhotos.Clear();
 
                         //foreach (var attach in userProfilePostDto.ProfilePhoto)
                         //{
-                        var attachCreated = await _IFileRepository.Create(filePostDto.UserPhoto);
+                        var attachCreated = await _IFileRepository.Create(filePostDto.UserPhoto, lang);
                         Files resAttachment = (Files)attachCreated.Result;
                         user.UserPhotos.Add(resAttachment);
                         //}

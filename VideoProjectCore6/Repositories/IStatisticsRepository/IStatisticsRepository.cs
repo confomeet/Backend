@@ -6,10 +6,10 @@ namespace VideoProjectCore6.Repositories.IStatisticsRepository
 {
     public interface IStatisticsRepository
     {
-        Task<List<ValueIdDesc>> ByApp(DateTimeRange range);
+        Task<List<ValueIdDesc>> ByApp(DateTimeRange range, string lang);
 
-        Task<ListCount> ByOnlineUsers(DateTimeRange range);
+        Task<ListCount> ByOnlineUsers(DateTimeRange range, string lang);
 
-        Task<List<ValueIdDesc>> ByMeetingStatus(DateTimeRange range);
+        Task<List<ValueIdDesc>> ByMeetingStatus(DateTimeRange range, string lang);
     }
 }

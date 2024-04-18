@@ -30,7 +30,7 @@ namespace VideoProjectCore6.Controllers.ConfEvent
         [HttpGet("room/{meetingId}/{id}")]
         public async Task<ActionResult> GetParticipantsByRoom([FromBody] DateTimeRange range, [FromRoute] string meetingId, [FromRoute] string id, [FromHeader] string lang = "en")
         {
-            return Ok(await _IConfEventRepository.HandleGetRoom(range, id, meetingId));
+            return Ok(await _IConfEventRepository.HandleGetRoom(range, id, meetingId, lang));
         }
     }
 }

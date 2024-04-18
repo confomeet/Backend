@@ -15,7 +15,7 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         public string GetUserName();
         public bool IsAdmin();
         public Task<APIResult> FindUserById(int id, string lang);
-        public Task<APIResult> RefreshToken();
+        public Task<APIResult> RefreshToken(string lang);
         public Task<List<RoleGetDto>> GetUserRoles(int userId, string lang);
         public Task<APIResult> EditProfile(int id, UserPostDto UserPostDto, bool fromUg, bool updateRoles, string lang);
         public Task<APIResult> EditUser(int id,int editBy, UserView dto, bool fromUg ,string lang);
@@ -26,7 +26,7 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         public Task<APIResult> ResendActivation(string email, string lang);
         public Task<APIResult> SendResetPasswordEmail(MultiLangMessage multiLangMessage, string email, string lang);
         public Task<APIResult> CreateUser(UserPostDto UserPostDto, string ImageUrl, bool updateRoles, string lang);
-        public Task<APIResult> DeleteUser(int id);
+        public Task<APIResult> DeleteUser(int id, string lang);
         public Task<UserPermissionsDTO> GetUserPermissions(int userId);
         public Task<IdentityResult> EditUserRolesAsync(int userId, List<int> userRoles, string lang);
         Task<List<int>> GetUserClaimPermissions(int userId, string claimType);

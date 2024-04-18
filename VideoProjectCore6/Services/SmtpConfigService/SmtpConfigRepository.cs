@@ -34,7 +34,7 @@ namespace VideoProjectCore6.Services.SmtpConfigService
                     _context.SmtpConfigs.Update(existingConfig);
                     await _context.SaveChangesAsync();
 
-                    return result.SuccessMe(1, "Success", false, APIResult.RESPONSE_CODE.CREATED, new SmtpConfigGetDto
+                    return result.SuccessMe(1, Translation.getMessage(lang, "Success"), false, APIResult.RESPONSE_CODE.CREATED, new SmtpConfigGetDto
                     {
                         Id = existingConfig.Id,
                         DisplayName = smtpConfigPostDto.DisplayName,
@@ -60,7 +60,7 @@ namespace VideoProjectCore6.Services.SmtpConfigService
 
                 await _context.SaveChangesAsync();
 
-                return result.SuccessMe(1, "Success", false, APIResult.RESPONSE_CODE.CREATED, new SmtpConfigGetDto
+                return result.SuccessMe(1, Translation.getMessage(lang, "Success"), false, APIResult.RESPONSE_CODE.CREATED, new SmtpConfigGetDto
                 {
                     Id = newSmtpConfig.Id,
                     DisplayName = smtpConfigPostDto.DisplayName,
@@ -93,7 +93,7 @@ namespace VideoProjectCore6.Services.SmtpConfigService
                     Port = existingConfig.Port,
                     Host = existingConfig.Host
                 };
-                return result.SuccessMe(1, "Success", false, APIResult.RESPONSE_CODE.CREATED, smtpConfigGetDto);
+                return result.SuccessMe(1, Translation.getMessage(lang, "Success"), false, APIResult.RESPONSE_CODE.CREATED, smtpConfigGetDto);
             }
             catch
             {

@@ -28,7 +28,7 @@ namespace VideoProjectCore6.Services.AclRepository
                 }).ToListAsync();
 
 
-                return result.SuccessMe(1, "Success", false, APIResult.RESPONSE_CODE.OK, acls);
+                return result.SuccessMe(1, Translation.getMessage(lang, "Success"), false, APIResult.RESPONSE_CODE.OK, acls);
             }
 
             catch

@@ -24,7 +24,7 @@ namespace VideoProjectCore6.Services.FileService
             _iFilesUploaderRepositiory = iFilesUploaderRepositiory;
         }
 
-        public async Task<APIResult> Create(IFormFile file)
+        public async Task<APIResult> Create(IFormFile file, string lang)
         {
             APIResult result = new APIResult();
 
@@ -54,7 +54,7 @@ namespace VideoProjectCore6.Services.FileService
 
                 await _context.SaveChangesAsync();
 
-                return result.SuccessMe(1, "Success", false, APIResult.RESPONSE_CODE.CREATED, sysFile);
+                return result.SuccessMe(1, Translation.getMessage(lang, "Success"), false, APIResult.RESPONSE_CODE.CREATED, sysFile);
 
             }
 
@@ -64,7 +64,7 @@ namespace VideoProjectCore6.Services.FileService
             }
         }
 
-        public async Task<APIResult> Add(Files attachment)
+        public async Task<APIResult> Add(Files attachment, string lang)
         {
             APIResult result = new APIResult();
 
@@ -80,7 +80,7 @@ namespace VideoProjectCore6.Services.FileService
                 _context.SysFiles.Add(attachment);
                 await _context.SaveChangesAsync();
 
-                return result.SuccessMe(1, "Success", false, APIResult.RESPONSE_CODE.CREATED, newAttachment);
+                return result.SuccessMe(1, Translation.getMessage(lang, "Success"), false, APIResult.RESPONSE_CODE.CREATED, newAttachment);
             }
 
             catch
@@ -89,7 +89,7 @@ namespace VideoProjectCore6.Services.FileService
             }
         }
 
-        public async Task<KeyValuePair<byte[], string>> Download(int fileId)
+        public async Task<KeyValuePair<byte[], string>> Download(int fileId, string lang)
         {
             APIResult result = new APIResult();
 
@@ -113,7 +113,7 @@ namespace VideoProjectCore6.Services.FileService
             return responseMessage;
         }
         
-        public async Task<APIResult> Delete(int fileId)
+        public async Task<APIResult> Delete(int fileId, string lang)
         {
 
             APIResult result = new APIResult();
@@ -136,7 +136,7 @@ namespace VideoProjectCore6.Services.FileService
                 await _context.SaveChangesAsync();
 
                 await _iFilesUploaderRepositiory.DeleteFile(Path.Combine(_iFilesUploaderRepositiory.GetRootPath(), file.FilePath));
-                return result.SuccessMe(1, "Success", true);
+                return result.SuccessMe(1, Translation.getMessage(lang, "Success"), true);
 
             }
             catch
@@ -145,7 +145,7 @@ namespace VideoProjectCore6.Services.FileService
             }
         }
         
-        public async Task<Files> Update(Files attachment)
+        public async Task<Files> Update(Files attachment, string lang)
         {
             _context.SysFiles.Update(attachment);
             await _context.SaveChangesAsync();

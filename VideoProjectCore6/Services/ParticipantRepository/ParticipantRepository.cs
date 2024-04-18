@@ -106,7 +106,7 @@ public class ParticipantRepository : IParticipantRepository
             }
             return result.FailMe(-1, "Error adding participants: " + m + "***" + m2);
         }
-        return result.SuccessMe(1, "Done", true, APIResult.RESPONSE_CODE.OK, receivers);
+        return result.SuccessMe(1, Translation.getMessage(lang, "Done"), true, APIResult.RESPONSE_CODE.OK, receivers);
     }
 
     public async Task<List<MeetingUserLink>> NotifyParticipants(List<Receiver> participants, string mettingId, List<NotificationLogPostDto> notifications_,

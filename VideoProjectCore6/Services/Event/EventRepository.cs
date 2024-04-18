@@ -727,7 +727,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         };
     }
 
-    public async Task<EventFullView?> EventDetails(int id, int userId, string timeZoneId)
+    public async Task<EventFullView?> EventDetails(int id, int userId, string timeZoneId, string lang)
     {
         var allUsers = await _DbContext.ConfUsers.ToListAsync();
 
@@ -780,9 +780,8 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                 .Where(ce => ce.MeetingId == e.MeetingId)
                 .ToListAsync();
             e.VideoLogs = await FetchVideoLogs(e.MeetingId, _DbContext, timeZoneId);
-            if (_IUserRepository.IsAdmin())
-                e.EventLogs = EventLog(e.MeetingId, allUsers, roomEvents, "en", timeZoneId);
-            e.MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, "en", roomEvents);
+            e.EventLogs = EventLog(e.MeetingId, allUsers, roomEvents, lang, timeZoneId);
+            e.MeetingStatus = _IGeneralRepository.CheckStatus(e.StartDate, e.EndDate, e.Id, e.MeetingId, lang, roomEvents);
             var usersId1 = e.Participants.Select(p => p.UserId).Distinct().ToList();
             usersId1.Add(e.CreatedBy);
             var userName = _DbContext.Users.Where(u => usersId1.Distinct().Contains(u.Id)).Select(x => new { x.Id, x.FullName }).ToDictionary(x => x.Id, x => x.FullName);

@@ -340,7 +340,7 @@ namespace VideoProjectCore6.Services.ConfEventService
         /// <param name="lang"></param>
         /// 
         /// <returns>Active users depending on the id and meeting id of the room</returns>
-        public async Task<APIResult> HandleGetRoom(DateTimeRange range, string pId, string meetingID)
+    public async Task<APIResult> HandleGetRoom(DateTimeRange range, string pId, string meetingID, string lang)
         {
             APIResult res = new();
 
@@ -392,7 +392,7 @@ namespace VideoProjectCore6.Services.ConfEventService
                     }
                 }
 
-                return res.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, activeEvents);
+                return res.SuccessMe(1, Translation.getMessage(lang, "Success"), true, APIResult.RESPONSE_CODE.OK, activeEvents);
             }
 
             catch
@@ -435,7 +435,7 @@ namespace VideoProjectCore6.Services.ConfEventService
                     })
                     .ToListAsync();
 
-                res.SuccessMe(1, "Success", true, APIResult.RESPONSE_CODE.OK, activeEvents);
+                res.SuccessMe(1, Translation.getMessage(lang, "Success"), true, APIResult.RESPONSE_CODE.OK, activeEvents);
             }
             catch (Exception e)
             {

@@ -166,18 +166,18 @@ namespace VideoProjectCore6.Controllers.FilesUploader
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("ViewFile")]
-        public async Task<FileContentResult> ViewFile(int fileId)
+        public async Task<FileContentResult> ViewFile(int fileId, [FromHeader] string lang)
         {
-            var res = await _IFileRepository.Download(fileId);
+            var res = await _IFileRepository.Download(fileId, lang);
 
             return File(res.Key, res.Value);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("DeleteFile")]
-        public async Task<IActionResult> DeleteFile(int fileId)
+        public async Task<IActionResult> DeleteFile(int fileId, [FromHeader] string lang)
         {
-            var res = await _IFileRepository.Delete(fileId);
+            var res = await _IFileRepository.Delete(fileId, lang);
 
             return Ok(res);
         }

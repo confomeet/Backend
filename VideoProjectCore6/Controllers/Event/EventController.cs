@@ -77,7 +77,7 @@ namespace VideoProjectCore6.Controllers.Event
         [HttpGet("{id}/Details")]
         public async Task<ActionResult> EventDetails([FromRoute] int id, [FromHeader] string timeZone, [FromHeader] string lang = "en")
         {
-            var result = await _IEventRepository.EventDetails(id, _IUserRepository.GetUserID(), timeZone);
+            var result = await _IEventRepository.EventDetails(id, _IUserRepository.GetUserID(), timeZone, lang);
             if (result != null)
             {
                 return StatusCode(StatusCodes.Status200OK, result);

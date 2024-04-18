@@ -1054,7 +1054,7 @@ namespace VideoProjectCore6.Services.ContactService
                     {
                         //foreach (var attach in userProfilePostDto.ProfilePhoto)
                         //{
-                        var attachCreated = await _IFileRepository.Create(filePostDto.UserPhoto);
+                        var attachCreated = await _IFileRepository.Create(filePostDto.UserPhoto, lang);
                         Files resAttachment = (Files)attachCreated.Result;
                         user.UserPhotos.Add(resAttachment);
                         //}
@@ -1066,13 +1066,13 @@ namespace VideoProjectCore6.Services.ContactService
                         var existingAttach = user.UserPhotos.FirstOrDefault();
 
 
-                        await _IFileRepository.Delete(existingAttach.Id);
+                        await _IFileRepository.Delete(existingAttach.Id, lang);
 
                         user.UserPhotos.Clear();
 
                         //foreach (var attach in userProfilePostDto.ProfilePhoto)
                         //{
-                        var attachCreated = await _IFileRepository.Create(filePostDto.UserPhoto);
+                        var attachCreated = await _IFileRepository.Create(filePostDto.UserPhoto, lang);
                         Files resAttachment = (Files)attachCreated.Result;
                         user.UserPhotos.Add(resAttachment);
                         //}

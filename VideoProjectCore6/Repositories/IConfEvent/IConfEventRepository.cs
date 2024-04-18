@@ -9,7 +9,7 @@ namespace VideoProjectCore6.Repositories.IConfEventRepository
     {
         Task<APIResult> AddProsodyEvent(ProsodyEventPostDto prosodyEventPostDto);
 
-        Task<APIResult> HandleGetRoom(DateTimeRange range, string pId, string meetingID);
+        Task<APIResult> HandleGetRoom(DateTimeRange range, string pId, string meetingID, string lang);
 
         Task<APIResult> HandleListRoom(string lang);
     }

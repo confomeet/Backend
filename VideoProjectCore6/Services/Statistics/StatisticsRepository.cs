@@ -30,7 +30,7 @@ namespace VideoProjectCore6.Services.Statistics
 
         private readonly IGeneralRepository _IGeneralRepository = iGeneralRepository;
 
-        public async Task<List<ValueIdDesc>> ByApp(DateTimeRange range)
+        public async Task<List<ValueIdDesc>> ByApp(DateTimeRange range, string lang)
         {
             // TODO: need to store app_id somewhere and perform some group by here.
             // Probably the best way is to have JWT with app_id and app_display_name encoded in the token.
@@ -39,7 +39,7 @@ namespace VideoProjectCore6.Services.Statistics
             return await Task.FromResult(new List<ValueIdDesc>());
         }
 
-        public async Task<List<ValueIdDesc>> ByMeetingStatus(DateTimeRange range)
+        public async Task<List<ValueIdDesc>> ByMeetingStatus(DateTimeRange range, string lang)
         {
             if (range.EndDateTime < range.StartDateTime)
                 return [];
@@ -114,7 +114,7 @@ namespace VideoProjectCore6.Services.Statistics
             return result;
         }
 
-        public async Task<ListCount> ByOnlineUsers(DateTimeRange range)
+        public async Task<ListCount> ByOnlineUsers(DateTimeRange range, string lang)
         {
             if (range.EndDateTime < range.StartDateTime)
             {
@@ -132,7 +132,7 @@ namespace VideoProjectCore6.Services.Statistics
             foreach(var ev in events)
             {
 
-                var singleRoomActiveUsers = await _IConfEventRepository.HandleGetRoom(range, ev.Id.ToString(), ev.MeetingId);
+                var singleRoomActiveUsers = await _IConfEventRepository.HandleGetRoom(range, ev.Id.ToString(), ev.MeetingId, lang);
 
                 EventActiveUsers eventActiveUsers = new()
                 {

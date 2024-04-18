@@ -6,9 +6,9 @@ namespace VideoProjectCore6.Repositories.IFileRepository;
 
 public interface IFileRepository
 {
-    Task<APIResult> Create(IFormFile file);
-    Task<KeyValuePair<byte[], string>> Download(int fileId);
+    Task<APIResult> Create(IFormFile file, string lang);
+    Task<KeyValuePair<byte[], string>> Download(int fileId, string lang);
     //Task<APIResult> GetAll(int chatId, int userId, int pageSize, int pageNumber);
-    Task<APIResult> Delete(int fileId);
-    Task<Files> Update(Files file);
+    Task<APIResult> Delete(int fileId, string lang);
+    Task<Files> Update(Files file, string lang);
 }
