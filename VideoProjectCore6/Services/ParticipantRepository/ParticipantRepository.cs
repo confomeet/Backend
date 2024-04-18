@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using System.Text;
 using VideoProjectCore6.DTOs;
 using System.Linq;
+using VideoProjectCore6.Utilities.Time;
 
 namespace VideoProjectCore6.Services.ParticipantRepository;
 #nullable disable
@@ -158,10 +159,10 @@ public class ParticipantRepository : IParticipantRepository
             var e = await _DbContext.Events.FindAsync(participant.EventId);
             var parameters = new Dictionary<string, string>
                  {
-                   { FROM_DATE, e.StartDate.ToString("dd-MM-yyyy")},
-                   { TO_DATE, e.EndDate.ToString("dd-MM-yyyy")},
-                   { FROM_TIME, e.StartDate.ToString("hh:mm tt")},
-                   { TO_TIME, e.EndDate.ToString("hh:mm tt")},
+                   { FROM_DATE, TimeConverter.ConvertFromUtc(e.StartDate, e.TimeZone).ToString("dd-MM-yyyy")},
+                   { TO_DATE, TimeConverter.ConvertFromUtc(e.EndDate, e.TimeZone).ToString("dd-MM-yyyy")},
+                   { FROM_TIME, TimeConverter.ConvertFromUtc(e.StartDate, e.TimeZone).ToString("HH:mm")},
+                   { TO_TIME, TimeConverter.ConvertFromUtc(e.EndDate, e.TimeZone).ToString("HH:mm")},
                    { TOPIC, e.Topic},
                    { TIMEZONE, e.TimeZone},
                    {MEETING_ID ,e.MeetingId},

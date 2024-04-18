@@ -236,13 +236,11 @@ public class EventRepository(IMeetingRepository iMeetingRepository
             string[] MeetingIdSplit = e.MeetingId.ToUpper().Split('C', 2);
             var clearMeetingID = MeetingIdSplit.Last();
             var parameters = new Dictionary<string, string>
-
-            //var parameters = new Dictionary<string, string>
                  {
-                   { FROM_DATE, e.StartDate.ToString("dd-MM-yyyy")},
-                   { TO_DATE, e.EndDate.ToString("dd-MM-yyyy")},
-                   { FROM_TIME, e.StartDate.ToString("hh:mm tt")},
-                   { TO_TIME, e.EndDate.ToString("hh:mm tt")},
+                   { FROM_DATE, TimeConverter.ConvertFromUtc(e.StartDate, e.TimeZone).ToString("dd-MM-yyyy")},
+                   { TO_DATE, TimeConverter.ConvertFromUtc(e.EndDate, e.TimeZone).ToString("dd-MM-yyyy")},
+                   { FROM_TIME, TimeConverter.ConvertFromUtc(e.StartDate, e.TimeZone).ToString("HH:mm")},
+                   { TO_TIME, TimeConverter.ConvertFromUtc(e.EndDate, e.TimeZone).ToString("HH:mm")},
                    { MEETING_ID, clearMeetingID},
                    { TOPIC, e.Topic},
                    { TIMEZONE, e.TimeZone},
@@ -917,10 +915,10 @@ public class EventRepository(IMeetingRepository iMeetingRepository
 
             var parameters = new Dictionary<string, string>
                  {
-                   { FROM_DATE, rDates.Dates[0].StartDateTime.ToString("dd-MM-yyyy")},
-                   { TO_DATE, rDates.Dates[0].EndDateTime.ToString("dd-MM-yyyy")},
-                   { FROM_TIME, rDates.Dates[0].StartDateTime.ToString("hh:mm tt")},
-                   { TO_TIME, rDates.Dates[0].EndDateTime.ToString("hh:mm tt")},
+                   { FROM_DATE, TimeConverter.ConvertFromUtc(rDates.Dates[0].StartDateTime, dto.TimeZone).ToString("dd-MM-yyyy")},
+                   { TO_DATE, TimeConverter.ConvertFromUtc(rDates.Dates[0].EndDateTime, dto.TimeZone).ToString("dd-MM-yyyy")},
+                   { FROM_TIME, TimeConverter.ConvertFromUtc(rDates.Dates[0].StartDateTime, dto.TimeZone).ToString("HH:mm")},
+                   { TO_TIME, TimeConverter.ConvertFromUtc(rDates.Dates[0].EndDateTime, dto.TimeZone).ToString("HH:mm")},
                    { MEETING_ID, dto.MeetingId},
                    { TOPIC, dto.Topic},
                    { TIMEZONE, dto.TimeZone},
