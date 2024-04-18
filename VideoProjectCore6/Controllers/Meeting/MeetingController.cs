@@ -105,7 +105,7 @@ namespace VideoProjectCore6.Controllers.Meeting
         // Join by public link
         [AllowAnonymous]
         [HttpPost("Join/{meetingId}")]
-        public async Task<IActionResult> joinAnonymous([FromRoute] string meetingId, [FromBody] JoinData userData, [FromHeader] string lang = "ar")
+        public async Task<IActionResult> joinAnonymous([FromRoute] string meetingId, [FromBody] JoinData userData, [FromHeader] string lang = "en")
         {
             object obj = await _IMeetingRepository.MeetingJWT(meetingId, null, userData, lang);
             return Ok(obj);
@@ -114,7 +114,7 @@ namespace VideoProjectCore6.Controllers.Meeting
         // Join by button in UI
         [HasPermission(Permissions.Meeting_FetchDetails_IfParticipant)]
         [HttpPost("Join/{userId}/{meetingId}")]
-        public async Task<IActionResult> joinTo([FromRoute] string meetingId, [FromRoute] int userId , [FromHeader] string lang = "ar")
+        public async Task<IActionResult> joinTo([FromRoute] string meetingId, [FromRoute] int userId , [FromHeader] string lang = "en")
         {
             object obj = await _IMeetingRepository.MeetingJWT(meetingId, userId, null, lang);
             return Ok(obj);
@@ -122,7 +122,7 @@ namespace VideoProjectCore6.Controllers.Meeting
 
         // Join by personal link
         [HttpPost("Verify/{ParticipantId}/{Guid}")]
-        public async Task<IActionResult> joinTo_([FromRoute] int ParticipantId,[FromQuery] int? partyId, [FromRoute] Guid Guid, [FromHeader] string lang = "ar")
+        public async Task<IActionResult> joinTo_([FromRoute] int ParticipantId,[FromQuery] int? partyId, [FromRoute] Guid Guid, [FromHeader] string lang = "en")
         {
             var result = await _IMeetingRepository.MeetingJWT(ParticipantId,Guid, partyId,  lang);
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);

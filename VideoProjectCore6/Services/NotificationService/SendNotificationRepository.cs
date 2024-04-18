@@ -277,7 +277,7 @@ namespace VideoProjectCore6.Services.NotificationService
                     //{
                     //    NotificationChannelId = smsChannel,
                     //    UserId = userId,
-                    //    Lang = "ar",/*defLang.Trim().ToLower()*/
+                    //    lang = "en",/*defLang.Trim().ToLower()*/
                     //    NotificationTitle = Constants.OTP_TITLE_AR,
                     //    NotificationBody = (Constants.OTP_BODY_AR + code).Trim(),
                     //    ToAddress = mobile,
@@ -306,7 +306,7 @@ namespace VideoProjectCore6.Services.NotificationService
                     //{
                     //    NotificationChannelId = emailChannel,
                     //    UserId = userId,
-                    //    Lang = "ar",/*defLang.Trim().ToLower()*/
+                    //    lang = "en",/*defLang.Trim().ToLower()*/
                     //    NotificationTitle = Constants.OTP_TITLE_AR,
                     //    NotificationBody = Constants.OTP_BODY_AR + code,
                     //    ToAddress = email,
@@ -553,7 +553,7 @@ namespace VideoProjectCore6.Services.NotificationService
                     {
                         NotificationChannelId = smsChannel,
                         UserId = userId,
-                        Lang = "ar",/*defLang.Trim().ToLower()*/
+                        Lang = "en",/*defLang.Trim().ToLower()*/
                         NotificationTitle = "",
                         NotificationBody = "",
                         ToAddress = mobile
@@ -580,7 +580,7 @@ namespace VideoProjectCore6.Services.NotificationService
                     {
                         NotificationChannelId = emailChannel,
                         UserId = userId,
-                        Lang = "ar",/*defLang.Trim().ToLower()*/
+                        Lang = "en",/*defLang.Trim().ToLower()*/
                         NotificationTitle = "",
                         NotificationBody = "",
                         ToAddress = email,

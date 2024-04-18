@@ -15,7 +15,7 @@ namespace VideoProjectCore6.Controllers.ConfEvent
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetAll([FromQuery] int pageIndex, [FromQuery] int pageSize, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> GetAll([FromQuery] int pageIndex, [FromQuery] int pageSize, [FromHeader] string lang = "en")
         {
             return Ok(await _ICountryRepository.getAllCountries(lang, pageIndex, pageSize));
         }

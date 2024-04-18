@@ -22,7 +22,7 @@ namespace VideoProjectCore6.Controllers.Notification
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
         [HttpPost]
-        public async Task<ActionResult> Get([FromBody] NotificationFilterDto notificationFilterDto, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> Get([FromBody] NotificationFilterDto notificationFilterDto, [FromHeader] string lang = "en")
         {
             var result = await _INotificationLogRepository.GetNotificationsLog(notificationFilterDto, null, lang);
             if (result != null)
@@ -36,7 +36,7 @@ namespace VideoProjectCore6.Controllers.Notification
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("Mine")]
-        public async Task<ActionResult> MyNotification([FromBody] NotificationFilterDto notificationFilterDto, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> MyNotification([FromBody] NotificationFilterDto notificationFilterDto, [FromHeader] string lang = "en")
         {
             var result = await _INotificationLogRepository.GetNotificationsLog(notificationFilterDto, _IUserRepository.GetUserID(), lang);
             if (result != null)

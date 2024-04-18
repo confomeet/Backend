@@ -31,16 +31,16 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         public Task<IdentityResult> EditUserRolesAsync(int userId, List<int> userRoles, string lang);
         Task<List<int>> GetUserClaimPermissions(int userId, string claimType);
         public  Task<ListCount> GetUsers(string lang, int pageIndex = 1, int pageSize = 25);
-        public  Task<APIResult> DisableAccount(int id,string lang="ar");
-        public  Task<APIResult> EnableAccount(int id,string lang= "ar");
-        public Task<APIResult> LockAccount(int id,int? forDays , string lang = "ar");
-        public Task<APIResult> UnLockAccount(int id, string lang = "ar");
-        public Task<APIResult> ActivateAccount(int id, string lang = "ar");
+        public  Task<APIResult> DisableAccount(int id,string lang="en");
+        public  Task<APIResult> EnableAccount(int id,string lang= "en");
+        public Task<APIResult> LockAccount(int id,int? forDays , string lang = "en");
+        public Task<APIResult> UnLockAccount(int id, string lang = "en");
+        public Task<APIResult> ActivateAccount(int id, string lang = "en");
         public Task<UserView> Search(string email);
-        public Task<ListCount> SearchFilterUsers(UserFilterDto userFilterDto, int currentUser, string lang = "ar");
+        public Task<ListCount> SearchFilterUsers(UserFilterDto userFilterDto, int currentUser, string lang = "en");
         public Task<APIResult> CheckEMailAddress(string email,string lang);
         public Task<ListCount> SearchFilterUsers(string? text = null, string? name = null, string? email = null,
-                                                       int pageIndex = 1, int pageSize = 25, string lang = "ar");
+                                                       int pageIndex = 1, int pageSize = 25, string lang = "en");
         Task<APIResult> VerifyOTP(OtpLogInDto otpLogInDto, string lang);
         Task<APIResult> LogIn(LogInDto logInDto, string lang);
         Task<APIResult> LogInWithToken(string token);

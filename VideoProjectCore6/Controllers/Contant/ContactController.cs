@@ -36,28 +36,28 @@ namespace VideoProjectCore6.Controllers.Contant
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet()]
-        public async Task<ActionResult> Contact([FromQuery] byte tabId, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> Contact([FromQuery] byte tabId, [FromHeader] string lang = "en")
         {
             return Ok(await _IContantRepository.Contacts(_IUserRepository.GetUserID(), tabId, lang));
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("MyContacts")]
-        public async Task<ActionResult> MyContact([FromBody] SearchFilterDto searchFilterDto, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> MyContact([FromBody] SearchFilterDto searchFilterDto, [FromHeader] string lang = "en")
         {
             return Ok(await _IContantRepository.AllMyContacts(searchFilterDto, _IUserRepository.GetUserID(), lang));
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("ContactById")]
-        public async Task<ActionResult> ContactById(int Id, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> ContactById(int Id, [FromHeader] string lang = "en")
         {
             return Ok(await _IContantRepository.ContactById(Id, _IUserRepository.GetUserID(), lang));
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, [FromBody] ContactDto dto, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> Update(int id, [FromBody] ContactDto dto, [FromHeader] string lang = "en")
         {
             var result = await _IContantRepository.Update(id, dto, _IUserRepository.GetUserID(), lang);
             return result.Id > 0 ? Ok(result) : BadRequest(result);
@@ -91,7 +91,7 @@ namespace VideoProjectCore6.Controllers.Contant
         /// </summary>
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("Sections")]
-        public async Task<IActionResult> Sections([FromQuery] string text, [FromQuery] int companyId, /*[FromHeader] int pageIndex = 1, [FromHeader] int pageSize = 24,*/ [FromHeader] string lang = "ar")
+        public async Task<IActionResult> Sections([FromQuery] string text, [FromQuery] int companyId, /*[FromHeader] int pageIndex = 1, [FromHeader] int pageSize = 24,*/ [FromHeader] string lang = "en")
         {
             object obj = await _IContantRepository.SearchSections(_IUserRepository.GetUserID(), companyId, text, lang);
             return Ok(obj);
@@ -99,7 +99,7 @@ namespace VideoProjectCore6.Controllers.Contant
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("Companies")]
-        public async Task<IActionResult> Companies([FromQuery] string text, /*[FromHeader] int pageIndex = 1, [FromHeader] int pageSize = 24, */[FromHeader] string lang = "ar")
+        public async Task<IActionResult> Companies([FromQuery] string text, /*[FromHeader] int pageIndex = 1, [FromHeader] int pageSize = 24, */[FromHeader] string lang = "en")
         {
             object obj = await _IContantRepository.SearchCompanies(_IUserRepository.GetUserID(), text, lang);
             return Ok(obj);
@@ -108,7 +108,7 @@ namespace VideoProjectCore6.Controllers.Contant
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("Managers")]
-        public async Task<IActionResult> Companies([FromQuery] string text, [FromQuery] int companyId,/*[FromHeader] int pageIndex = 1, [FromHeader] int pageSize = 24, */[FromHeader] string lang = "ar")
+        public async Task<IActionResult> Companies([FromQuery] string text, [FromQuery] int companyId,/*[FromHeader] int pageIndex = 1, [FromHeader] int pageSize = 24, */[FromHeader] string lang = "en")
         {
             object obj = await _IContantRepository.SearchDirectManagers(_IUserRepository.GetUserID(), companyId, text, lang);
             return Ok(obj);
@@ -120,7 +120,7 @@ namespace VideoProjectCore6.Controllers.Contant
         ///
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("Tabs")]
-        public async Task<IActionResult> ContactClasses([FromHeader] string lang = "ar")
+        public async Task<IActionResult> ContactClasses([FromHeader] string lang = "en")
         {
             object obj = await _IContantRepository.ContactClasses(lang);
             return Ok(obj);
@@ -131,7 +131,7 @@ namespace VideoProjectCore6.Controllers.Contant
         ///
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("ContactPhoto")]
-        public async Task<IActionResult> ContactPhoto([FromQuery] int contactId, [FromForm] FilePostDto filePostDto, [FromHeader] string lang = "ar")
+        public async Task<IActionResult> ContactPhoto([FromQuery] int contactId, [FromForm] FilePostDto filePostDto, [FromHeader] string lang = "en")
         {
             object obj = await _IContantRepository.EditProfilePhoto(contactId, filePostDto, false, false, lang);
             return Ok(obj);

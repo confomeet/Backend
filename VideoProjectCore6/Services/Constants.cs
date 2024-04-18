@@ -205,7 +205,7 @@ namespace VideoProjectCore6.Services
 
         public const string PROTOCOL_POST = "POST";
         public const string PROTOCOL_GET = "GET";
-        public const string DEFAULT_LANG = "ar";
+        public const string DEFAULT_LANG = "en";
 
         // contact tabs
         public enum CONTACT_UPPER_TABS

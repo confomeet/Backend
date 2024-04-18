@@ -508,7 +508,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         return ValidateEvent(postDto, lang);
     }
 
-    public async Task<List<EventFullView>> GetAllOfUser(int userId, EventSearchObject? obj = null, string lang = "ar")
+    public async Task<List<EventFullView>> GetAllOfUser(int userId, EventSearchObject? obj = null, string lang = "en")
     {
         bool applyRelatedEvent = false;
         bool serverSearch = obj != null && obj.HasDateSearch();
@@ -961,7 +961,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
     }
 
     public async Task<APIResult> ShiftRecurrenceEvents(int eventId, int updatedBy, DateTime originStartDate, double daysStart, 
-        double daysEnd, double minutsStart, double minutsEnd, string? timeZone, UpdateOption opt, bool updateThis = true, string lang = "ar")
+        double daysEnd, double minutsStart, double minutsEnd, string? timeZone, UpdateOption opt, bool updateThis = true, string lang = "en")
     {
         APIResult result = new();
         var evt = await _DbContext.Events.Where(e => e.Id == eventId).FirstOrDefaultAsync();
@@ -1077,7 +1077,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
                     {
                         NotificationChannelId = emailChannel,
                         UserId = participant.UserId,
-                        Lang = "ar",/*defLang.Trim().ToLower()*/
+                        Lang = "en",/*defLang.Trim().ToLower()*/
                         NotificationTitle = Constants.OTP_TITLE_AR,
                         NotificationBody = Constants.CANCEL_BODY_AR + participant.Event.MeetingId,
                         ToAddress = participant.Email,

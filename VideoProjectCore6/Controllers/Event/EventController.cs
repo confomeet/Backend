@@ -24,14 +24,14 @@ namespace VideoProjectCore6.Controllers.Event
 
         [HasPermission(Permissions.Meeting_Create)]
         [HttpPost("MeetingEvent")]
-        public async Task<ActionResult> AddMeetingEvent([FromBody] EventWParticipant dto, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> AddMeetingEvent([FromBody] EventWParticipant dto, [FromHeader] string lang = "en")
         {
             return Ok(await _IEventRepository.AddMeetingEvent(dto, _IUserRepository.GetUserID(), true, lang));
         }
 
         [HasPermission(Permissions.Meeting_Search_IfParticipant)]
         [HttpPost("Search")]
-        public async Task<ActionResult> SearchLocal([FromBody] EventSearchObject obj, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> SearchLocal([FromBody] EventSearchObject obj, [FromHeader] string lang = "en")
         {
             var result = await _IEventRepository.GetAllOfUser(_IUserRepository.GetUserID(), obj, lang);
             if (result != null)
@@ -64,7 +64,7 @@ namespace VideoProjectCore6.Controllers.Event
 
         [HasPermission(Permissions.Meeting_FetchDetails_IfParticipant)]
         [HttpGet("{id}/Details")]
-        public async Task<ActionResult> EventDetails([FromRoute] int id, [FromHeader] string timeZone, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> EventDetails([FromRoute] int id, [FromHeader] string timeZone, [FromHeader] string lang = "en")
         {
             var result = await _IEventRepository.EventDetails(id, _IUserRepository.GetUserID(), timeZone);
             if (result != null)
@@ -76,7 +76,7 @@ namespace VideoProjectCore6.Controllers.Event
 
         [HasPermission(Permissions.Meeting_Create)]
         [HttpPost("AddRecurrence")]
-        public async Task<ActionResult> AddREvent([FromBody] RecurrenceEvent events, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> AddREvent([FromBody] RecurrenceEvent events, [FromHeader] string lang = "en")
         {
             var result = await _IEventRepository.AddRecurrenceEvents(events.Event, events.RDates, _IUserRepository.GetUserID(), true, lang);
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status404NotFound, result);

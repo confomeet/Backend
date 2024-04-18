@@ -21,14 +21,14 @@ namespace VideoProjectCore6.Controllers.ConfEvent
 
         [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
         [HttpGet("ActiveRoomsList")]
-        public async Task<ActionResult> GetRoom([FromHeader] string lang = "ar")
+        public async Task<ActionResult> GetRoom([FromHeader] string lang = "en")
         {
             return Ok(await _IConfEventRepository.HandleListRoom(lang));
         }
 
         [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
         [HttpGet("room/{meetingId}/{id}")]
-        public async Task<ActionResult> GetParticipantsByRoom([FromBody] DateTimeRange range, [FromRoute] string meetingId, [FromRoute] string id, [FromHeader] string lang = "ar")
+        public async Task<ActionResult> GetParticipantsByRoom([FromBody] DateTimeRange range, [FromRoute] string meetingId, [FromRoute] string id, [FromHeader] string lang = "en")
         {
             return Ok(await _IConfEventRepository.HandleGetRoom(range, id, meetingId));
         }

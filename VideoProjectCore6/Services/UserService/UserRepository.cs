@@ -1225,22 +1225,8 @@ namespace VideoProjectCore6.Services.UserService
                 MeetingId = 0.ToString(),
                 NotificationChannelId = channel
             };
-            NotificationLogPostDto notificationPost2 = new()
-            {
-                LinkCaption = "تم ارسال رابط اعادة تعيين كلمة السر",
-                Template = ACTIVATION_TEMPLATE,
-                NotificationLink = url,
-                Lang = "ar",
-                UserId = user.Id,
-                CreatedDate = DateTime.Now,
-                NotificationBody = message.Ar,
-                ToAddress = email,
-                NotificationTitle = "تم ارسال رابط اعادة تعيين كلمة السر",
-                MeetingId = 0.ToString(),
-                NotificationChannelId = channel
-            };
 
-            List<NotificationLogPostDto> notifications = new() { notificationPost, notificationPost2 };
+            List<NotificationLogPostDto> notifications = new() { notificationPost };
 
             SendNotificationRepository sendNotificationRepository = new(_DbContext, _mailSetting, _smsSetting, _iGeneralRepository, _iNotificationLogRepository);
             await sendNotificationRepository.DoSend(notifications, true, true, null);
@@ -1385,7 +1371,7 @@ namespace VideoProjectCore6.Services.UserService
             return claims.ToArray();
         }
 
-        public async Task<APIResult> DisableAccount(int id, string lang = "ar")
+        public async Task<APIResult> DisableAccount(int id, string lang = "en")
         {
             APIResult result = new APIResult();
             var user = await _userManager.FindByIdAsync(id.ToString());
@@ -1403,7 +1389,7 @@ namespace VideoProjectCore6.Services.UserService
             catch { return result.FailMe(-1, Translation.getMessage(lang, "faildUpdate")); }
 
         }
-        public async Task<APIResult> EnableAccount(int id, string lang = "ar")
+        public async Task<APIResult> EnableAccount(int id, string lang = "en")
         {
             APIResult result = new APIResult();
             var user = await _userManager.FindByIdAsync(id.ToString());
@@ -1421,7 +1407,7 @@ namespace VideoProjectCore6.Services.UserService
             }
             catch { return result.FailMe(-1, Translation.getMessage(lang, "faildUpdate")); }
         }
-        public async Task<APIResult> LockAccount(int id, int? forDays, string lang = "ar")
+        public async Task<APIResult> LockAccount(int id, int? forDays, string lang = "en")
         {
             APIResult result = new APIResult();
             var user = await _userManager.FindByIdAsync(id.ToString());
@@ -1455,7 +1441,7 @@ namespace VideoProjectCore6.Services.UserService
                 return result.FailMe(-1, Translation.getMessage(lang, "faildUpdate"));
             }
         }
-        public async Task<APIResult> UnLockAccount(int id, string lang = "ar")
+        public async Task<APIResult> UnLockAccount(int id, string lang = "en")
         {
             APIResult result = new APIResult();
             var user = await _userManager.FindByIdAsync(id.ToString());
@@ -1487,7 +1473,7 @@ namespace VideoProjectCore6.Services.UserService
                 return result.FailMe(-1, Translation.getMessage(lang, "faildUpdate"));
             }
         }
-        public async Task<APIResult> ActivateAccount(int id, string lang = "ar")
+        public async Task<APIResult> ActivateAccount(int id, string lang = "en")
         {
             APIResult result = new();
             var user = await _userManager.FindByIdAsync(id.ToString());
@@ -1532,7 +1518,7 @@ namespace VideoProjectCore6.Services.UserService
             };
         }
 
-        public async Task<ListCount> SearchFilterUsers(UserFilterDto userFilterDto, int currentUser, string lang = "ar")
+        public async Task<ListCount> SearchFilterUsers(UserFilterDto userFilterDto, int currentUser, string lang = "en")
         {
 
 
@@ -1616,7 +1602,7 @@ namespace VideoProjectCore6.Services.UserService
         }
 
         public async Task<ListCount> SearchFilterUsers(string text = null, string name = null, string email = null,
-                                                       int pageIndex = 1, int pageSize = 25, string lang = "ar")
+                                                       int pageIndex = 1, int pageSize = 25, string lang = "en")
         {
 
             bool twoArePassed = name != null && email != null;

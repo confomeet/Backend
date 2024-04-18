@@ -11,6 +11,6 @@ namespace VideoProjectCore6.Repositories.INotificationRepository
                 Task<List<NotificationLogGetDto>> GetInternalNotificationsLog(int userId, string lang);
                 Task<bool> ReadInternalNotificationsLog(int userId, int notifyId);
                 Task<int> UpdateInternalNotificationsLogState(int notificationID);
-                Task<ListCount> GetNotificationsLog(NotificationFilterDto notificationFilterDto, int? userId = null, string lang = "ar", int pageIndex = 1, int pageSize = 25);
+                Task<ListCount> GetNotificationsLog(NotificationFilterDto notificationFilterDto, int? userId = null, string lang = "en", int pageIndex = 1, int pageSize = 25);
     }
 }

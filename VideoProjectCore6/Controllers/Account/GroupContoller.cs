@@ -40,35 +40,35 @@ namespace VideoProjectCore6.Controllers.Account
 
         [HasPermission(Permissions.Group_Read)]
         [HttpGet()]
-        public async Task<IActionResult> GetAllGroups([FromQuery] string? text, [FromQuery] string? groupName, [FromHeader] int pageSize = 25, [FromHeader] int pageIndex = 1, [FromHeader] string lang = "ar")
+        public async Task<IActionResult> GetAllGroups([FromQuery] string? text, [FromQuery] string? groupName, [FromHeader] int pageSize = 25, [FromHeader] int pageIndex = 1, [FromHeader] string lang = "en")
         {
             return Ok(await _IGroupRepository.GetGroups(text, groupName, lang, pageSize, pageIndex));
         }
 
         [HasPermission(Permissions.Group_Delete)]
         [HttpDelete()]
-        public async Task<IActionResult> DeleteGroup([FromQuery] int groupId, [FromHeader] string lang = "ar")
+        public async Task<IActionResult> DeleteGroup([FromQuery] int groupId, [FromHeader] string lang = "en")
         {
             return Ok(await _IGroupRepository.DeleteGroup(groupId, lang));
         }
 
         [HasPermission(Permissions.Group_Update)]
         [HttpPost("UsersToGroup")]
-        public async Task<IActionResult> AddUsersToGroup([FromBody] GroupPostUserDto groupPostUserDto, [FromHeader] string lang = "ar")
+        public async Task<IActionResult> AddUsersToGroup([FromBody] GroupPostUserDto groupPostUserDto, [FromHeader] string lang = "en")
         {
             return Ok(await _IGroupRepository.AddUsersToGroup(groupPostUserDto, lang));
         }
 
         [HasPermission(Permissions.Group_Read)]
         [HttpDelete("UsersOfGroup")]
-        public async Task<IActionResult> RemoveUsersOfGroup([FromBody] GroupPostUserDto groupPostUserDto, [FromHeader] string lang = "ar")
+        public async Task<IActionResult> RemoveUsersOfGroup([FromBody] GroupPostUserDto groupPostUserDto, [FromHeader] string lang = "en")
         {
             return Ok(await _IGroupRepository.RemoveUsersFromGroup(groupPostUserDto, lang));
         }
 
         [HasPermission(Permissions.Group_Read)]
         [HttpGet("GetUserById")]
-        public async Task<IActionResult> GetUsersById([FromQuery] int groupId,[FromHeader] int pageIndex = 1,[FromHeader] int pageSize = 25,[FromHeader] string lang = "ar")
+        public async Task<IActionResult> GetUsersById([FromQuery] int groupId,[FromHeader] int pageIndex = 1,[FromHeader] int pageSize = 25,[FromHeader] string lang = "en")
         {
             return Ok(await _IGroupRepository.GetUsersByGroupId(groupId, pageIndex, pageSize));
         }

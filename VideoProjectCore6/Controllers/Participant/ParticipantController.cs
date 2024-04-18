@@ -25,7 +25,7 @@ public class ParticipantController : ControllerBase
 
     // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet("Search")]
-    public async Task<ActionResult> SearchParticipant([FromQuery] string toSearch, [FromHeader] string lang = "ar")
+    public async Task<ActionResult> SearchParticipant([FromQuery] string toSearch, [FromHeader] string lang = "en")
     {
         var result = await _IParticipantRepository.SearchParticipant(toSearch);
         return Ok(result);
@@ -47,14 +47,14 @@ public class ParticipantController : ControllerBase
 
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPut("{id}/Liberate")]
-    public async Task<ActionResult> Liberate([FromRoute] int id,[FromHeader] string lang = "ar")
+    public async Task<ActionResult> Liberate([FromRoute] int id,[FromHeader] string lang = "en")
     {
         var result = await _IParticipantRepository.Liberate(id, _IUserRepository.GetUserID(),lang);
         return result.Id > 0 ? Ok(result) : BadRequest(result);
     }
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPut("{id}/SetNote")]
-    public async Task<ActionResult> SetNote([FromRoute] int id,[FromBody] NoteDto dto, [FromHeader] string lang = "ar")
+    public async Task<ActionResult> SetNote([FromRoute] int id,[FromBody] NoteDto dto, [FromHeader] string lang = "en")
     {
         var result = await _IParticipantRepository.UpdateNote(id, dto.note, _IUserRepository.GetUserID(), lang);
         return result.Id > 0 ? Ok(result) : BadRequest(result);

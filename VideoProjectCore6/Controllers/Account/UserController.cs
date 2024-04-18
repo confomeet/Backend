@@ -121,7 +121,7 @@ namespace VideoProjectCore6.Controllers.Account
 
         [HasPermission(Permissions.User_Read)]
         [HttpGet]
-        public async Task<IActionResult> AllUser([FromQuery] int pageIndex, [FromQuery] int pageSize, [FromHeader] string lang = "ar")
+        public async Task<IActionResult> AllUser([FromQuery] int pageIndex, [FromQuery] int pageSize, [FromHeader] string lang = "en")
         {
             try
             {
@@ -136,7 +136,7 @@ namespace VideoProjectCore6.Controllers.Account
 
         [HasPermission(Permissions.User_Read)]
         [HttpPost("SearchFilterUser")]
-        public async Task<IActionResult> SearchFilterUser([FromBody] UserFilterDto userFilterDto, [FromHeader] string lang = "ar")
+        public async Task<IActionResult> SearchFilterUser([FromBody] UserFilterDto userFilterDto, [FromHeader] string lang = "en")
         {
             try
             {
@@ -157,7 +157,7 @@ namespace VideoProjectCore6.Controllers.Account
         [HasPermission(Permissions.User_Read)]
         [HttpGet("FilterUsers")]
         public async Task<IActionResult> SearchFilterUser([FromQuery] string text, [FromQuery] string name, [FromQuery] string email,
-            [FromQuery] int pageIndex, [FromQuery] int pageSize, [FromHeader] string lang = "ar")
+            [FromQuery] int pageIndex, [FromQuery] int pageSize, [FromHeader] string lang = "en")
         {
             try
             {
@@ -175,7 +175,7 @@ namespace VideoProjectCore6.Controllers.Account
 
         [HasPermission(Permissions.User_Enable)]
         [HttpPost("{id}/UnLock")]
-        public async Task<IActionResult> UnLockAccount([FromRoute] int id, [FromHeader] string lang = "ar")
+        public async Task<IActionResult> UnLockAccount([FromRoute] int id, [FromHeader] string lang = "en")
         {
             var result = await _IUserRepository.UnLockAccount(id, lang);
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
@@ -183,7 +183,7 @@ namespace VideoProjectCore6.Controllers.Account
 
         [HasPermission(Permissions.User_Disable)]
         [HttpPost("{id}/Lock")]
-        public async Task<IActionResult> LockAccount([FromRoute] int id, [FromHeader] string lang = "ar")
+        public async Task<IActionResult> LockAccount([FromRoute] int id, [FromHeader] string lang = "en")
         {
             var result = await _IUserRepository.LockAccount(id, null, lang);
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
@@ -191,7 +191,7 @@ namespace VideoProjectCore6.Controllers.Account
 
         [HasPermission(Permissions.User_Enable)]
         [HttpPost("{id}/Activate")]
-        public async Task<IActionResult> ActivateAccount([FromRoute] int id, [FromHeader] string lang = "ar")
+        public async Task<IActionResult> ActivateAccount([FromRoute] int id, [FromHeader] string lang = "en")
         {
             var result = await _IUserRepository.ActivateAccount(id, lang);
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
@@ -318,7 +318,7 @@ namespace VideoProjectCore6.Controllers.Account
 
         [HasPermission(Permissions.Profile_Read)]
         [HttpGet("MyProfile")]
-        public async Task<IActionResult> MyProfile([FromHeader] string lang = "ar")
+        public async Task<IActionResult> MyProfile([FromHeader] string lang = "en")
         {
             var currentPath = Request.Path.Value;
             var pathToTokenLogin = currentPath.Replace("MyProfile", "LoginWithToken");
