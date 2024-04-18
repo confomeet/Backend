@@ -24,74 +24,74 @@ namespace VideoProjectCore6.Controllers.Meeting
             _iUserRepository = iUserRepository;
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
-        public async Task<ActionResult> AddMeeting([FromBody] MeetingPostDto meetingDto, [FromHeader] string lang)
-        {
-            var result = await _IMeetingRepository.AddMeeting(meetingDto, _iUserRepository.GetUserID(), lang);
-            if (result != null)
-            {
-                return StatusCode(StatusCodes.Status200OK, result);
-            }
+        // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        // [HttpPost]
+        // public async Task<ActionResult> AddMeeting([FromBody] MeetingPostDto meetingDto, [FromHeader] string lang)
+        // {
+        //     var result = await _IMeetingRepository.AddMeeting(meetingDto, _iUserRepository.GetUserID(), lang);
+        //     if (result != null)
+        //     {
+        //         return StatusCode(StatusCodes.Status200OK, result);
+        //     }
 
-            return StatusCode(StatusCodes.Status404NotFound, "error accrued");
-        }
+        //     return StatusCode(StatusCodes.Status404NotFound, "error accrued");
+        // }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet]
-        public async Task<ActionResult> Get([FromHeader] string lang)
-        {
-            var result = await _IMeetingRepository.GetMeetings(_iUserRepository.GetUserID(), lang);
-            return result != null ? StatusCode(StatusCodes.Status200OK, result) : StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
-
-
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPut("{id}")]
-        public async Task<ActionResult> Update(MeetingPostDto MeetingPostDto, int id, [FromHeader] string lang)
-        {
-            var result = await _IMeetingRepository.UpdateMeeting(id, MeetingPostDto, _iUserRepository.GetUserID(), lang);
-            return StatusCode(StatusCodes.Status200OK, result);
-        }
+        // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        // [HttpGet]
+        // public async Task<ActionResult> Get([FromHeader] string lang)
+        // {
+        //     var result = await _IMeetingRepository.GetMeetings(_iUserRepository.GetUserID(), lang);
+        //     return result != null ? StatusCode(StatusCodes.Status200OK, result) : StatusCode(StatusCodes.Status404NotFound, "error occurred");
+        // }
 
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("{id}")]
-        public async Task<ActionResult> Get(int id, [FromHeader] string lang)
-        {
-            var result = await _IMeetingRepository.GetMeetingById(id, lang);
-            return result != null ? StatusCode(StatusCodes.Status200OK, result) : StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
 
-        [HttpGet("GetMeetingInfo")]
-        public async Task<ActionResult> GetMeetingInfo(string meetingId, string password, [FromHeader] string lang)
-        {
-            var result = await _IMeetingRepository.GetMeetingByMeetingIdAndPassword(meetingId, password, lang);
-            return result != null ? StatusCode(StatusCodes.Status200OK, result) : StatusCode(StatusCodes.Status404NotFound, "error occurred");
-        }
+        // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        // [HttpPut("{id}")]
+        // public async Task<ActionResult> Update(MeetingPostDto MeetingPostDto, int id, [FromHeader] string lang)
+        // {
+        //     var result = await _IMeetingRepository.UpdateMeeting(id, MeetingPostDto, _iUserRepository.GetUserID(), lang);
+        //     return StatusCode(StatusCodes.Status200OK, result);
+        // }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("LogInToMeeting")]
-        public async Task<ActionResult> LogInToMeeting(string meetingNo)
-        {
-            var result = await _IMeetingRepository.LogInToMeeting(meetingNo);
-            return Ok(result);
-        }
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("Invite")]
-        public async Task<ActionResult> InviteToMeeting([FromBody] List<string> contacts,string meetingId)
-        {
-            var result = await _IMeetingRepository.InviteToMeeting(meetingId, contacts);
-            return Ok(result);
-        }
 
-        [HttpPost("anonymJWT")]
-        public async Task<IActionResult> anonymJWT(string meetingId, [FromBody] JoinData userData, [FromHeader] string lang)
-        {
-            object obj = await _IMeetingRepository.MeetingJWT(meetingId, null, userData, lang);
-            return Ok(obj);
-        }
+        // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        // [HttpGet("{id}")]
+        // public async Task<ActionResult> Get(int id, [FromHeader] string lang)
+        // {
+        //     var result = await _IMeetingRepository.GetMeetingById(id, lang);
+        //     return result != null ? StatusCode(StatusCodes.Status200OK, result) : StatusCode(StatusCodes.Status404NotFound, "error occurred");
+        // }
+
+        // [HttpGet("GetMeetingInfo")]
+        // public async Task<ActionResult> GetMeetingInfo(string meetingId, string password, [FromHeader] string lang)
+        // {
+        //     var result = await _IMeetingRepository.GetMeetingByMeetingIdAndPassword(meetingId, password, lang);
+        //     return result != null ? StatusCode(StatusCodes.Status200OK, result) : StatusCode(StatusCodes.Status404NotFound, "error occurred");
+        // }
+
+        // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        // [HttpPost("LogInToMeeting")]
+        // public async Task<ActionResult> LogInToMeeting(string meetingNo)
+        // {
+        //     var result = await _IMeetingRepository.LogInToMeeting(meetingNo);
+        //     return Ok(result);
+        // }
+        // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        // [HttpPost("Invite")]
+        // public async Task<ActionResult> InviteToMeeting([FromBody] List<string> contacts,string meetingId)
+        // {
+        //     var result = await _IMeetingRepository.InviteToMeeting(meetingId, contacts);
+        //     return Ok(result);
+        // }
+
+        // [HttpPost("anonymJWT")]
+        // public async Task<IActionResult> anonymJWT(string meetingId, [FromBody] JoinData userData, [FromHeader] string lang)
+        // {
+        //     object obj = await _IMeetingRepository.MeetingJWT(meetingId, null, userData, lang);
+        //     return Ok(obj);
+        // }
 
         // Join by button in UI
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -127,13 +127,13 @@ namespace VideoProjectCore6.Controllers.Meeting
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status500InternalServerError, result);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
-        [HttpPost("ReEnableMeeting")]
-        public async Task<IActionResult> ReEnableMeeting(string meetingId, [FromHeader] string lang)
-        {
-            object obj = await _IMeetingRepository.SetMeetingStatus(meetingId, Constants.MEETING_STATUS.STARTED, false, lang);
-            return Ok(obj);
-        }
+        // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Constants.AdminPolicy)]
+        // [HttpPost("ReEnableMeeting")]
+        // public async Task<IActionResult> ReEnableMeeting(string meetingId, [FromHeader] string lang)
+        // {
+        //     object obj = await _IMeetingRepository.SetMeetingStatus(meetingId, Constants.MEETING_STATUS.STARTED, false, lang);
+        //     return Ok(obj);
+        // }
 
 
     }
