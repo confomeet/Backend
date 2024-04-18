@@ -113,11 +113,11 @@ namespace VideoProjectCore6.Services
 
         public static Dictionary<EVENT_STATUS, Dictionary<string, string>> EventStatusValue = new Dictionary<EVENT_STATUS, Dictionary<string, string>>()
         {
-            { EVENT_STATUS.CANCELED, new Dictionary<string, string>(){{ "ar","ملغي"},{"en","Canceled"} }},
-            { EVENT_STATUS.DELETED, new Dictionary<string, string>(){{ "ar","محذوف"},{"en","Deleted"} }},
-            { EVENT_STATUS.SUSPEND, new Dictionary<string, string>(){{ "ar","معلق "},{"en", "Suspend" } }},
-            { EVENT_STATUS.ACTIVE, new Dictionary<string, string>(){{ "ar","فعال "},{"en","Active"} }},
-            { EVENT_STATUS.RESCHEDULED, new Dictionary<string, string>(){{ "ar","معاد جدولته"},{"en", "Rescheduled" } }},
+            { EVENT_STATUS.CANCELED, new Dictionary<string, string>(){{ "ru","Отменен"},{"en","Canceled"} }},
+            { EVENT_STATUS.DELETED, new Dictionary<string, string>(){{ "ru","Удален"},{"en","Deleted"} }},
+            { EVENT_STATUS.SUSPEND, new Dictionary<string, string>(){{ "ru","Ожидает"},{"en", "Suspend" } }},
+            { EVENT_STATUS.ACTIVE, new Dictionary<string, string>(){{ "ru","Онлайн"},{"en","Active"} }},
+            { EVENT_STATUS.RESCHEDULED, new Dictionary<string, string>(){{ "ru","Перенесена"},{"en", "Rescheduled" } }},
         };
 
         public static Dictionary<EVENT_TYPE, string[]> MeetingStatusValue = new Dictionary<EVENT_TYPE, string[]>()
