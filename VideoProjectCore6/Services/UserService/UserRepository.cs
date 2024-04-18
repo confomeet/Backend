@@ -1370,8 +1370,9 @@ namespace VideoProjectCore6.Services.UserService
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim("userId", user.Id.ToString()  ),
+                new Claim("email", user.Email),
+                new Claim("fullName", user.FullName),
             };
 
             foreach (var role in _roleManager.Roles.ToList())

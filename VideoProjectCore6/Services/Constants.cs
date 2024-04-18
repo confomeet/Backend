@@ -228,45 +228,5 @@ namespace VideoProjectCore6.Services
             { CONTACT_UPPER_TABS.MYCONTACT, new Dictionary<string, string>(){{ "ar", "جهات الاتصال" },{"en","My Contacts"} }},
             { CONTACT_UPPER_TABS.ALL, new Dictionary<string, string>(){{ "ar","الكل"},{"en","All"} }},
         };
-        public static Dictionary<byte, Dictionary<string, string>> DaysOfWeek = new Dictionary<byte, Dictionary<string, string>>
-        {
-         { 0, new Dictionary<string, string> { { "ar", "الإثنين"  } , { "en", "Monday"  } } },
-         { 1, new Dictionary<string, string> { { "ar", "الثلاثاء" } , { "en", "Tuesday" } } },
-         { 2, new Dictionary<string, string> { { "ar", "الأربعاء" } , { "en", "Wednesday" } } },
-         { 3, new Dictionary<string, string> { { "ar", "الخميس"  } , { "en", "Thursday" } } },
-         { 4, new Dictionary<string, string> { { "ar", "الجمعة"  } , { "en", "Friday" } } },
-         { 5, new Dictionary<string, string> { { "ar", "السبت"   } , { "en", "Saturday" } } },
-         { 6, new Dictionary<string, string> { { "ar", "الأحد"    } , { "en", "Sunday" } } }
-        };
-        public static string GetDayOfWeek(string language, byte dayNumber)
-        {
-            string value;
-            if (DaysOfWeek.TryGetValue(dayNumber, out var dayDict))
-            {
-                if (dayDict.TryGetValue(language, out value))
-                {
-                    return value;
-                }
-                else
-                {
-                    throw new ArgumentException("Language not found in dictionary");
-                }
-            }
-            else
-            {
-                throw new ArgumentException("Day number not found in dictionary");
-            }
-        }
-        public static Dictionary<string, string> GetDayOfWeek(byte dayNumber)
-        {
-            if (DaysOfWeek.TryGetValue(dayNumber, out var dayDict))
-            {
-                return DaysOfWeek[dayNumber];
-            }
-            else
-            {
-                throw new ArgumentException("Day number not found in dictionary");
-            }
-        }
     }
 }
