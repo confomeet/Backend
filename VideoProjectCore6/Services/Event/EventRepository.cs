@@ -711,16 +711,11 @@ public class EventRepository(IMeetingRepository iMeetingRepository
 
         var filteredResult = PaginatedList<EventFullView>.Create(events.AsQueryable(), pageIndex > 0 ? pageIndex : 1, pageSize > 0 ? pageSize : 25, total);
 
-        //if (events != null && events.Any())
-        //{
-        //    var usersId1 = events.Select(x => x.CreatedBy).ToList().Distinct();
-        //    var userName = _DbContext.Users.Where(u => usersId1.Contains(u.Id)).ToDictionary(x => x.Id, x => x.FullName);
-        //    string v; 
-        //    foreach (var e in events)
-        //    {
-        //        e.CreatedByName = userName.TryGetValue(e.CreatedBy, out v) ? v : string.Empty;
-        //    }
-        //}
+        foreach (var e in events)
+        {
+            e.VideoLogs = await FetchVideoLogs(e.MeetingId, _DbContext, null);
+        }
+
         return new ListCount
         {
             Count = total,
