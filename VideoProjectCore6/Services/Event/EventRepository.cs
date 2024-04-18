@@ -292,7 +292,7 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         return result.SuccessMe(eventId, Translation.getMessage(lang, "ParticipantAdded"), true, APIResult.RESPONSE_CODE.OK, result.Result);
     }
 
-    public async Task<APIResult> UpdateEvent(int id, int updatedBy, MeetingEventDto dto, UpdateOption? opt, string lang)
+    public async Task<APIResult> UpdateEvent(int id, int updatedBy, MeetingEventDto dto, UpdateOption? opt, string lang, bool checkUpdaterIsOwner)
     {
         APIResult result = new APIResult();
         result = ValidateEvent(dto, lang);
@@ -310,6 +310,10 @@ public class EventRepository(IMeetingRepository iMeetingRepository
         if (evt == null)
         {
             return result.FailMe(-1, "Конференция не найдена");
+        }
+        if (checkUpdaterIsOwner && evt.CreatedBy != updatedBy)
+        {
+            return result.FailMe(-403, "", false, APIResult.RESPONSE_CODE.Forbidden);
         }
         var originStartDate = evt.StartDate;
         string? newTimeZone = dto.TimeZone != evt.TimeZone ? dto.TimeZone : null;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VideoProjectCore6.DTOs.CommonDto;
 using VideoProjectCore6.DTOs.EventDto;
 using VideoProjectCore6.Repositories.IEventRepository;
 using VideoProjectCore6.Repositories.IUserRepository;
@@ -46,7 +47,17 @@ namespace VideoProjectCore6.Controllers.Event
         [HttpPut("{id}")]
         public async Task<ActionResult> Update(MeetingEventDto dto, int id, [FromHeader] string lang)
         {
-            var result = await _IEventRepository.UpdateEvent(id, _IUserRepository.GetUserID(), dto, null, lang);
+            var result = await _IEventRepository.UpdateEvent(id, _IUserRepository.GetUserID(), dto, null, lang, false);
+            return Ok(result);
+        }
+
+        [HasPermission(Permissions.Meeting_Update_Mine)]
+        [HttpPut("Mine/{id}")]
+        public async Task<ActionResult> UpdateMyEvent(MeetingEventDto dto, int id, [FromHeader] string lang)
+        {
+            var result = await _IEventRepository.UpdateEvent(id, _IUserRepository.GetUserID(), dto, null, lang, true);
+            if (result.Code == APIResult.RESPONSE_CODE.Forbidden)
+                return Forbid();
             return Ok(result);
         }
 
@@ -82,13 +93,14 @@ namespace VideoProjectCore6.Controllers.Event
             return result.Id > 0 ? Ok(result) : StatusCode(StatusCodes.Status404NotFound, result);
         }
 
-        [HasPermission(Permissions.Meeting_Update_All)]
-        [HttpPut("Recurrence/{id}")]
-        public async Task<ActionResult> Update(EventWUpdatOption dto, int id, [FromHeader] string lang)
-        {
-            var result = await _IEventRepository.UpdateEvent(id, _IUserRepository.GetUserID(), dto.EventDto, dto.Options, lang);
-            return Ok(result);
-        }
+        // Unsupported
+        // [HasPermission(Permissions.Meeting_Update_All)]
+        // [HttpPut("Recurrence/{id}")]
+        // public async Task<ActionResult> Update(EventWUpdatOption dto, int id, [FromHeader] string lang)
+        // {
+        //     var result = await _IEventRepository.UpdateEvent(id, _IUserRepository.GetUserID(), dto.EventDto, dto.Options, lang);
+        //     return Ok(result);
+        // }
 
         [HasPermission(Permissions.Meeting_Cancel_All)]
         [HttpPut("{id}/Cancel")]

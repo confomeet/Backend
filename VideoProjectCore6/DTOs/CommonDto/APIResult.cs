@@ -14,6 +14,7 @@ namespace VideoProjectCore6.DTOs.CommonDto
             CREATED = 201,
             BadRequest = 400,
             Unauthorized = 401,
+            Forbidden = 403,
             Locked = 423,
             NotAcceptable = 406,
             UnavailableForLegalReasons = 451,
