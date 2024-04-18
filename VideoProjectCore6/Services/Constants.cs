@@ -222,11 +222,9 @@ namespace VideoProjectCore6.Services
 
         public static Dictionary<CONTACT_UPPER_TABS, Dictionary<string, string>> UpperTabsValues = new Dictionary<CONTACT_UPPER_TABS, Dictionary<string, string>>()
         {
-            //{ CONTACT_UPPER_TABS.OUTBOX, new Dictionary<string, string>(){{ "ar","صادر"},{"en","Outbox"} } },
-            //{ CONTACT_UPPER_TABS.INBOX, new Dictionary<string, string>(){{ "ar","وارد"},{"en","Inbox"} }} ,
-            { CONTACT_UPPER_TABS.ORGANIZATION, new Dictionary<string, string>(){{ "ar","جهات اتصال الشركة"},{"en","Organization contacts"} }},
-            { CONTACT_UPPER_TABS.MYCONTACT, new Dictionary<string, string>(){{ "ar", "جهات الاتصال" },{"en","My Contacts"} }},
-            { CONTACT_UPPER_TABS.ALL, new Dictionary<string, string>(){{ "ar","الكل"},{"en","All"} }},
+            { CONTACT_UPPER_TABS.ORGANIZATION, new Dictionary<string, string>(){{ "ru", "Контакты организации"},{"en","Organization contacts"} }},
+            { CONTACT_UPPER_TABS.MYCONTACT, new Dictionary<string, string>(){{ "ru", "Мои контакты" },{"en","My Contacts"} }},
+            { CONTACT_UPPER_TABS.ALL, new Dictionary<string, string>(){{ "ru","Все"},{"en","All"} }},
         };
     }
 }
