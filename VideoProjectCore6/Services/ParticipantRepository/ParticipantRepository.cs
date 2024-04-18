@@ -137,20 +137,6 @@ public class ParticipantRepository : IParticipantRepository
         //var participant = await _DbContext.Participants.Where(x => x.Id == id).AsNoTracking().FirstOrDefaultAsync();
         if (participant != null)
         {
-            //Check if participant with cisco -------
-            string ciscoLink = null;
-            string ciscoPass = null;
-            var meetingId = await _DbContext.Events.Where(x => x.Id == participant.EventId).Select(x => x.MeetingId).FirstOrDefaultAsync();
-            if (meetingId.ToUpper().Contains("C"))
-            {
-                var ciscoData = await _DbContext.Meetings.Where(m => m.MeetingId == meetingId).Select(m => new { m.Password, m.MeetingLog }).FirstOrDefaultAsync();
-                if (ciscoData != null)
-                {
-                    ciscoLink = ciscoData.MeetingLog;
-                    ciscoPass = ciscoData.Password;
-                }
-            }
-            //--------------------------------------
             var secondEmail = false;
             if (!string.IsNullOrWhiteSpace(email))
             {
@@ -178,12 +164,11 @@ public class ParticipantRepository : IParticipantRepository
                    { TO_TIME, e.EndDate.ToString("hh:mm tt")},
                    { TOPIC, e.Topic},
                    { TIMEZONE, e.TimeZone},
-                   {PASSCODE ,ciscoPass},
                    {MEETING_ID ,e.MeetingId},
                  };
             int envitationActionId = await _DbContext.Actions.Where(x => x.Shortcut == SEND_INVITATION_ACTION).Select(x => x.Id).FirstOrDefaultAsync();
             var toSendNoti = await _INotificationSettingRepository.GetNotificationsForAction(envitationActionId, e.Id);
-            var a = await NotifyParticipants(receivers, e.MeetingId, toSendNoti, parameters, INVITATION_TEMPLATE, true, false, ciscoLink);
+            var a = await NotifyParticipants(receivers, e.MeetingId, toSendNoti, parameters, INVITATION_TEMPLATE, true, false, null);
             //-------------***********--------Temp code to send sms
             //APIResult smsResult = new();
             //if (!string.IsNullOrWhiteSpace(receiver.Mobile))
