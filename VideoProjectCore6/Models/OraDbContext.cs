@@ -1371,6 +1371,21 @@ namespace VideoProjectCore6.Models
                     .HasMaxLength(200)
                     .HasColumnName("full_name");
 
+                entity.Property(e => e.FirstName)
+                    .HasMaxLength(50)
+                    .HasColumnName("first_name");
+
+                entity.Property(e => e.Surname)
+                    .HasMaxLength(50)
+                    .HasColumnName("surname");
+
+                entity.Property(e => e.Patronymic)
+                    .HasMaxLength(50)
+                    .HasColumnName("patronymic");
+
+                entity.Property(e => e.CountryId)
+                    .HasColumnName("country_id");
+
                 entity.Property(e => e.Gender)
                     .HasMaxLength(50)
                     .HasColumnName("gender");
@@ -1471,6 +1486,11 @@ namespace VideoProjectCore6.Models
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("meeting_id");
+
+                entity.HasOne(u => u.Country)
+                    .WithMany()
+                    .HasForeignKey(u => u.CountryId)
+                    .HasConstraintName("user_country_fk");
 
                 /*entity.HasMany(d => d.Roles)
                     .WithMany(p => p.Users)

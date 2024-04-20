@@ -92,7 +92,8 @@
             { "Charge",   new string[]   { " accused of ", " accused of " } } ,
             { "Suspended",   new string[]   { "Аккаунт отключен", "Your account is suspended" } } ,
             { "PasswordIsRequired", ["Отсутсвует пароль", "Password is required"] },
-            { "Room", [ "Комната", "Room"] }
+            { "Room", [ "Комната", "Room"] },
+            { "UserNotFound", ["Пользователь не найден", "User not found"]}
 
         };
 

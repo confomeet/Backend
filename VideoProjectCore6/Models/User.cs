@@ -24,6 +24,9 @@ namespace VideoProjectCore6.Models
         }
 
         public string FullName { get; set; }
+        public string FirstName { get; set; }
+        public string Surname { get; set; }
+        public string Patronymic { get; set; }
         public int? SecurityQuestionId { get; set; }
         public string SecurityQuestionAnswer { get; set; }
         public DateTime? BirthdayDate { get; set; }
@@ -36,6 +39,7 @@ namespace VideoProjectCore6.Models
         public int? NotificationType { get; set; }
         public int? ProfileStatus { get; set; }
         public string Address { get; set; }
+        public int? CountryId { get; set; }
         public string Image { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? LastUpdatedDate { get; set; }
@@ -59,5 +63,6 @@ namespace VideoProjectCore6.Models
         public virtual ICollection<Event> Events { get; set; }
         public virtual ICollection<Files> UserPhotos { get; set; }
         public virtual ICollection<SmtpConfig> SmtpConfigs { get; set; }
+        public virtual Country Country { get; set; }
     }
 }

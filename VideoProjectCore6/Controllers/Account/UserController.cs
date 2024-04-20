@@ -232,19 +232,20 @@ namespace VideoProjectCore6.Controllers.Account
         public async Task<IActionResult> EditUser([FromRoute] int id, [FromBody] UserPostDto userPostDto, [FromHeader] string lang)
         {
             var obj = await _IUserRepository.EditProfile(id, userPostDto, false, false, lang);
-            if (obj.Id < 0)
+            if (obj.Code == APIResult.RESPONSE_CODE.PageNotFound)
             {
                 return NotFound(obj);
             }
+            if (obj.Id < 0)
+                return BadRequest(obj);
             return Ok(obj);
         }
 
-
         [HasPermission(Permissions.User_Update)]
         [HttpPost("Edit/{id}")]
-        public async Task<IActionResult> EditUserWithRole([FromRoute] int id, [FromBody] UserView dto, [FromHeader] string lang)
+        public async Task<IActionResult> EditUserWithRole([FromRoute] int id, [FromBody] UpdateUserDto dto, [FromHeader] string lang)
         {
-            var obj = await _IUserRepository.EditUser(id, _IUserRepository.GetUserID(), dto, false, lang);
+            var obj = await _IUserRepository.EditUser(id, dto, lang);
             if (obj.Id < 0)
             {
                 return NotFound(obj);

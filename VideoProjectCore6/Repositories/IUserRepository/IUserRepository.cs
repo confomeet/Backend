@@ -18,7 +18,7 @@ namespace VideoProjectCore6.Repositories.IUserRepository
         public Task<APIResult> RefreshToken(string lang);
         public Task<List<RoleGetDto>> GetUserRoles(int userId, string lang);
         public Task<APIResult> EditProfile(int id, UserPostDto UserPostDto, bool fromUg, bool updateRoles, string lang);
-        public Task<APIResult> EditUser(int id,int editBy, UserView dto, bool fromUg ,string lang);
+        public Task<APIResult> EditUser(int id, UpdateUserDto dto, string lang);
         public Task<APIResult> ResetPasswordByToken(ResetPasswordDTO resetPasswordObject, string lang);
         public Task<bool> EditPassword(EditUserPasswordDTO editUserPasswordDTO, string lang);
         public Task<APIResult> RegisterAsync(RegisterDTO registerDTO, string lang, bool sendNotification, bool AddByAdmin = false);

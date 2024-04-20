@@ -1,26 +1,35 @@
 ﻿//using FluentValidation;
+using System.ComponentModel.DataAnnotations;
 using VideoProjectCore6.Models;
 
-#nullable disable
 namespace VideoProjectCore6.DTOs.UserDTO
 {
     public class RegisterDTO
     {
-        public string FullName { get; set; }
+        [Required]
+        public string FullName { get; set; } = null!;
 
-        public string Email { get; set; }
+        [Required]
+        public string Email { get; set; } = null!;
 
-        public string Password { get; set; }
+        public string? Password { get; set; } = string.Empty;
 
-        public string ConfirmPassword { get; set; }
+        public string? ConfirmPassword { get; set; } = string.Empty;
 
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
         //  public List<RoleDTO> Roles { get; set; }
 
+        public string? Address { get; set; }
+        public int? Country { get; set; }
+        [Required]
+        public string? FirstName { get; set; }
+        [Required]
+        public string? Surname { get; set; }
+        public string? Patronymic { get; set; }
         //[Required]
-        public string ReCaptchaToken { get; set; }
+        public string? ReCaptchaToken { get; set; }
 
-        public List<int?> Roles { get; set; } 
+        public List<int?> Roles { get; set; } = [];
 
 
         public User GetEntity()
@@ -29,14 +38,20 @@ namespace VideoProjectCore6.DTOs.UserDTO
             {
                 FullName = FullName,
                 Email = Email,
-                PhoneNumber = PhoneNumber
-                
+                PhoneNumber = PhoneNumber,
+                CountryId = Country,
+                FirstName = FirstName,
+                Surname = Surname,
+                Patronymic = Patronymic,
+                Address = Address,
             };
 
             return user;
         }
         public static RegisterDTO GetDTO(User user)
         {
+            if (user.Email == null)
+                throw new ArgumentNullException("user.email must not be null");
             RegisterDTO registerDTO = new()
             {
                 FullName = user.FullName,

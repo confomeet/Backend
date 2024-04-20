@@ -1119,73 +1119,59 @@ namespace VideoProjectCore6.Services.UserService
             }
         }
 
-        public async Task<APIResult> EditUser(int id, int editBy, UserView dto, bool fromUg, string lang)
+        public async Task<APIResult> EditUser(int id, UpdateUserDto dto, string lang)
         {
             APIResult res = new();
-            using TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            using TransactionScope scope = new(TransactionScopeAsyncFlowOption.Enabled);
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
             {
-                return res.FailMe(-1, "مستخدم غير موجود");
+                return res.FailMe(-1, Translation.getMessage(lang, "UserNotFound"));
             }
 
-            if(dto.UserName == null)
+            if (dto.FullName != null)
+                user.FullName = dto.FullName;
+            if (dto.FirstName != null)
+                user.FirstName = dto.FirstName;
+            if (dto.Surname != null)
+                user.Surname = dto.Surname;
+            if (dto.Patronymic != null)
+                user.Patronymic = dto.Patronymic;
+            if (dto.Email != null)
             {
-                dto.UserName = dto.Email;
+                user.Email = dto.Email;
+                user.NormalizedEmail = dto.Email.ToUpper();
             }
-
-            if (await _DbContext.Users.AnyAsync(x => x.Email.Trim() == dto.Email.Trim() && x.Id != id))
-            {
-                if (fromUg)
-                {
-                    User oldUser = await _DbContext.Users.Where(x => x.Email.Trim() == dto.Email.Trim()).FirstOrDefaultAsync();
-                    await GenerateInvalidEmailAsync(oldUser);
-                }
-                else
-                {
-                    return res.FailMe(-1, "الايميل مستخدم مسبقا");
-                }
-            }
-
-            if (await _DbContext.Users.AnyAsync(x => x.UserName.Trim() == dto.UserName.Trim() && x.Id != id))
-            {
-                if (fromUg)
-                {
-                    User oldUser = await _DbContext.Users.Where(x => x.Email.Trim() == dto.Email.Trim()).FirstOrDefaultAsync();
-                    await GenerateInvalidEmailAsync(oldUser);
-                }
-                else
-                {
-                    return res.FailMe(-1, "اسم المستخدم موجود مسبقا");
-                }
-            }
-
-            user.PhoneNumber = dto.PhoneNumber;//GetPhoneNumberWithCode(userPostDto.PhoneNumber);
-            user.NormalizedEmail = dto.Email.ToUpper();
-            user.Email = dto.Email;
-            user.NormalizedUserName = dto.UserName.ToLower();
-            user.UserName = dto.UserName;
-            user.FullName = dto.FullName;
+            if (dto.PhoneNumber != null)
+                user.PhoneNumber = dto.PhoneNumber;
             user.LastUpdatedDate = DateTime.Now;
             if (dto.Enable2FA != null)
-                await _userManager.SetTwoFactorEnabledAsync(user, (bool)dto.Enable2FA);
+                user.TwoFactorEnabled = (bool)dto.Enable2FA;
+            if (dto.Country != null)
+                user.CountryId = dto.Country;
+            if (dto.Address != null)
+                user.Address = dto.Address;
 
             var result = await _userManager.UpdateAsync(user);
-            var resUpdateRole = IdentityResult.Success;
-            resUpdateRole = await EditUserRolesAsync(user.Id, dto.Roles, lang);
-
-            await EditUserGroupsAsync(user.Id, dto.Groups, lang);
-
+            if (!result.Succeeded)
+            {
+                _logger.LogError("Failed to updated user: {}", result.ToString());
+                return res.FailMe(-1, Translation.getMessage(lang, "failedUpdate"));
+            }
+            result = await EditUserRolesAsync(user.Id, dto.Roles, lang);
+            if (!result.Succeeded)
+            {
+                _logger.LogError("Failed to update user roles: {}", result.ToString());
+                return res.FailMe(-1, Translation.getMessage(lang, "failedUpdate"));
+            }
+            result = await EditUserGroupsAsync(user.Id, dto.Groups, lang);
+            if (!result.Succeeded)
+            {
+                _logger.LogError("Failed to update user groups: {}", result.ToString());
+                return res.FailMe(-1, Translation.getMessage(lang, "failedUpdate"));
+            }
             scope.Complete();
-
-            if (result.Succeeded && resUpdateRole.Succeeded)
-            {
-                return res.SuccessMe(user.Id, Translation.getMessage(lang, "sucsessUpdate"));
-            }
-            else
-            {
-                return res.FailMe(-1, result.Errors.FirstOrDefault().Description + resUpdateRole.Errors.FirstOrDefault().Description);
-            }
+            return res.SuccessMe(user.Id, Translation.getMessage(lang, "sucsessUpdate"));
         }
 
         public async Task<APIResult> SendResetPasswordEmail(MultiLangMessage message, string email, string lang)
@@ -1522,7 +1508,12 @@ namespace VideoProjectCore6.Services.UserService
                             Confirmed = u.EmailConfirmed,
                             Roles = u.UserRoles.Select(r => r.RoleId).ToList(),
                             Enable2FA = u.TwoFactorEnabled,
-
+                            FirstName = u.FirstName,
+                            Surname = u.Surname,
+                            Patronymic = u.Patronymic,
+                            Country = u.CountryId,
+                            CountryName = u.Country == null ? null : u.Country.CntCountryEn,
+                            Address = u.Address,
                         }).Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
             int total = await _DbContext.Users.CountAsync();
             return new ListCount
@@ -1549,7 +1540,7 @@ namespace VideoProjectCore6.Services.UserService
             //try
             //{
 
-                var query = await _DbContext.Users.Where(u =>
+                var query = await _DbContext.Users.Include(u => u.Country).Where(u =>
 
             (userFilterDto.text == null
 
@@ -1583,10 +1574,13 @@ namespace VideoProjectCore6.Services.UserService
 
             u.FullName.Contains(""))).AsNoTracking().
 
-                        Select(u => new UserGroupDtoView
+                        Select(u => new UserView
                         {
                             Email = u.Email,
                             FullName = u.FullName,
+                            FirstName = u.FirstName,
+                            Surname = u.Surname,
+                            Patronymic = u.Patronymic,
                             Id = u.Id,
                             PhoneNumber = u.PhoneNumber,
                             UserName = u.UserName,
@@ -1594,7 +1588,10 @@ namespace VideoProjectCore6.Services.UserService
                             Confirmed = u.EmailConfirmed,
                             Roles = u.UserRoles.Select(r => r.RoleId).ToList(),
                             UserGroups = u.UserGroups.Select(o => o.Group.GroupName).ToList().Count > 0 ? u.UserGroups.Select(o => new ValueId { Id = o.GroupId, Value = o.Group.GroupName }).ToList() : defaultGroup,
-                            Enable2FA = u.TwoFactorEnabled
+                            Enable2FA = u.TwoFactorEnabled,
+                            Country = u.CountryId,
+                            CountryName = u.Country == null ? null : u.Country.CntCountryEn,
+                            Address = u.Address,
                         }).ToListAsync();
 
             if (userFilterDto.userGroups?.Count() > 0 || userFilterDto.isLocked != null || userFilterDto.isConfirmed != null)
@@ -1645,7 +1642,12 @@ namespace VideoProjectCore6.Services.UserService
                             Locked = CheckLockState(u.LockoutEnabled, u.LockoutEnd),
                             Confirmed = u.EmailConfirmed,
                             Enable2FA = u.TwoFactorEnabled,
-
+                            Country = u.CountryId,
+                            CountryName = u.Country == null ? null : u.Country.CntCountryEn,
+                            FirstName = u.FirstName,
+                            Surname = u.Surname,
+                            Patronymic = u.Patronymic,
+                            Address = u.Address,
                         }).ToListAsync();
 
             int total = query.Count();
@@ -1673,6 +1675,12 @@ namespace VideoProjectCore6.Services.UserService
                             Locked = CheckLockState(u.LockoutEnabled, u.LockoutEnd),
                             Confirmed = u.EmailConfirmed,
                             Enable2FA = u.TwoFactorEnabled,
+                            Country = u.CountryId,
+                            CountryName = u.Country == null ? null : u.Country.CntCountryEn,
+                            FirstName = u.FirstName,
+                            Surname = u.Surname,
+                            Patronymic = u.Patronymic,
+                            Address = u.Address,
                         }).FirstOrDefaultAsync();
             int total = await _DbContext.Users.CountAsync();
             return query;
